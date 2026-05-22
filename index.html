@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>El Mar Rojo — Juego Educativo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrap">
+
+  <button id="btn-sonido" type="button" title="Silenciar/Activar">🔊</button>
+
+  <!-- ══════════════════════════════════════
+       PANTALLA 1 — INICIO
+  ══════════════════════════════════════ -->
+  <section id="s-start" class="pantalla">
+    <div class="deco-ola">🌊</div>
+    <h1 class="titulo-juego">El Mar Rojo</h1>
+    <p class="subtitulo">
+      Moisés abrió el mar. ¡Ayuda al pueblo a cruzar!<br>
+      Devuelve los animales al agua y recicla la basura.
+    </p>
+    <div class="tarjetas-reglas">
+      <div class="tarjeta bien">
+        <span class="t-ico">🐠 → 🌊</span>
+        <p>Animales al <strong>agua</strong></p>
+      </div>
+      <div class="tarjeta mal">
+        <span class="t-ico">🗑️ → ♻️</span>
+        <p>Basura al <strong>contenedor</strong></p>
+      </div>
+    </div>
+    <button class="boton" id="btn-inicio">▶&nbsp;&nbsp;Jugar</button>
+    <blockquote class="cita-biblica">
+      "Y pasaron los hijos de Israel por en medio del mar, en seco." — Éxodo 14:22
+    </blockquote>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PANTALLA 2 — INSTRUCCIONES DE MOISÉS
+       Aparece al pulsar "Jugar".
+       Moisés explica los contenedores con voz.
+  ══════════════════════════════════════ -->
+  <section id="s-instrucciones" class="pantalla oculta">
+
+    <!-- Moisés animado -->
+    <div id="moises-instructor">
+      <div id="moises-emoji">🧙‍♂️</div>
+      <div id="bocadillo">
+        <p id="bocadillo-texto"></p>
+      </div>
+    </div>
+
+    <!-- Contenedor activo en este paso -->
+    <div id="paso-bin">
+      <div id="paso-bin-icono"></div>
+      <div id="paso-bin-nombre"></div>
+      <div id="paso-bin-objetos"></div>
+    </div>
+
+    <!-- Barra de pasos (puntos de progreso) -->
+    <div id="pasos-dots"></div>
+
+    <!-- Botones -->
+    <div class="fila-botones">
+      <button class="boton ghost" id="btn-saltar">Saltar ▶▶</button>
+      <button class="boton" id="btn-paso-sig">Siguiente ▶</button>
+    </div>
+
+    <!-- Control de voz -->
+    <div id="ctrl-voz">
+      <button id="btn-voz" type="button" title="Activar/desactivar voz">🔊 Voz activada</button>
+    </div>
+
+  </section><!-- fin #s-instrucciones -->
+
+  <!-- ══════════════════════════════════════
+       PANTALLA 3 — JUEGO ACTIVO
+  ══════════════════════════════════════ -->
+  <section id="s-game" class="pantalla oculta">
+
+    <!-- Barra de información superior (HUD) -->
+    <header id="barra-info">
+      <div class="dato">🙏 Nv <span id="val-nivel">1</span></div>
+      <div id="barra-prog-wrap">
+        <div id="barra-prog"></div>
+      </div>
+      <div class="dato">🐠 <span id="val-animales">0</span></div>
+      <div class="dato">♻️ <span id="val-reciclado">0</span></div>
+      <div class="dato">⭐ <span id="val-puntos">0</span></div>
+      <div class="dato" id="val-vidas">❤️❤️❤️</div>
+    </header>
+
+    <!-- Campo de juego -->
+    <div id="area-juego">
+
+      <!-- Zonas visuales: agua izquierda · arena · agua derecha -->
+      <div class="zona" id="zona-agua-izq">
+        <span class="pista-agua">◄ Al mar</span>
+      </div>
+      <div class="zona" id="zona-arena"></div>
+      <div class="zona" id="zona-agua-der">
+        <span class="pista-agua">Al mar ►</span>
+      </div>
+
+      <!-- Decoración de la arena -->
+      <div id="textura-arena"></div>
+      <div id="carril-marcha"></div>
+
+      <!-- Muros de agua (paredes del mar abierto) -->
+      <div id="muro-izq" class="muro-agua"></div>
+      <div id="muro-der" class="muro-agua"></div>
+
+      <!-- Horizonte y personaje fijo -->
+      <div id="franja-cielo"></div>
+      <div id="moises">🧙‍♂️</div>
+      <p id="etiqueta-nivel"></p>
+
+      <!-- ──────────────────────────────────────────
+           CONTENEDORES DE RECICLAJE
+           Solo aparecen los activos en cada nivel.
+           JS añade/quita la clase .activo según el nivel.
+
+           Nivel 1: 🟡 + ⚫             (2 contenedores)
+           Nivel 2: 🟡 + 🔵 + ⚫        (3 contenedores)
+           Nivel 3: 🟡 + 🔵 + 🟢 + ⚫   (4 contenedores)
+           Nivel 4: los 5 contenedores
+           Nivel 5: los 5, máxima velocidad
+      ────────────────────────────────────────────── -->
+      <div id="contenedores-reciclaje">
+
+        <div class="contenedor" id="bin-amarillo" data-bin="amarillo">
+          <span class="bin-color">🟡</span>
+          <span class="bin-ico">♻️</span>
+          <span class="bin-lbl">Envases</span>
+        </div>
+
+        <div class="contenedor" id="bin-azul" data-bin="azul">
+          <span class="bin-color">🔵</span>
+          <span class="bin-ico">♻️</span>
+          <span class="bin-lbl">Papel</span>
+        </div>
+
+        <div class="contenedor" id="bin-verde" data-bin="verde">
+          <span class="bin-color">🟢</span>
+          <span class="bin-ico">♻️</span>
+          <span class="bin-lbl">Vidrio</span>
+        </div>
+
+        <div class="contenedor" id="bin-marron" data-bin="marron">
+          <span class="bin-color">🟤</span>
+          <span class="bin-ico">♻️</span>
+          <span class="bin-lbl">Orgánico</span>
+        </div>
+
+        <div class="contenedor" id="bin-gris" data-bin="gris">
+          <span class="bin-color">⚫</span>
+          <span class="bin-ico">♻️</span>
+          <span class="bin-lbl">Resto</span>
+        </div>
+
+      </div><!-- fin #contenedores-reciclaje -->
+
+      <!-- Banner de nuevo contenedor (aparece al inicio de niveles 2, 3, 4) -->
+      <div id="banner-bin">
+        <div class="banner-titulo">¡Nuevo contenedor!</div>
+        <div id="banner-bin-contenido"></div>
+      </div>
+
+      <!-- Mensaje de retroalimentación (correcto / incorrecto) -->
+      <div id="mensaje" role="alert" aria-live="assertive"></div>
+
+    </div><!-- fin #area-juego -->
+
+    <!-- Destello rojo al perder una vida -->
+    <div id="destello-vida"></div>
+
+  </section><!-- fin #s-game -->
+
+  <!-- ══════════════════════════════════════
+       PANTALLA 3 — GAME OVER
+  ══════════════════════════════════════ -->
+  <section id="s-go" class="pantalla oculta">
+    <div class="ola-impacto">🌊</div>
+    <h2 class="titulo-fin">¡El mar se cerró!</h2>
+    <p class="txt-fin">
+      Un objeto bloqueó el camino y el mar<br>comenzó a cerrarse sobre el pueblo.
+    </p>
+    <p class="puntuacion-grande">Puntos: <span id="go-pts">0</span></p>
+    <div class="fila-botones">
+      <button class="boton" id="btn-reiniciar">↩ Intentar de nuevo</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PANTALLA 4 — HISTORIA BÍBLICA
+       Se muestra al completar cada nivel.
+       Incluye la historia del Éxodo y una
+       vista previa de los contenedores del
+       siguiente nivel.
+  ══════════════════════════════════════ -->
+  <section id="s-lu" class="pantalla oculta">
+    <h2 class="lu-titulo">¡El pueblo avanzó! 🙏</h2>
+
+    <!-- Tarjeta con el relato bíblico -->
+    <article class="tarjeta-historia">
+      <span class="h-escena" id="lu-escena">✨</span>
+      <h3 class="h-titulo" id="lu-titulo"></h3>
+      <p class="h-texto" id="lu-texto"></p>
+      <blockquote class="h-cita" id="lu-cita"></blockquote>
+      <cite class="h-ref" id="lu-ref"></cite>
+    </article>
+
+    <!-- Contenedores activos en el próximo nivel -->
+    <div class="proximos-bins" id="proximos-bins">
+      <p class="pb-titulo">En el siguiente nivel reciclarás en:</p>
+      <div class="pb-lista" id="pb-lista"></div>
+    </div>
+
+    <p class="puntuacion-grande" style="color:#a0e8ff">
+      Puntos: <span id="lu-pts">0</span>
+    </p>
+    <button class="boton" id="btn-siguiente">Continuar ▶</button>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PANTALLA 5 — VICTORIA
+  ══════════════════════════════════════ -->
+  <section id="s-win" class="pantalla oculta">
+    <div class="deco-victoria">🎉🙏🌊♻️🎉</div>
+    <h2 class="titulo-victoria">¡El pueblo cruzó el Mar Rojo!</h2>
+    <p class="txt-victoria">
+      ¡Salvaste a los animales del mar y reciclaste toda la basura!<br>
+      El pueblo de Israel llegó sano y salvo a la otra orilla.<br>
+      Dios cumplió su promesa.
+    </p>
+    <p class="puntuacion-grande">Puntuación final: <span id="win-pts">0</span></p>
+    <button class="boton" id="btn-nueva-partida">Jugar de nuevo ↩</button>
+    <blockquote class="cita-biblica">
+      "Así salvó el Señor aquel día a Israel de mano de los egipcios." — Éxodo 14:30
+    </blockquote>
+  </section>
+
+</div><!-- fin #wrap -->
+<script src="js/script.js"></script>
+</body>
+</html>

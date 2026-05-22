@@ -1,0 +1,731 @@
+/* ============================================================
+   El Mar Rojo — Juego Educativo
+   Archivo : css/style.css
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap');
+
+/* ── RESET Y BASE ── */
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #040c1a;
+  font-family: 'Nunito', system-ui, sans-serif;
+  touch-action: none;
+  user-select: none;
+}
+body { display: flex; align-items: center; justify-content: center; }
+
+/* ── CONTENEDOR RAÍZ ── */
+#wrap { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+/* ── PANTALLAS ── */
+.pantalla {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(.6em, 2vh, 1.3em);
+  padding: clamp(1em, 4vw, 2.5em);
+  text-align: center;
+}
+.pantalla.oculta { display: none !important; }
+
+/* ── PANTALLA DE INSTRUCCIONES ── */
+#s-instrucciones {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 80%, #0a3a80 0%, transparent 65%),
+    linear-gradient(160deg, #1a1a3a 0%, #0d2255 60%, #0a3570 100%);
+  gap: clamp(.5em, 1.8vh, 1.1em);
+  justify-content: center;
+}
+
+/* Moisés con bocadillo */
+#moises-instructor {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(.5em, 2vw, 1em);
+  max-width: 480px;
+  width: 92%;
+  animation: sube .5s ease;
+}
+#moises-emoji {
+  font-size: clamp(2.8em, 10vw, 5em);
+  flex-shrink: 0;
+  animation: moises-habla 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.5));
+}
+@keyframes moises-habla {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%     { transform: translateY(-6px) rotate(3deg); }
+}
+#bocadillo {
+  background: rgba(255,255,255,.95);
+  color: #1a1a3a;
+  border-radius: 18px 18px 18px 4px;
+  padding: clamp(.6em,1.8vh,1em) clamp(.8em,2.5vw,1.3em);
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,.35);
+  flex: 1;
+  min-height: clamp(56px,10vh,80px);
+  display: flex;
+  align-items: center;
+}
+#bocadillo::before {
+  content: '';
+  position: absolute;
+  left: -12px; bottom: 14px;
+  border: 7px solid transparent;
+  border-right-color: rgba(255,255,255,.95);
+}
+#bocadillo-texto {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(.78em, 2.5vw, 1em);
+  font-weight: 700;
+  line-height: 1.5;
+  color: #1a1a3a;
+  min-height: 2em;
+}
+
+/* Tarjeta del contenedor actual */
+#paso-bin {
+  background: rgba(255,255,255,.08);
+  border: 1.5px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: clamp(.7em,2vh,1.2em) clamp(1em,3vw,1.8em);
+  max-width: 420px;
+  width: 92%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4em;
+  min-height: clamp(90px,16vh,130px);
+  justify-content: center;
+  animation: sube .4s ease;
+  transition: border-color .4s, background .4s;
+}
+#paso-bin.amarillo { border-color: rgba(244,199,80,.7);  background: rgba(80,55,0,.4); }
+#paso-bin.azul     { border-color: rgba(80,160,230,.7);  background: rgba(10,30,90,.4); }
+#paso-bin.verde    { border-color: rgba(70,190,70,.7);   background: rgba(8,55,12,.4); }
+#paso-bin.marron   { border-color: rgba(160,100,50,.7);  background: rgba(60,28,6,.4); }
+#paso-bin.gris     { border-color: rgba(160,160,160,.7); background: rgba(40,40,40,.4); }
+#paso-bin.intro    { border-color: rgba(244,199,80,.35); background: rgba(20,40,100,.3); }
+
+#paso-bin-icono {
+  font-size: clamp(2em,8vw,3.5em);
+  line-height: 1;
+  animation: icono-pop .5s cubic-bezier(.2,1.6,.5,1) both;
+}
+@keyframes icono-pop {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0);      opacity: 1; }
+}
+#paso-bin-nombre {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1em,3.5vw,1.4em);
+  color: #fff;
+  letter-spacing: .03em;
+}
+#paso-bin-objetos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(.3em,1vw,.5em);
+  justify-content: center;
+}
+.obj-pastilla {
+  background: rgba(255,255,255,.12);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: clamp(.56em,1.7vw,.78em);
+  color: rgba(255,255,255,.9);
+  font-weight: 700;
+  white-space: nowrap;
+  animation: sube .35s ease both;
+}
+
+/* Puntos de progreso */
+#pasos-dots {
+  display: flex;
+  gap: .5em;
+  justify-content: center;
+}
+.dot {
+  width: clamp(7px,2vw,10px);
+  height: clamp(7px,2vw,10px);
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  transition: background .3s, transform .3s;
+}
+.dot.activo {
+  background: #f4c750;
+  transform: scale(1.3);
+}
+.dot.completado { background: rgba(255,255,255,.55); }
+
+/* Botón ghost */
+.boton.ghost {
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.75);
+  box-shadow: 0 3px 0 rgba(0,0,0,.2), 0 0 0 1.5px rgba(255,255,255,.18) inset;
+  font-size: clamp(.8em,2.5vw,1em);
+}
+.boton.ghost:active { transform: translateY(2px); }
+
+/* Control de voz */
+#ctrl-voz {
+  display: flex;
+  justify-content: center;
+}
+#btn-voz {
+  background: none;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 20px;
+  color: rgba(255,255,255,.6);
+  font-size: clamp(.6em,1.8vw,.8em);
+  padding: 3px 12px;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+#btn-voz:hover { color: rgba(255,255,255,.9); border-color: rgba(255,255,255,.5); }
+#btn-voz.silenciado { color: rgba(255,255,255,.3); text-decoration: line-through; }
+
+/* ── PANTALLA DE INICIO ── */
+#s-start {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 100%, #0a4a8c 0%, transparent 70%),
+    linear-gradient(175deg, #bf6c1a 0%, #e88c2a 22%, #f5a535 38%, #f0901f 45%, #1155a0 55%, #0a3570 100%);
+}
+.deco-ola { font-size: clamp(2.5em, 10vw, 5em); animation: ola-bob 2s ease-in-out infinite; }
+@keyframes ola-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+.titulo-juego {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2em, 8vw, 4em);
+  color: #fff8e0;
+  text-shadow: 0 3px 0 rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4);
+  line-height: 1.1;
+  animation: sube .9s ease both;
+}
+.subtitulo {
+  font-size: clamp(.8em, 2.8vw, 1.1em);
+  color: rgba(255,255,255,.9);
+  line-height: 1.65; max-width: 380px;
+  animation: sube .9s .12s ease both;
+}
+@keyframes sube { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+/* Tarjetas de reglas */
+.tarjetas-reglas {
+  display: flex; gap: clamp(.5em, 2vw, 1em);
+  flex-wrap: wrap; justify-content: center;
+  animation: sube .9s .22s ease both;
+}
+.tarjeta {
+  background: rgba(255,255,255,.1);
+  border: 1.5px solid rgba(255,255,255,.22);
+  border-radius: 16px;
+  padding: .6em 1em;
+  display: flex; flex-direction: column;
+  align-items: center; gap: .25em;
+  min-width: clamp(80px, 22vw, 130px);
+}
+.tarjeta .t-ico { font-size: clamp(1.4em, 5.5vw, 2em); }
+.tarjeta p { font-size: clamp(.58em, 1.8vw, .78em); font-weight: 700; color: rgba(255,255,255,.85); }
+.tarjeta.bien { border-color: rgba(80,220,160,.5); background: rgba(20,100,60,.3); }
+.tarjeta.mal  { border-color: rgba(255,160,60,.5);  background: rgba(120,50,10,.3); }
+
+/* Botón principal */
+.boton {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1em, 3.5vw, 1.4em);
+  background: #f4c750; color: #3d2200;
+  border: none; border-radius: 50px;
+  padding: .55em 2.5em; cursor: pointer;
+  box-shadow: 0 5px 0 #c8922a, 0 8px 18px rgba(0,0,0,.35);
+  transition: transform .1s, box-shadow .1s;
+  animation: sube .9s .3s ease both;
+}
+.boton:active { transform: translateY(3px); box-shadow: 0 2px 0 #c8922a, 0 4px 10px rgba(0,0,0,.3); }
+.fila-botones { display: flex; gap: .8em; flex-wrap: wrap; justify-content: center; animation: sube .9s .3s ease both; }
+
+/* Cita bíblica */
+.cita-biblica {
+  font-size: clamp(.58em, 1.7vw, .82em);
+  color: rgba(255,255,255,.52);
+  font-style: italic; line-height: 1.75;
+  border-top: 1px solid rgba(255,255,255,.18);
+  padding-top: .9em; max-width: 340px;
+  animation: sube .9s .38s ease both;
+}
+
+/* ── BARRA DE INFORMACIÓN (HUD) ── */
+#barra-info {
+  width: 100%; display: flex; align-items: center;
+  gap: .35em; padding: 0 .7em;
+  background: rgba(0,0,0,.62);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: clamp(.65em, 2.3vw, .95em); font-weight: 700;
+  height: clamp(38px, 6.5vh, 54px);
+  flex-shrink: 0; z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+#barra-info .dato { display: flex; align-items: center; gap: .2em; white-space: nowrap; }
+#barra-prog-wrap {
+  flex: 1; height: 8px;
+  background: rgba(255,255,255,.14);
+  border-radius: 4px; overflow: hidden; margin: 0 .35em;
+}
+#barra-prog {
+  height: 100%; width: 0%; border-radius: 4px;
+  transition: width .45s ease;
+  background: linear-gradient(to right, #5dc8f0, #f4c750);
+}
+
+/* ── PANTALLA DE JUEGO ── */
+#s-game { padding: 0; gap: 0; justify-content: flex-start; }
+
+/* ── ÁREA DE JUEGO ── */
+#area-juego { position: relative; flex: 1; width: 100%; overflow: hidden; }
+
+/* ── ZONAS (agua y arena) ── */
+.zona { position: absolute; top: 0; bottom: 0; pointer-events: none; }
+#zona-agua-izq { left: 0;   width: 25%; background: linear-gradient(to right, #0b3a78, #1258a8); }
+#zona-agua-der { right: 0;  width: 25%; background: linear-gradient(to left,  #0b3a78, #1258a8); }
+#zona-arena    { left: 25%; right: 25%; background: linear-gradient(to bottom, #d4a040, #c99038); }
+
+/* Efecto de ondas en el agua */
+#zona-agua-izq::after, #zona-agua-der::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
+    transparent 2px, transparent 12px
+  );
+  animation: brillo-agua 1.6s linear infinite;
+}
+@keyframes brillo-agua { to { background-position-y: 12px; } }
+
+/* Estados de zona al arrastrar un animal */
+#zona-agua-izq.dz-bien { background: linear-gradient(to right, #0e5090, #1870d0); outline: 3px solid rgba(80,220,160,.7); outline-offset: -3px; }
+#zona-agua-der.dz-bien { background: linear-gradient(to left,  #0e5090, #1870d0); outline: 3px solid rgba(80,220,160,.7); outline-offset: -3px; }
+#zona-agua-izq.dz-mal,
+#zona-agua-der.dz-mal  { outline: 3px solid rgba(255,90,60,.45); outline-offset: -3px; }
+
+/* Pistas de texto en el agua */
+.pista-agua {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  color: rgba(255,255,255,.35);
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.5em, 1.6vw, .75em);
+  letter-spacing: .08em; pointer-events: none; z-index: 1;
+}
+#zona-agua-izq .pista-agua { right: 12px; }
+#zona-agua-der .pista-agua { left: 12px; }
+
+/* ── MUROS DE AGUA ── */
+#muro-izq, #muro-der {
+  position: absolute; top: 0; bottom: 0; width: 8px; z-index: 5; pointer-events: none;
+}
+#muro-izq { left: 25%;  background: linear-gradient(to right, rgba(100,210,255,.5), rgba(220,245,255,.92)); }
+#muro-der { right: 25%; background: linear-gradient(to left,  rgba(100,210,255,.5), rgba(220,245,255,.92)); }
+#muro-izq::before, #muro-der::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,.65) 35%, rgba(255,255,255,.1) 65%, rgba(255,255,255,.72) 100%);
+  animation: pulso-muro 2.4s ease-in-out infinite;
+}
+@keyframes pulso-muro { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+/* ── TEXTURA Y CARRIL ── */
+#textura-arena {
+  position: absolute; left: 25%; right: 25%; top: 0; bottom: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,.04) 0, rgba(255,255,255,.04) 1px, transparent 1px, transparent 20px);
+}
+#carril-marcha {
+  position: absolute; top: 0; bottom: 0; left: 37.5%; width: 25%;
+  pointer-events: none; transition: background .3s;
+  background: rgba(220,175,60,.2);
+  border-left: 1.5px dashed rgba(180,120,0,.22);
+  border-right: 1.5px dashed rgba(180,120,0,.22);
+}
+
+/* ── CIELO Y MOISÉS ── */
+#franja-cielo {
+  position: absolute; top: 0; left: 0; right: 0; height: clamp(28px, 7vh, 55px);
+  background: linear-gradient(to bottom, rgba(200,110,20,.52) 0%, transparent 100%);
+  pointer-events: none; z-index: 5;
+}
+#moises {
+  position: absolute; top: clamp(1px, .5vh, 4px); left: 50%; transform: translateX(-50%);
+  font-size: clamp(1.6em, 5.5vw, 2.8em); z-index: 30; pointer-events: none;
+  animation: moises-flota 3s ease-in-out infinite;
+}
+@keyframes moises-flota { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-5px)} }
+
+#etiqueta-nivel {
+  position: absolute; bottom: clamp(72px, 14vh, 100px); left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.42); color: rgba(255,255,255,.52);
+  font-size: clamp(.46em, 1.4vw, .7em); padding: 2px 12px; border-radius: 20px;
+  white-space: nowrap; z-index: 30; pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════
+   CONTENEDORES DE RECICLAJE
+   Los 5 contenedores. JS muestra solo los activos
+   del nivel actual añadiendo la clase .activo.
+══════════════════════════════════════════════════ */
+#contenedores-reciclaje {
+  position: absolute;
+  bottom: clamp(5px, 1.2vh, 12px);
+  left: 25%; right: 25%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: clamp(3px, 1vw, 8px);
+  z-index: 26;
+  pointer-events: none;
+  padding: 0 4px;
+}
+
+/* Contenedor base — oculto por defecto */
+.contenedor {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  border-radius: clamp(6px, 1.5vw, 10px);
+  padding: clamp(4px, 1vh, 8px) clamp(5px, 1.5vw, 10px);
+  pointer-events: all;
+  cursor: default;
+  transition: transform .2s, box-shadow .2s, border-color .2s, background .2s;
+  min-width: clamp(38px, 9vw, 68px);
+}
+.contenedor.activo { display: flex; }
+
+/* Colores de cada contenedor */
+#bin-amarillo { background: rgba(80,55,0,.88);   border: 2px solid rgba(244,199,80,.7); }
+#bin-azul     { background: rgba(10,30,90,.88);  border: 2px solid rgba(80,160,230,.7); }
+#bin-verde    { background: rgba(8,55,12,.88);   border: 2px solid rgba(70,190,70,.7);  }
+#bin-marron   { background: rgba(60,28,6,.88);   border: 2px solid rgba(160,100,50,.7); }
+#bin-gris     { background: rgba(40,40,40,.88);  border: 2px solid rgba(160,160,160,.7);}
+
+/* Elementos del contenedor */
+.bin-color { font-size: clamp(1em, 3.5vw, 1.6em); line-height: 1; }
+.bin-ico   { font-size: clamp(.7em, 2.2vw, 1em);  line-height: 1; }
+.bin-lbl {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.4em, 1.3vw, .6em);
+  color: rgba(255,255,255,.82);
+  letter-spacing: .03em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Estado arrastre: destino correcto */
+.contenedor.dz-bien {
+  transform: scale(1.18);
+  box-shadow: 0 0 22px rgba(80,255,120,.7);
+}
+#bin-amarillo.dz-bien { border-color: #f4c750; background: rgba(100,70,0,.95); }
+#bin-azul.dz-bien     { border-color: #50a0e8; background: rgba(15,45,110,.95); }
+#bin-verde.dz-bien    { border-color: #50d050; background: rgba(12,70,16,.95); }
+#bin-marron.dz-bien   { border-color: #c08050; background: rgba(75,38,10,.95); }
+#bin-gris.dz-bien     { border-color: #c0c0c0; background: rgba(60,60,60,.95); }
+
+/* Estado arrastre: destino incorrecto */
+.contenedor.dz-mal { border-color: rgba(255,60,40,.4) !important; opacity: .55; }
+
+/* Animación al recibir un objeto correcto */
+.contenedor.recibiendo { animation: bin-recibe .45s ease-out; }
+@keyframes bin-recibe {
+  0%  { transform: scale(1); }
+  30% { transform: scale(1.32) rotate(-7deg); }
+  60% { transform: scale(1.15) rotate(4deg); }
+  100%{ transform: scale(1) rotate(0deg); }
+}
+
+/* ── BANNER DE NUEVO CONTENEDOR ── */
+#banner-bin {
+  position: absolute;
+  top: clamp(42px, 7.5vh, 62px);
+  left: 50%; transform: translateX(-50%);
+  background: rgba(5,20,50,.92);
+  border: 2px solid rgba(244,199,80,.5);
+  border-radius: 14px;
+  padding: .5em 1.4em;
+  z-index: 160; pointer-events: none;
+  text-align: center;
+  display: none;
+  min-width: 200px;
+}
+#banner-bin.visible {
+  display: block;
+  animation: banner-entra .4s ease;
+}
+@keyframes banner-entra {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.banner-titulo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.7em, 2.2vw, .92em);
+  color: #f4c750; margin-bottom: .2em;
+}
+.banner-bins { display: flex; gap: .4em; justify-content: center; flex-wrap: wrap; }
+.banner-pastilla {
+  font-size: clamp(.55em, 1.7vw, .76em);
+  padding: 2px 8px; border-radius: 20px;
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.9);
+  white-space: nowrap;
+}
+
+/* ── CRIATURAS Y OBJETOS ── */
+.criatura {
+  position: absolute; display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+  touch-action: none; cursor: grab; z-index: 20; pointer-events: all;
+  animation: objeto-pop .38s cubic-bezier(.2,1.6,.6,1) both;
+}
+@keyframes objeto-pop { from{transform:scale(0) rotate(-15deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+
+/* Balanceo en espera */
+.criatura.espera.es-animal .c-em { animation: balanceo-animal 1.9s ease-in-out infinite; }
+@keyframes balanceo-animal { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-5px) rotate(3deg)} }
+.criatura.espera.es-basura .c-em { animation: balanceo-basura 2.1s ease-in-out infinite; }
+@keyframes balanceo-basura { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+
+/* Etiquetas: azul para animales, colores para basura */
+.es-animal .c-lb  { background: rgba(14,72,180,.82);   color: #e0f4ff; }
+.es-basura .c-lb  { background: rgba(40,30,10,.88);    color: #fff0d8; }
+
+/* Al arrastrar */
+.criatura.arrastrando { cursor: grabbing; z-index: 50; opacity: .88; }
+.criatura.arrastrando .c-em { animation: temblor .22s linear infinite !important; }
+@keyframes temblor { 0%,100%{transform:rotate(-7deg)} 50%{transform:rotate(7deg)} }
+
+/* Estilos generales */
+.criatura .c-em { display: block; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+.criatura .c-lb {
+  font-size: clamp(.43em, 1.35vw, .66em); font-weight: 700;
+  border-radius: 5px; padding: 1px 5px; pointer-events: none;
+  white-space: nowrap; letter-spacing: .02em;
+}
+
+/* Parpadeo de peligro */
+.criatura.peligro { animation: parpadeo-peligro .33s infinite ease-in-out !important; }
+@keyframes parpadeo-peligro {
+  0%,100%{ filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  50%    { filter: brightness(2.2) saturate(3) hue-rotate(-20deg) drop-shadow(0 0 12px rgba(255,50,50,.95)); }
+}
+
+/* ── PUEBLO DE ISRAEL ── */
+.grupo-pueblo {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  z-index: 15; pointer-events: none;
+}
+.figura     { position: absolute; top: 0; animation: paso-marcha .52s ease-in-out infinite; }
+.figura-par { animation-delay: .26s; }
+@keyframes paso-marcha { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+/* Animales del éxodo que caminan entre las personas */
+.figura.es-animal-exodo {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+  line-height: 1;
+}
+
+/* ── EFECTOS VISUALES ── */
+.salpicadura {
+  position: absolute; pointer-events: none; z-index: 40;
+  font-size: clamp(1.2em, 4.5vw, 2em);
+  animation: explota-agua .7s ease-out forwards;
+}
+@keyframes explota-agua {
+  0%  {opacity:1;transform:scale(.3) translateY(0)}
+  55% {opacity:1;transform:scale(1.6) translateY(-10px)}
+  100%{opacity:0;transform:scale(.8) translateY(-28px)}
+}
+.gota {
+  position: absolute; pointer-events: none; z-index: 42;
+  font-size: clamp(.5em, 1.8vw, .82em);
+  animation: arco-gota var(--dur,.7s) ease-out forwards;
+}
+@keyframes arco-gota {
+  0%  {opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-30px)) scale(.3)}
+}
+.pts-flotantes {
+  position: absolute; pointer-events: none; z-index: 45;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.82em, 2.8vw, 1.25em);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  animation: sube-pts 1.15s ease-out forwards;
+}
+.pts-flotantes.pts-animal  { color: #5dc8f0; }
+.pts-flotantes.pts-basura  { color: #80dd60; }
+@keyframes sube-pts { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-52px)} }
+
+/* Destello rojo al perder vida */
+#destello-vida {
+  position: absolute; inset: 0; pointer-events: none; z-index: 200;
+  background: rgba(220,30,30,.45); opacity: 0;
+}
+#destello-vida.visible { animation: destello-rojo .6s ease forwards; }
+@keyframes destello-rojo { 0%{opacity:1} 100%{opacity:0} }
+
+/* Confeti de victoria */
+.confeti {
+  position: absolute; pointer-events: none; z-index: 300;
+  animation: cae-confeti var(--d,2s) var(--del,0s) ease-in forwards;
+}
+@keyframes cae-confeti {
+  0%  {opacity:1;transform:translate(0,0) rotate(0)}
+  100%{opacity:0;transform:translate(var(--xf,0),100vh) rotate(var(--r,720deg))}
+}
+
+/* Efecto reciclaje correcto ✅ */
+.eco-burst {
+  position: absolute; pointer-events: none; z-index: 44;
+  font-size: clamp(.9em, 3vw, 1.4em);
+  animation: eco-pop .6s ease-out forwards;
+}
+@keyframes eco-pop {
+  0%  {opacity:1;transform:scale(.4) translateY(0)}
+  50% {opacity:1;transform:scale(1.5) translateY(-8px)}
+  100%{opacity:0;transform:scale(.9) translateY(-24px)}
+}
+
+/* ── MENSAJE DE RETROALIMENTACIÓN ── */
+#mensaje {
+  position: absolute; top: 36%; left: 50%; transform: translate(-50%,-50%);
+  background: rgba(5,15,40,.9); color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.88em, 3vw, 1.32em);
+  padding: .5em 1.4em; border-radius: 30px;
+  z-index: 160; pointer-events: none;
+  text-align: center; display: none; white-space: nowrap;
+  border: 2px solid rgba(255,255,255,.25);
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+}
+#mensaje.visible {
+  display: block;
+  animation: mensaje-pop .3s ease;
+}
+@keyframes mensaje-pop {
+  from{opacity:0;transform:translate(-50%,-62%) scale(.8)}
+  to  {opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+/* ── PANTALLA GAME OVER ── */
+#s-go { background: radial-gradient(ellipse 60% 60% at 50% 80%, #0a2a6a 0%, transparent 70%), #040c1a; }
+.ola-impacto { font-size: clamp(3em, 11vw, 5.5em); animation: impacto .6s ease-out; }
+@keyframes impacto { from{transform:scale(1.9) rotate(-12deg)} to{transform:scale(1) rotate(0)} }
+.titulo-fin {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2em, 8vw, 4em); color: #e74c3c;
+  text-shadow: 0 3px 12px rgba(231,76,60,.5);
+  animation: sube .5s ease;
+}
+.txt-fin {
+  color: rgba(255,255,255,.8);
+  font-size: clamp(.82em, 2.8vw, 1.1em); line-height: 1.6; max-width: 320px;
+  animation: sube .5s .1s ease both;
+}
+
+/* ── PANTALLA HISTORIA BÍBLICA ── */
+#s-lu {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 50%, rgba(30,80,180,.4) 0%, transparent 70%),
+    linear-gradient(160deg, #1560c0, #0a3070);
+  gap: clamp(.35em, 1.4vh, .85em);
+}
+.lu-titulo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.3em, 4.5vw, 2em); color: #f4c750;
+  text-shadow: 0 3px 0 rgba(0,0,0,.3); animation: sube .5s ease;
+}
+.tarjeta-historia {
+  background: rgba(255,248,210,.08); border: 1.5px solid rgba(255,215,100,.3);
+  border-radius: 18px;
+  padding: clamp(.65em, 1.8vh, 1.2em) clamp(.85em, 2.8vw, 1.5em);
+  max-width: 440px; width: 92%;
+  display: flex; flex-direction: column; gap: .45em;
+  animation: sube .55s .08s ease both;
+}
+.h-escena { font-size: clamp(1.8em, 7vw, 3em); animation: ola-bob 2.2s ease-in-out infinite; line-height: 1.1; }
+.h-titulo { font-family: 'Fredoka One', cursive; font-size: clamp(.95em, 3.2vw, 1.35em); color: #ffd870; animation: sube .5s .15s ease both; }
+.h-texto  { font-size: clamp(.72em, 2.2vw, .93em); color: rgba(255,255,255,.9); line-height: 1.7; animation: sube .5s .25s ease both; }
+.h-cita   { font-size: clamp(.6em, 1.8vw, .8em); color: rgba(255,220,130,.72); font-style: italic; line-height: 1.6; border-top: 1px solid rgba(255,210,80,.2); padding-top: .5em; animation: sube .5s .35s ease both; }
+.h-ref    { font-size: clamp(.55em, 1.6vw, .72em); color: rgba(255,200,80,.55); font-weight: 700; animation: sube .5s .42s ease both; }
+
+/* Próximos contenedores */
+.proximos-bins {
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18);
+  border-radius: 12px;
+  padding: .55em .9em;
+  max-width: 380px; width: 92%;
+  animation: sube .5s .48s ease both;
+}
+.pb-titulo {
+  font-size: clamp(.58em, 1.8vw, .78em);
+  color: rgba(255,255,255,.65); font-weight: 700;
+  letter-spacing: .03em; margin-bottom: .35em;
+}
+.pb-lista {
+  display: flex; flex-wrap: wrap;
+  gap: .4em; justify-content: center;
+}
+.bin-pastilla {
+  display: inline-flex; align-items: center; gap: .25em;
+  background: rgba(255,255,255,.1); border-radius: 20px;
+  padding: 2px 9px;
+  font-size: clamp(.52em, 1.6vw, .75em);
+  color: rgba(255,255,255,.88); white-space: nowrap;
+}
+.bin-pastilla.nuevo {
+  background: rgba(244,199,80,.2);
+  border: 1px solid rgba(244,199,80,.5);
+  color: #f4c750;
+}
+
+/* ── PANTALLA VICTORIA ── */
+#s-win {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 90%, #0a4a8c 0%, transparent 65%),
+    linear-gradient(175deg, #bf6c1a 0%, #e88c2a 25%, #1560c0 60%, #0a3070 100%);
+}
+.deco-victoria { font-size: clamp(1.8em, 7vw, 3.8em); animation: sube .6s ease; }
+.titulo-victoria {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.8em, 6.5vw, 3.2em); color: #fff8e0;
+  text-shadow: 0 3px 0 rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4);
+  animation: sube .6s ease;
+}
+.txt-victoria {
+  color: rgba(255,255,255,.88);
+  font-size: clamp(.82em, 2.7vw, 1.08em); line-height: 1.6; max-width: 360px;
+  animation: sube .6s .15s ease both;
+}
+
+/* Puntuación grande (común a varias pantallas) */
+.puntuacion-grande {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.2em, 4vw, 1.8em); color: #f4c750;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+  animation: sube .5s .2s ease both;
+}
+
+/* ── BOTÓN DE SONIDO ── */
+#btn-sonido {
+  position: fixed; top: clamp(40px, 7vh, 56px); right: 8px; z-index: 500;
+  background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50%; width: 32px; height: 32px;
+  cursor: pointer; font-size: 16px; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
