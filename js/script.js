@@ -168,78 +168,246 @@ const COLORES_CONFETI = ['#f4c750','#5dc8f0','#7ed86f','#f07860','#b090f8','#fff
 /* ============================================================
    FIGURAS BÍBLICAS — SVG generado en JavaScript
    ============================================================ */
-const FIGURAS_CFG = [
-  { r:'#c09050',t:'#e8d080',tb:'#ccb050',s:'#d4a070',b:'#6a4020',baculo:false,barba:false,mujer:false },
-  { r:'#7090b2',t:'#f0eee0',tb:'#d0c8a8',s:'#c88860',b:'#3a5060',baculo:false,barba:false,mujer:true  },
-  { r:'#a06040',t:'#d4a840',tb:'#b89030',s:'#d09060',b:'#602018',baculo:true, barba:false,mujer:false },
-  { r:'#f0e8d0',t:'#f8f4e8',tb:'#d8cc98',s:'#c89060',b:'#a08050',baculo:true, barba:true, mujer:false },
-  { r:'#8a9868',t:'#e0d480',tb:'#c4b858',s:'#e0b880',b:'#586040',baculo:false,barba:false,mujer:false },
-  { r:'#907898',t:'#e8def8',tb:'#c0b0d8',s:'#d4a878',b:'#403858',baculo:false,barba:false,mujer:false },
-];
+/* ============================================================
+   FIGURAS BÍBLICAS CARTOON — 6 variantes expresivas
+   Cabeza grande (1/3 del cuerpo), ojos con brillo,
+   cuerpo redondeado, colores saturados.
+   Cada función genera un SVG independiente.
+   ============================================================ */
 
-function figuraSVG(c) {
-  const rL = c.mujer ? 4.5 : 5.5, rR = 22 - rL;
-  return `<svg width="22" height="46" viewBox="0 0 22 46" xmlns="http://www.w3.org/2000/svg">
-<ellipse cx="11" cy="45" rx="8" ry="2.5" fill="rgba(0,0,0,0.18)"/>
-<path d="M${rL} 14 Q11 12.5 ${rR} 14 L${rR+1.5} 44 L${rL-1.5} 44 Z" fill="${c.r}"/>
-<path d="M11 12.5 L10 21 L11 25 L12 21 Z" fill="rgba(0,0,0,0.07)"/>
-<rect x="${rL-1}" y="23" width="${rR-rL+2}" height="2.3" rx="1.1" fill="${c.b}" opacity="0.88"/>
-<path d="M${rL} 17 L${rL-4.5} 31" stroke="${c.r}" stroke-width="5" stroke-linecap="round"/>
-<path d="M${rR} 17 L${rR+4.5} 31" stroke="${c.r}" stroke-width="5" stroke-linecap="round"/>
-<rect x="9.5" y="12" width="3" height="4" rx="1.5" fill="${c.s}"/>
-<circle cx="11" cy="8.5" r="5.5" fill="${c.s}"/>
-${c.mujer
-  ? `<ellipse cx="11" cy="5" rx="6.5" ry="3.5" fill="${c.t}"/><rect x="4.5" y="5" width="13" height="5.5" rx="1" fill="${c.t}" opacity="0.82"/><path d="M4.5 7 L3.5 15.5" stroke="${c.t}" stroke-width="2.8" stroke-linecap="round"/>`
-  : `<ellipse cx="11" cy="4.5" rx="6.5" ry="4" fill="${c.t}"/><rect x="4.5" y="6.5" width="13" height="2" rx="1" fill="${c.tb}"/>`}
-${c.barba  ? `<ellipse cx="11" cy="13.5" rx="3.5" ry="2.5" fill="rgba(245,240,225,0.8)"/>` : ''}
-${c.baculo ? `<line x1="19.5" y1="13" x2="21" y2="44" stroke="#7a5030" stroke-width="2.3" stroke-linecap="round"/>` : ''}
-<ellipse cx="7.5" cy="44" rx="3.5" ry="1.9" fill="${c.b}"/>
-<ellipse cx="14.5" cy="44" rx="3.5" ry="1.9" fill="${c.b}"/>
+/* Hombre joven — túnica azul, turbante amarillo */
+function figHombre1() {
+  return `<svg width="28" height="52" viewBox="0 0 28 52" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="14" cy="51" rx="9" ry="2.2" fill="rgba(0,0,0,0.2)"/>
+<rect x="9" y="39" width="4.5" height="11" rx="2.2" fill="#c07828"/>
+<rect x="14.5" y="39" width="4.5" height="11" rx="2.2" fill="#a86018"/>
+<ellipse cx="11.2" cy="50" rx="4" ry="1.8" fill="#6a3810"/>
+<ellipse cx="16.8" cy="50" rx="4" ry="1.8" fill="#6a3810"/>
+<path d="M5 19 Q14 15 23 19 L23.5 41 Q14 45 4.5 41 Z" fill="#3a82d4"/>
+<rect x="5" y="29" width="18" height="3" rx="1.5" fill="#1a5298"/>
+<rect x="11" y="16" width="6" height="5" rx="2.5" fill="#e8a060"/>
+<circle cx="14" cy="10" r="9" fill="#e8a060"/>
+<circle cx="10.5" cy="9.5" r="2" fill="#fff"/><circle cx="17.5" cy="9.5" r="2" fill="#fff"/>
+<circle cx="11" cy="9.8" r="1.2" fill="#2a1505"/><circle cx="18" cy="9.8" r="1.2" fill="#2a1505"/>
+<circle cx="11.4" cy="9.2" r=".5" fill="#fff"/><circle cx="18.4" cy="9.2" r=".5" fill="#fff"/>
+<path d="M9 7 Q11 6 13 7" stroke="#60300a" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M15 7 Q17 6 19 7" stroke="#60300a" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M11 13.5 Q14 15 17 13.5" stroke="#b07030" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M5 9.5 Q5 1.5 14 1 Q23 1.5 23 9.5" fill="#e8c030"/>
+<ellipse cx="14" cy="9.5" rx="9" ry="3.5" fill="#f0d040"/>
+<path d="M14 1 Q19 2.5 20.5 6" stroke="#c8a020" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<ellipse cx="3.5" cy="26" rx="3.2" ry="7.5" fill="#3a82d4" transform="rotate(-10,3.5,26)"/>
+<ellipse cx="24.5" cy="26" rx="3.2" ry="7.5" fill="#3a82d4" transform="rotate(10,24.5,26)"/>
+<circle cx="3" cy="33" r="2.8" fill="#e8a060"/>
+<circle cx="25" cy="33" r="2.8" fill="#e8a060"/>
 </svg>`;
 }
 
+/* Mujer — túnica rosa, velo crema */
+function figMujer() {
+  return `<svg width="28" height="52" viewBox="0 0 28 52" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="14" cy="51" rx="9" ry="2.2" fill="rgba(0,0,0,0.2)"/>
+<rect x="9" y="39" width="4.5" height="11" rx="2.2" fill="#d08060"/>
+<rect x="14.5" y="39" width="4.5" height="11" rx="2.2" fill="#b86848"/>
+<ellipse cx="11.2" cy="50" rx="4" ry="1.8" fill="#7a3818"/>
+<ellipse cx="16.8" cy="50" rx="4" ry="1.8" fill="#7a3818"/>
+<path d="M4 19 Q14 14 24 19 L24.5 42 Q14 46.5 3.5 42 Z" fill="#e06888"/>
+<rect x="4" y="29" width="20" height="3" rx="1.5" fill="#b83860"/>
+<rect x="11" y="16" width="6" height="5" rx="2.5" fill="#f0a870"/>
+<circle cx="14" cy="10" r="9" fill="#f0a870"/>
+<circle cx="10.5" cy="9.5" r="2" fill="#fff"/><circle cx="17.5" cy="9.5" r="2" fill="#fff"/>
+<circle cx="11" cy="9.8" r="1.2" fill="#2a1505"/><circle cx="18" cy="9.8" r="1.2" fill="#2a1505"/>
+<circle cx="11.4" cy="9.2" r=".5" fill="#fff"/><circle cx="18.4" cy="9.2" r=".5" fill="#fff"/>
+<path d="M9.5 7.5 L9.8 6.3" stroke="#2a1505" stroke-width=".8"/>
+<path d="M11 7 L11.2 5.8" stroke="#2a1505" stroke-width=".8"/>
+<path d="M12.5 7.2 L12.8 6" stroke="#2a1505" stroke-width=".8"/>
+<path d="M15.5 7.2 L15.2 6" stroke="#2a1505" stroke-width=".8"/>
+<path d="M17 7 L16.8 5.8" stroke="#2a1505" stroke-width=".8"/>
+<path d="M18.5 7.5 L18.2 6.3" stroke="#2a1505" stroke-width=".8"/>
+<path d="M11 13.5 Q14 15 17 13.5" stroke="#b07030" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M5 9.5 Q5 1 14 0.8 Q23 1 23 9.5" fill="#f8e8d0"/>
+<ellipse cx="14" cy="10" rx="9" ry="3.8" fill="#fef0e0"/>
+<path d="M5 11 L3.5 22 Q5 25 6.5 22" fill="#4a2008"/>
+<path d="M23 11 L24.5 22 Q23 25 21.5 22" fill="#4a2008"/>
+<ellipse cx="3.5" cy="26" rx="3.2" ry="7.5" fill="#e06888" transform="rotate(-10,3.5,26)"/>
+<ellipse cx="24.5" cy="26" rx="3.2" ry="7.5" fill="#e06888" transform="rotate(10,24.5,26)"/>
+<circle cx="3" cy="33" r="2.8" fill="#f0a870"/>
+<circle cx="25" cy="33" r="2.8" fill="#f0a870"/>
+</svg>`;
+}
+
+/* Hombre adulto — túnica verde, turbante naranja */
+function figHombre2() {
+  return `<svg width="28" height="52" viewBox="0 0 28 52" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="14" cy="51" rx="9" ry="2.2" fill="rgba(0,0,0,0.2)"/>
+<rect x="9" y="39" width="4.5" height="11" rx="2.2" fill="#b87828"/>
+<rect x="14.5" y="39" width="4.5" height="11" rx="2.2" fill="#9a6018"/>
+<ellipse cx="11.2" cy="50" rx="4" ry="1.8" fill="#6a3810"/>
+<ellipse cx="16.8" cy="50" rx="4" ry="1.8" fill="#6a3810"/>
+<path d="M5 19 Q14 15 23 19 L23.5 41 Q14 45 4.5 41 Z" fill="#4a9858"/>
+<rect x="5" y="29" width="18" height="3" rx="1.5" fill="#2a6838"/>
+<rect x="11" y="16" width="6" height="5" rx="2.5" fill="#d89858"/>
+<circle cx="14" cy="10" r="9" fill="#d89858"/>
+<circle cx="10.5" cy="9.5" r="2" fill="#fff"/><circle cx="17.5" cy="9.5" r="2" fill="#fff"/>
+<circle cx="11" cy="9.8" r="1.2" fill="#2a1505"/><circle cx="18" cy="9.8" r="1.2" fill="#2a1505"/>
+<circle cx="11.4" cy="9.2" r=".5" fill="#fff"/><circle cx="18.4" cy="9.2" r=".5" fill="#fff"/>
+<path d="M9 7 Q11 6 13 7" stroke="#60300a" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M15 7 Q17 6 19 7" stroke="#60300a" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M11 13.5 Q14 15 17 13.5" stroke="#b07030" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M5 9.5 Q5 1.5 14 1 Q23 1.5 23 9.5" fill="#e87820"/>
+<ellipse cx="14" cy="9.5" rx="9" ry="3.5" fill="#f08828"/>
+<path d="M14 1 Q19 2.5 20.5 6" stroke="#c06010" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="23" y1="18" x2="25.5" y2="51" stroke="#7a4820" stroke-width="2.8" stroke-linecap="round"/>
+<circle cx="23" cy="17" r="2.2" fill="#8a5830"/>
+<ellipse cx="3.5" cy="26" rx="3.2" ry="7.5" fill="#4a9858" transform="rotate(-10,3.5,26)"/>
+<ellipse cx="24.5" cy="26" rx="3.2" ry="7.5" fill="#4a9858" transform="rotate(10,24.5,26)"/>
+<circle cx="3" cy="33" r="2.8" fill="#d89858"/>
+<circle cx="25" cy="33" r="2.8" fill="#d89858"/>
+</svg>`;
+}
+
+/* Anciano — túnica blanca, barba, turbante blanco, báculo */
+function figAnciano() {
+  return `<svg width="28" height="56" viewBox="0 0 28 56" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="14" cy="55" rx="9" ry="2.2" fill="rgba(0,0,0,0.2)"/>
+<rect x="9" y="42" width="4.5" height="12" rx="2.2" fill="#b89060"/>
+<rect x="14.5" y="42" width="4.5" height="12" rx="2.2" fill="#9a7848"/>
+<ellipse cx="11.2" cy="54" rx="4" ry="1.8" fill="#6a4820"/>
+<ellipse cx="16.8" cy="54" rx="4" ry="1.8" fill="#6a4820"/>
+<path d="M5 20 Q14 16 23 20 L23.5 44 Q14 48 4.5 44 Z" fill="#f0ead8"/>
+<rect x="5" y="30" width="18" height="3" rx="1.5" fill="#c8b888"/>
+<rect x="11" y="17" width="6" height="5" rx="2.5" fill="#c89858"/>
+<circle cx="14" cy="11" r="9" fill="#c89858"/>
+<circle cx="10.5" cy="10.5" r="2" fill="#fff"/><circle cx="17.5" cy="10.5" r="2" fill="#fff"/>
+<circle cx="11" cy="10.8" r="1.2" fill="#2a1505"/><circle cx="18" cy="10.8" r="1.2" fill="#2a1505"/>
+<circle cx="11.4" cy="10.2" r=".45" fill="#fff"/><circle cx="18.4" cy="10.2" r=".45" fill="#fff"/>
+<path d="M9 8.5 Q11 7 13 8.5" stroke="#e8e8e0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+<path d="M15 8.5 Q17 7 19 8.5" stroke="#e8e8e0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+<path d="M10.5 15 Q14 16.5 17.5 15" stroke="#c07840" stroke-width="1" fill="none" stroke-linecap="round"/>
+<ellipse cx="14" cy="18" rx="6" ry="4.5" fill="rgba(248,246,240,.95)"/>
+<path d="M5 10.5 Q5 2 14 1.5 Q23 2 23 10.5" fill="#ece8d8"/>
+<ellipse cx="14" cy="10.5" rx="9" ry="4" fill="#f5f2e8"/>
+<line x1="23" y1="19" x2="25.5" y2="55" stroke="#7a4820" stroke-width="2.8" stroke-linecap="round"/>
+<circle cx="23" cy="18" r="2.2" fill="#8a5830"/>
+<ellipse cx="3.5" cy="28" rx="3.2" ry="7.5" fill="#f0ead8" transform="rotate(-12,3.5,28)"/>
+<ellipse cx="20" cy="28" rx="3.2" ry="7.5" fill="#f0ead8" transform="rotate(6,20,28)"/>
+<circle cx="3" cy="35" r="2.8" fill="#c89858"/>
+<circle cx="20.5" cy="35" r="2.8" fill="#c89858"/>
+</svg>`;
+}
+
+/* Niño/a — cuerpo pequeño, cabeza extra grande, pelo oscuro */
+function figNino() {
+  return `<svg width="22" height="44" viewBox="0 0 22 44" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="11" cy="43" rx="7" ry="1.8" fill="rgba(0,0,0,0.2)"/>
+<rect x="6.5" y="32" width="3.8" height="10" rx="1.9" fill="#c88030"/>
+<rect x="11.5" y="32" width="3.8" height="10" rx="1.9" fill="#a86818"/>
+<ellipse cx="8.4" cy="42" rx="3.5" ry="1.6" fill="#6a3810"/>
+<ellipse cx="13.4" cy="42" rx="3.5" ry="1.6" fill="#6a3810"/>
+<path d="M3 16 Q11 12.5 19 16 L19.5 33 Q11 37 2.5 33 Z" fill="#e8c038"/>
+<rect x="3" y="24" width="16" height="2.5" rx="1.2" fill="#c0a020"/>
+<rect x="8.5" y="13.5" width="5" height="4.5" rx="2" fill="#f0c070"/>
+<circle cx="11" cy="8" r="8.5" fill="#f0c070"/>
+<circle cx="7.8" cy="7.5" r="2.3" fill="#fff"/><circle cx="14.2" cy="7.5" r="2.3" fill="#fff"/>
+<circle cx="8.3" cy="7.8" r="1.4" fill="#2a1505"/><circle cx="14.7" cy="7.8" r="1.4" fill="#2a1505"/>
+<circle cx="8.7" cy="7.2" r=".55" fill="#fff"/><circle cx="15.1" cy="7.2" r=".55" fill="#fff"/>
+<path d="M7.5 5.2 Q11 4 14.5 5.2" stroke="#60300a" stroke-width=".9" fill="none" stroke-linecap="round"/>
+<path d="M8.5 12 Q11 13.5 13.5 12" stroke="#b07030" stroke-width=".9" fill="none" stroke-linecap="round"/>
+<path d="M3.5 8 Q3 0.5 11 0.2 Q19 0.5 18.5 8" fill="#3a1a08"/>
+<ellipse cx="2.5" cy="22" rx="2.8" ry="6.5" fill="#e8c038" transform="rotate(-10,2.5,22)"/>
+<ellipse cx="19.5" cy="22" rx="2.8" ry="6.5" fill="#e8c038" transform="rotate(10,19.5,22)"/>
+<circle cx="2" cy="28" r="2.2" fill="#f0c070"/>
+<circle cx="20" cy="28" r="2.2" fill="#f0c070"/>
+</svg>`;
+}
+
+/* Mujer mayor — túnica morada, manto oscuro */
+function figMujer2() {
+  return `<svg width="28" height="52" viewBox="0 0 28 52" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="14" cy="51" rx="9" ry="2.2" fill="rgba(0,0,0,0.2)"/>
+<rect x="9" y="39" width="4.5" height="11" rx="2.2" fill="#b87060"/>
+<rect x="14.5" y="39" width="4.5" height="11" rx="2.2" fill="#9a5848"/>
+<ellipse cx="11.2" cy="50" rx="4" ry="1.8" fill="#6a3020"/>
+<ellipse cx="16.8" cy="50" rx="4" ry="1.8" fill="#6a3020"/>
+<path d="M4 19 Q14 14 24 19 L24.5 42 Q14 46.5 3.5 42 Z" fill="#8858a8"/>
+<rect x="4" y="29" width="20" height="3" rx="1.5" fill="#603878"/>
+<rect x="11" y="16" width="6" height="5" rx="2.5" fill="#d89868"/>
+<circle cx="14" cy="10" r="9" fill="#d89868"/>
+<circle cx="10.5" cy="9.5" r="2" fill="#fff"/><circle cx="17.5" cy="9.5" r="2" fill="#fff"/>
+<circle cx="11" cy="9.8" r="1.2" fill="#2a1505"/><circle cx="18" cy="9.8" r="1.2" fill="#2a1505"/>
+<circle cx="11.4" cy="9.2" r=".5" fill="#fff"/><circle cx="18.4" cy="9.2" r=".5" fill="#fff"/>
+<path d="M9.5 7.5 L9.8 6.3" stroke="#2a1505" stroke-width=".8"/>
+<path d="M11 7 L11.2 5.8" stroke="#2a1505" stroke-width=".8"/>
+<path d="M16.5 7.2 L16.2 6" stroke="#2a1505" stroke-width=".8"/>
+<path d="M18 7.5 L17.8 6.3" stroke="#2a1505" stroke-width=".8"/>
+<path d="M11 13.5 Q14 15 17 13.5" stroke="#b07030" stroke-width="1" fill="none" stroke-linecap="round"/>
+<path d="M5 9.5 Q5 1 14 0.8 Q23 1 23 9.5" fill="#4a3060"/>
+<ellipse cx="14" cy="10" rx="9" ry="3.8" fill="#5a3878"/>
+<path d="M5 11 L3.5 22 Q5 25 6.5 22" fill="#2a1008"/>
+<path d="M23 11 L24.5 22 Q23 25 21.5 22" fill="#2a1008"/>
+<ellipse cx="3.5" cy="26" rx="3.2" ry="7.5" fill="#8858a8" transform="rotate(-10,3.5,26)"/>
+<ellipse cx="24.5" cy="26" rx="3.2" ry="7.5" fill="#8858a8" transform="rotate(10,24.5,26)"/>
+<circle cx="3" cy="33" r="2.8" fill="#d89868"/>
+<circle cx="25" cy="33" r="2.8" fill="#d89868"/>
+</svg>`;
+}
+
+/* Pool de funciones generadoras */
+const GENERADORES_FIGURAS = [figHombre1, figMujer, figHombre2, figAnciano, figNino, figMujer2];
+
+/* ── GENERADOR DE MULTITUD con animales visibles ── */
 function generarMultitud(n) {
   const ANIMALES_EXODO = ['🐪','🐫','🐐','🐑','🐕','🐈','🫏','🐂'];
-  const PASO = 15;
+  const PASO = 18; /* un poco más de separación para las figuras más anchas */
 
+  /* Mezclar generadores */
   const pool = [];
-  while (pool.length < n) pool.push(...FIGURAS_CFG);
+  while (pool.length < n) pool.push(...GENERADORES_FIGURAS);
   pool.sort(() => Math.random() - .5);
 
-  /* Decidimos qué posiciones llevarán un animal */
+  /* Posiciones para animales: ~1 de cada 4, nunca en el primer lugar */
   const posicionesAnimal = new Set();
   const numAnimales = Math.max(1, Math.floor(n / 4));
   while (posicionesAnimal.size < numAnimales) {
-    posicionesAnimal.add(Math.floor(Math.random() * n));
+    posicionesAnimal.add(1 + Math.floor(Math.random() * (n - 1)));
   }
 
-  const anchoTotal = (n - 1) * PASO + 28;
+  /* Ancho total del grupo */
+  const anchoTotal = (n - 1) * PASO + 32;
 
-  /* Primero pintamos TODAS las figuras humanas */
-  let htmlPersonas = '';
-  let personaIdx = 0;
+  /* ── Personas primero (z-index 1) ── */
+  let htmlPersonas = '', pIdx = 0;
   for (let i = 0; i < n; i++) {
     if (!posicionesAnimal.has(i)) {
       const cls = i % 2 === 0 ? 'figura' : 'figura figura-par';
-      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;z-index:1">${figuraSVG(pool[personaIdx % pool.length])}</div>`;
-      personaIdx++;
+      const gen = pool[pIdx % pool.length];
+      /* figNino es más pequeña — ajustamos la posición vertical */
+      const esNino = gen === figNino;
+      const top    = esNino ? 'top:8px' : 'top:0';
+      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:1;position:absolute">${gen()}</div>`;
+      pIdx++;
     }
   }
 
-  /* Después pintamos los ANIMALES encima (z-index mayor, se ven siempre) */
+  /* ── Animales después (z-index 3, siempre encima) ──
+     Se colocan ligeramente por delante (top mayor) para
+     simular que caminan a los pies del grupo */
   let htmlAnimales = '';
   for (const i of posicionesAnimal) {
     const cls   = i % 2 === 0 ? 'figura' : 'figura figura-par';
     const emoji = ANIMALES_EXODO[Math.floor(Math.random() * ANIMALES_EXODO.length)];
-    const esGrande = emoji === '🐪' || emoji === '🐫' || emoji === '🐂';
-    const estilo = esGrande
-      ? `left:${i*PASO-2}px;font-size:19px;top:10px;z-index:2;line-height:1`
-      : `left:${i*PASO-1}px;font-size:15px;top:19px;z-index:2;line-height:1`;
-    htmlAnimales += `<div class="${cls}" style="${estilo}" title="${emoji}">${emoji}</div>`;
+    const esGrande = ['🐪','🐫','🐂'].includes(emoji);
+    const size  = esGrande ? 22 : 17;
+    const top   = esGrande ? 14 : 24;
+    /* desplazamiento horizontal ligero para que no quede exactamente detrás */
+    const offsetX = (Math.random() > 0.5 ? 4 : -3);
+    htmlAnimales += `<div class="${cls}" style="left:${i*PASO + offsetX}px;top:${top}px;font-size:${size}px;line-height:1;z-index:3;position:absolute;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${emoji}</div>`;
   }
 
-  return `<div style="position:relative;width:${anchoTotal}px;height:46px">${htmlPersonas}${htmlAnimales}</div>`;
+  return `<div style="position:relative;width:${anchoTotal}px;height:58px">${htmlPersonas}${htmlAnimales}</div>`;
 }
+
+
 
 
 /* ============================================================
@@ -1010,21 +1178,33 @@ let utteranceActual = null; /* referencia para cancelar si se avanza */
 /* Comprueba si el navegador soporta síntesis de voz */
 const hayVoz = 'speechSynthesis' in window;
 
-/* Habla un texto en español */
+/* Habla un texto en español con voz masculina grave */
 function hablar(texto, alTerminar) {
   if (!hayVoz || !vozActiva) {
     if (alTerminar) setTimeout(alTerminar, 200);
     return;
   }
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(texto);
-  u.lang  = 'es-ES';
-  u.rate  = 0.88;   /* un poco más lento para niños */
-  u.pitch = 1.05;
-  /* Intentar usar una voz en español si está disponible */
+  const u   = new SpeechSynthesisUtterance(texto);
+  u.lang    = 'es-ES';
+  u.rate    = 0.82;   /* más lento → más solemne */
+  u.pitch   = 0.55;   /* muy grave → voz masculina */
+  u.volume  = 1;
+
+  /* Intentar encontrar una voz masculina en español.
+     Los navegadores etiquetan las voces con el nombre;
+     buscamos primero por palabras clave de voz masculina. */
   const voces = window.speechSynthesis.getVoices();
-  const vozEs = voces.find(v => v.lang.startsWith('es'));
-  if (vozEs) u.voice = vozEs;
+
+  const masculinas = voces.filter(v =>
+    v.lang.startsWith('es') &&
+    /male|hombre|jorge|pablo|diego|antonio|carlos|miguel/i.test(v.name)
+  );
+  const espanolas = voces.filter(v => v.lang.startsWith('es'));
+
+  /* Prioridad: voz masculina española → cualquier española → lo que haya */
+  u.voice = masculinas[0] || espanolas[0] || null;
+
   if (alTerminar) u.onend = alTerminar;
   utteranceActual = u;
   window.speechSynthesis.speak(u);
