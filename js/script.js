@@ -1643,25 +1643,60 @@ function sndSplashGrande(esGrande) {
 }
 
 /* Crea el efecto visual de salpicadura grande en una posición del área de juego */
-function salpicaduraGrande(x, y, cantidad) {
+/* Crea un splash espectacular: todas las gotas van hacia ARRIBA y los lados,
+   nunca hacia abajo, para que no queden ocultas por overflow:hidden */
+function salpicaduraGrande(x, y, cantidad, esGigante) {
+  const tamBase   = esGigante ? 20 : 14;
+  const distBase  = esGigante ? 70 : 40;
+  const durBase   = esGigante ? 1.1 : .75;
+
   for (let i = 0; i < cantidad; i++) {
-    const ang  = (i / cantidad) * Math.PI * 2;
-    const dist = 30 + Math.random() * 50;
-    const dr   = document.createElement('div');
+    /* Ángulo: solo semicírculo superior (de -PI a 0) + algo lateral
+       Ángulos entre -170° y -10° → todas las gotas van hacia arriba */
+    const angGrados = -170 + (i / cantidad) * 160 + (Math.random() - .5) * 25;
+    const ang       = angGrados * Math.PI / 180;
+    const dist      = distBase + Math.random() * distBase * .8;
+    const tx        = Math.cos(ang) * dist;
+    const ty        = Math.sin(ang) * dist;   /* negativo = arriba */
+
+    const dr  = document.createElement('div');
     dr.className = 'droplet';
-    dr.textContent = i % 3 === 0 ? '💧' : '💦';
-    dr.style.cssText = `left:${x}px;top:${y}px;font-size:${12+Math.random()*10}px;`
-      + `--tx:${Math.cos(ang)*dist}px;--ty:${Math.sin(ang)*dist - 30}px;`
-      + `--dur:${.6+Math.random()*.5}s;animation-delay:${i*.04}s`;
+    dr.textContent = i % 2 === 0 ? '💧' : '💦';
+    dr.style.cssText =
+      `left:${x - 6}px; top:${y - 6}px;`
+    + `font-size:${tamBase + Math.random() * tamBase * .6}px;`
+    + `--tx:${tx}px; --ty:${ty}px;`
+    + `--dur:${durBase + Math.random() * .4}s;`
+    + `animation-delay:${i * .03}s`;
     $('area-juego').appendChild(dr);
-    setTimeout(() => dr.remove(), 1200);
+    setTimeout(() => dr.remove(), (durBase + .5) * 1000 + i * 30);
   }
-  /* Splash central */
+
+  /* Columna central de agua que sube y se dispersa */
+  ['💦','💧','💦'].forEach((em, i) => {
+    const col = document.createElement('div');
+    col.className = 'droplet';
+    col.textContent = em;
+    const ty = -(55 + i * 25 + Math.random() * 20);
+    col.style.cssText =
+      `left:${x + (i-1)*12 - 6}px; top:${y - 6}px;`
+    + `font-size:${(esGigante ? 22 : 16) - i * 2}px;`
+    + `--tx:${(i-1) * 8}px; --ty:${ty}px;`
+    + `--dur:${.7 + i * .12}s; animation-delay:${i * .06}s`;
+    $('area-juego').appendChild(col);
+    setTimeout(() => col.remove(), 1400);
+  });
+
+  /* Splash central grande */
   const sp = document.createElement('div');
-  sp.className = 'splash'; sp.textContent = '💦';
-  sp.style.cssText = `left:${x-22}px;top:${y-22}px;font-size:2em`;
+  sp.className = 'splash';
+  sp.textContent = esGigante ? '🌊' : '💦';
+  sp.style.cssText =
+    `left:${x - (esGigante ? 28 : 18)}px;`
+  + `top:${y - (esGigante ? 28 : 18)}px;`
+  + `font-size:${esGigante ? 3 : 2}em`;
   $('area-juego').appendChild(sp);
-  setTimeout(() => sp.remove(), 900);
+  setTimeout(() => sp.remove(), 950);
 }
 
 function saltoCriatura(tipo) {
@@ -1686,22 +1721,35 @@ function saltoCriatura(tipo) {
   const yInicio = H - tamano - 4;
 
   if (esBalena) {
-    /* ── BALLENA: emerge y chapotea, sin saltar ── */
-    const el = document.createElement('div');
-    el.style.cssText = `
+    /* ── BALLENA: salto majestuoso, emerge y cae con gran splash ── */
+    const tamBallena = Math.min(72, Math.floor(H * .14)); /* grande pero proporcional */
+    const altSaltoBallena = Math.floor(H * (.30 + Math.random() * .12));
+    const yInicioB = H - tamBallena - 6;
+
+    const elB = document.createElement('div');
+    elB.style.cssText = `
       position:absolute;
-      left:${xBase - tamano/2}px;
-      top:${yInicio}px;
-      font-size:${tamano}px;
+      left:${xBase - tamBallena/2}px;
+      top:${yInicioB}px;
+      font-size:${tamBallena}px;
       z-index:36; pointer-events:none;
-      animation: ballena-chapoteo 2.4s ease-in-out forwards;
+      --alto:${altSaltoBallena}px;
+      animation: delfin-salto 2.4s cubic-bezier(.28,.05,.72,.95) forwards;
     `;
-    el.textContent = emoji;
-    $('area-juego').appendChild(el);
+    elB.textContent = emoji;
+    $('area-juego').appendChild(elB);
     sndBallena();
-    setTimeout(() => { salpicaduraGrande(xGotas, yInicio, 10); sndSplashGrande(true); }, 350);
-    setTimeout(() => { salpicaduraGrande(xGotas, yInicio + 10, 7); }, 1700);
-    setTimeout(() => el.remove(), 2800);
+    /* Splash al salir — grande */
+    salpicaduraGrande(xGotas, yInicioB + 10, 18, true);
+    sndSplashGrande(true);
+    /* Splash al volver — espectacular */
+    setTimeout(() => {
+      salpicaduraGrande(xGotas,      yInicioB + 10, 24, true);
+      salpicaduraGrande(xGotas - 28, yInicioB + 18,  8, false);
+      salpicaduraGrande(xGotas + 28, yInicioB + 18,  8, false);
+      sndSplashGrande(true);
+    }, 2100);
+    setTimeout(() => elB.remove(), 3000);
 
   } else {
     /* ── DELFÍN: arco de salto bien visible ── */
@@ -1718,12 +1766,14 @@ function saltoCriatura(tipo) {
     `;
     el.textContent = emoji;
     $('area-juego').appendChild(el);
-    /* Splash al salir */
-    salpicaduraGrande(xGotas, yInicio + 10, 8);
+    salpicaduraGrande(xGotas, yInicio + 10, 12, false);
     sndSplashGrande(false);
     sndDelfin();
     /* Splash al volver */
-    setTimeout(() => { salpicaduraGrande(xGotas, yInicio + 10, 12); sndSplashGrande(false); }, 1550);
+    setTimeout(() => {
+      salpicaduraGrande(xGotas, yInicio + 10, 16, false);
+      sndSplashGrande(false);
+    }, 1550);
     setTimeout(() => el.remove(), 2200);
   }
 }
