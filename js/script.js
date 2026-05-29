@@ -1104,9 +1104,19 @@ function apareceGrupo() {
   if (!estado.activo) return;
   const nv = NIVELES[estado.nivel];
   if (estado.gruposCruzados + estado.grupos.length >= nv.gruposNecesarios) return;
+
   const el = document.createElement('div');
   el.className = 'grupo-pueblo';
-  el.innerHTML = generarMultitud(14 + Math.floor(Math.random()*7));
+
+  /* Calcular cuántas figuras caben en la arena sin desbordar */
+  const { anchoArena } = obtenerZonas();
+  const PASO     = 18;
+  const margen   = 24; /* espacio a cada lado del carril */
+  const maxCaben = Math.max(4, Math.floor((anchoArena - margen) / PASO));
+  const nDeseado = 14 + Math.floor(Math.random() * 7);
+  const n        = Math.min(nDeseado, maxCaben);
+
+  el.innerHTML = generarMultitud(n);
   el.style.top = '-65px';
   estado.grupos.push({ el, y:-65 });
   $('area-juego').appendChild(el);
