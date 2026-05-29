@@ -1643,60 +1643,120 @@ function sndSplashGrande(esGrande) {
 }
 
 /* Crea el efecto visual de salpicadura grande en una posición del área de juego */
-/* Crea un splash espectacular: todas las gotas van hacia ARRIBA y los lados,
-   nunca hacia abajo, para que no queden ocultas por overflow:hidden */
+/* ============================================================
+   SPLASH — Web Animations API (sin CSS variables, sin fallos)
+   z-index:200 garantiza que esté por encima de todo
+   ============================================================ */
 function salpicaduraGrande(x, y, cantidad, esGigante) {
-  const tamBase   = esGigante ? 20 : 14;
-  const distBase  = esGigante ? 70 : 40;
-  const durBase   = esGigante ? 1.1 : .75;
+  const area    = $('area-juego');
+  const EMOJIS  = ['💧','💦','💧','💦','💧'];
+  const tamBase = esGigante ? 26 : 18;
+  const distMax = esGigante ? 110 : 70;
+  const dur     = esGigante ? 1000 : 720;
 
+  /* ── Gotas en abanico, solo hacia arriba y lados ── */
   for (let i = 0; i < cantidad; i++) {
-    /* Ángulo: solo semicírculo superior (de -PI a 0) + algo lateral
-       Ángulos entre -170° y -10° → todas las gotas van hacia arriba */
-    const angGrados = -170 + (i / cantidad) * 160 + (Math.random() - .5) * 25;
-    const ang       = angGrados * Math.PI / 180;
-    const dist      = distBase + Math.random() * distBase * .8;
-    const tx        = Math.cos(ang) * dist;
-    const ty        = Math.sin(ang) * dist;   /* negativo = arriba */
+    /* Ángulos: semicírculo superior, de -175° a -5° */
+    const angDeg = -175 + (i / Math.max(cantidad - 1, 1)) * 170
+                        + (Math.random() - .5) * 20;
+    const ang = angDeg * Math.PI / 180;
+    const dist = (distMax * .5) + Math.random() * distMax;
+    const tx   = Math.cos(ang) * dist;
+    const ty   = Math.sin(ang) * dist;   /* negativo = sube */
+    const tam  = tamBase + Math.random() * tamBase * .5;
 
-    const dr  = document.createElement('div');
-    dr.className = 'droplet';
-    dr.textContent = i % 2 === 0 ? '💧' : '💦';
-    dr.style.cssText =
-      `left:${x - 6}px; top:${y - 6}px;`
-    + `font-size:${tamBase + Math.random() * tamBase * .6}px;`
-    + `--tx:${tx}px; --ty:${ty}px;`
-    + `--dur:${durBase + Math.random() * .4}s;`
-    + `animation-delay:${i * .03}s`;
-    $('area-juego').appendChild(dr);
-    setTimeout(() => dr.remove(), (durBase + .5) * 1000 + i * 30);
+    const el = document.createElement('div');
+    el.textContent = EMOJIS[i % EMOJIS.length];
+    el.style.cssText = `
+      position:absolute;
+      left:${x - tam / 2}px;
+      top:${y - tam / 2}px;
+      font-size:${tam}px;
+      pointer-events:none;
+      z-index:200;
+    `;
+    area.appendChild(el);
+
+    el.animate(
+      [
+        { opacity: 1, transform: 'translate(0,0) scale(1)' },
+        { opacity: 0, transform: `translate(${tx}px,${ty}px) scale(0.25)` }
+      ],
+      { duration: dur + Math.random() * 300, delay: i * 28,
+        easing: 'ease-out', fill: 'forwards' }
+    );
+    setTimeout(() => el.remove(), dur + i * 28 + 500);
   }
 
-  /* Columna central de agua que sube y se dispersa */
-  ['💦','💧','💦'].forEach((em, i) => {
-    const col = document.createElement('div');
-    col.className = 'droplet';
-    col.textContent = em;
-    const ty = -(55 + i * 25 + Math.random() * 20);
-    col.style.cssText =
-      `left:${x + (i-1)*12 - 6}px; top:${y - 6}px;`
-    + `font-size:${(esGigante ? 22 : 16) - i * 2}px;`
-    + `--tx:${(i-1) * 8}px; --ty:${ty}px;`
-    + `--dur:${.7 + i * .12}s; animation-delay:${i * .06}s`;
-    $('area-juego').appendChild(col);
-    setTimeout(() => col.remove(), 1400);
-  });
+  /* ── Columna central: 3 gotas que suben en línea ── */
+  for (let j = 0; j < 3; j++) {
+    const el2 = document.createElement('div');
+    el2.textContent = '💦';
+    el2.style.cssText = `
+      position:absolute;
+      left:${x + (j - 1) * 14 - 10}px;
+      top:${y - 10}px;
+      font-size:${(esGigante ? 28 : 18) - j * 3}px;
+      pointer-events:none;
+      z-index:200;
+    `;
+    area.appendChild(el2);
+    el2.animate(
+      [
+        { opacity: 1, transform: 'translate(0,0) scale(1)' },
+        { opacity: 0, transform: `translate(${(j-1)*10}px,${-(esGigante ? 90 : 55) - j*20}px) scale(0.2)` }
+      ],
+      { duration: dur + j * 80, delay: j * 40,
+        easing: 'ease-out', fill: 'forwards' }
+    );
+    setTimeout(() => el2.remove(), dur + j * 80 + 400);
+  }
 
-  /* Splash central grande */
+  /* ── Aro de agua expansivo (div circular que se expande) ── */
+  const ring = document.createElement('div');
+  const ringSize = esGigante ? 80 : 50;
+  ring.style.cssText = `
+    position:absolute;
+    left:${x - ringSize/2}px;
+    top:${y - ringSize/2}px;
+    width:${ringSize}px;
+    height:${ringSize}px;
+    border-radius:50%;
+    border:${esGigante ? 4 : 2.5}px solid rgba(100,200,255,.85);
+    pointer-events:none;
+    z-index:199;
+  `;
+  area.appendChild(ring);
+  ring.animate(
+    [
+      { opacity: .9, transform: 'scale(0.2)' },
+      { opacity: 0,  transform: `scale(${esGigante ? 3.2 : 2.5})` }
+    ],
+    { duration: esGigante ? 900 : 650, easing: 'ease-out', fill: 'forwards' }
+  );
+  setTimeout(() => ring.remove(), 1000);
+
+  /* ── Splash emoji central grande ── */
   const sp = document.createElement('div');
-  sp.className = 'splash';
   sp.textContent = esGigante ? '🌊' : '💦';
-  sp.style.cssText =
-    `left:${x - (esGigante ? 28 : 18)}px;`
-  + `top:${y - (esGigante ? 28 : 18)}px;`
-  + `font-size:${esGigante ? 3 : 2}em`;
-  $('area-juego').appendChild(sp);
-  setTimeout(() => sp.remove(), 950);
+  sp.style.cssText = `
+    position:absolute;
+    left:${x - (esGigante ? 30 : 18)}px;
+    top:${y  - (esGigante ? 30 : 18)}px;
+    font-size:${esGigante ? 3.5 : 2.2}em;
+    pointer-events:none;
+    z-index:200;
+  `;
+  area.appendChild(sp);
+  sp.animate(
+    [
+      { opacity: 1, transform: 'scale(0.4) translateY(0)' },
+      { opacity: 1, transform: `scale(1.6) translateY(-${esGigante ? 14 : 8}px)` },
+      { opacity: 0, transform: `scale(0.9) translateY(-${esGigante ? 24 : 14}px)` }
+    ],
+    { duration: esGigante ? 750 : 550, easing: 'ease-out', fill: 'forwards' }
+  );
+  setTimeout(() => sp.remove(), 900);
 }
 
 function saltoCriatura(tipo) {
