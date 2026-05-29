@@ -444,11 +444,20 @@ body { display: flex; align-items: center; justify-content: center; }
 
 #etiqueta-nivel {
   position: absolute;
-  bottom: max(132px, calc(env(safe-area-inset-bottom, 0px) + 82px));
-  left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,.42); color: rgba(255,255,255,.52);
-  font-size: clamp(.46em, 1.4vw, .7em); padding: 2px 12px; border-radius: 20px;
-  white-space: nowrap; z-index: 30; pointer-events: none;
+  /* Mover al margen superior derecho — lejos de los contenedores */
+  top: clamp(32px, 6vh, 52px);
+  right: 10px;
+  left: auto;
+  transform: none;
+  background: rgba(0,0,0,.55);
+  color: rgba(255,255,255,.75);
+  font-size: clamp(.48em, 1.5vw, .72em);
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  z-index: 30;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,.15);
 }
 
 /* ══════════════════════════════════════════════════
@@ -914,14 +923,24 @@ body { display: flex; align-items: center; justify-content: center; }
   animation: sube .5s .2s ease both;
 }
 
-/* ── SALTO DE DELFÍN Y BALLENA ── */
-@keyframes salto-criatura {
-  0%   { transform: translateY(0)     rotate(0deg)   scale(1);   opacity: 0; }
-  10%  { opacity: 1; }
-  35%  { transform: translateY(-55%)  rotate(-35deg) scale(1.1); opacity: 1; }
-  65%  { transform: translateY(-55%)  rotate(35deg)  scale(1.1); opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(0)     rotate(0deg)   scale(1);   opacity: 0; }
+/* ── SALTO DE DELFÍN ── */
+@keyframes delfin-salto {
+  0%   { transform: translateY(0)                rotate(0deg);  opacity:0; }
+  5%   { opacity: 1; }
+  30%  { transform: translateY(calc(var(--alto) * -1)) rotate(-38deg); opacity:1; }
+  70%  { transform: translateY(calc(var(--alto) * -1)) rotate(38deg);  opacity:1; }
+  95%  { opacity: 1; }
+  100% { transform: translateY(0)                rotate(0deg);  opacity:0; }
+}
+
+/* ── CHAPOTEO DE BALLENA ── */
+@keyframes ballena-chapoteo {
+  0%   { transform: translateY(40px) scaleX(1);   opacity:0; }
+  15%  { transform: translateY(0px)  scaleX(1);   opacity:1; }
+  40%  { transform: translateY(-18px) scaleX(1.1); opacity:1; }
+  60%  { transform: translateY(5px)  scaleX(.95); opacity:1; }
+  80%  { transform: translateY(-8px) scaleX(1.05); opacity:.8; }
+  100% { transform: translateY(40px) scaleX(1);   opacity:0; }
 }
 
 /* ── GAVIOTAS ── */
