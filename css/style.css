@@ -193,6 +193,60 @@ body { display: flex; align-items: center; justify-content: center; }
 #btn-voz:hover { color: rgba(255,255,255,.9); border-color: rgba(255,255,255,.5); }
 #btn-voz.silenciado { color: rgba(255,255,255,.3); text-decoration: line-through; }
 
+/* ── ANIMALES NADANDO EN EL MAR ── */
+.nadador {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  line-height: 1;
+  will-change: transform;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
+}
+/* Nado horizontal de lado a lado */
+.nadador.nada-der {
+  animation: nada-der var(--dur, 8s) var(--del, 0s) linear infinite;
+}
+.nadador.nada-izq {
+  animation: nada-izq var(--dur, 8s) var(--del, 0s) linear infinite;
+  transform: scaleX(-1);
+}
+@keyframes nada-der {
+  0%   { transform: translateX(-40px) translateY(0px); opacity: 0; }
+  5%   { opacity: 1; }
+  45%  { transform: translateX(calc(var(--ancho, 60px) * .45)) translateY(calc(sin(var(--fase,0) + 1.5) * 8px)); }
+  90%  { opacity: 1; }
+  100% { transform: translateX(calc(var(--ancho, 60px) + 20px)) translateY(0px); opacity: 0; }
+}
+@keyframes nada-izq {
+  0%   { transform: scaleX(-1) translateX(-40px) translateY(0px); opacity: 0; }
+  5%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: scaleX(-1) translateX(calc(var(--ancho, 60px) + 20px)) translateY(0px); opacity: 0; }
+}
+/* Flotación vertical suave para los que "descansan" */
+.nadador.flota {
+  animation: flota-suave var(--dur, 4s) var(--del, 0s) ease-in-out infinite;
+}
+@keyframes flota-suave {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  25%     { transform: translateY(-8px) rotate(3deg); }
+  75%     { transform: translateY(5px) rotate(-3deg); }
+}
+/* Burbujas decorativas */
+.burbuja {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.3);
+  animation: sube-burbuja var(--dur, 3s) var(--del, 0s) ease-in infinite;
+}
+@keyframes sube-burbuja {
+  0%   { transform: translateY(0) scale(1); opacity: .7; }
+  100% { transform: translateY(calc(var(--dist, -80px))) scale(.4); opacity: 0; }
+}
+
 /* ── PANTALLA DE INICIO ── */
 #s-start {
   background:
@@ -298,17 +352,21 @@ body { display: flex; align-items: center; justify-content: center; }
 #zona-agua-der { right: 0;  width: 25%; background: linear-gradient(to left,  #0b3a78, #1258a8); }
 #zona-arena    { left: 25%; right: 25%; background: linear-gradient(to bottom, #d4a040, #c99038); }
 
-/* Efecto de ondas en el agua */
+/* Olas onduladas animadas — dos capas moviéndose en sentidos contrarios */
 #zona-agua-izq::after, #zona-agua-der::after {
   content: ''; position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
-    transparent 2px, transparent 12px
-  );
-  animation: brillo-agua 1.6s linear infinite;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14'%3E%3Cpath d='M0,7 C15,1 35,13 60,7 C85,1 105,13 120,7' stroke='rgba(255,255,255,0.13)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='10'%3E%3Cpath d='M0,5 C10,1 20,9 40,5 C60,1 70,9 80,5' stroke='rgba(255,255,255,0.07)' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='18'%3E%3Cpath d='M0,9 C20,2 40,16 80,9 C120,2 140,16 160,9' stroke='rgba(255,255,255,0.05)' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-size: 120px 14px, 80px 10px, 160px 18px;
+  background-repeat: repeat;
+  animation: ondas-agua 4s linear infinite;
 }
-@keyframes brillo-agua { to { background-position-y: 12px; } }
+@keyframes ondas-agua {
+  from { background-position:   0px 0px,    0px 0px,    0px 0px; }
+  to   { background-position: 120px 14px, -80px 10px,  160px 18px; }
+}
 
 /* Estados de zona al arrastrar un animal */
 #zona-agua-izq.dz-bien { background: linear-gradient(to right, #0e5090, #1870d0); outline: 3px solid rgba(80,220,160,.7); outline-offset: -3px; }

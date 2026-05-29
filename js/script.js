@@ -525,7 +525,133 @@ function sndNivel() {
   });
 }
 
-/* Melodía de victoria */
+/* Aplausos sintetizados — ráfagas de ruido cortas y rítmicas */
+function sndAplausos() {
+  if (silenciado) return;
+  const a = audio();
+  /* 18 palmadas distribuidas en 3 segundos */
+  const patron = [
+    0, .12, .24,          /* tres palmadas rápidas */
+    .55, .67, .79,        /* otras tres */
+    1.05, 1.17, 1.29,     /* otras tres */
+    1.5, 1.58, 1.66, 1.74,/* cuatro más rápidas — crescendo */
+    1.95, 2.05, 2.15,
+    2.4, 2.52,
+  ];
+  patron.forEach((t, i) => {
+    const inicio = a.currentTime + t;
+    /* Ruido blanco recortado = palmada */
+    const frames = Math.floor(a.sampleRate * .068);
+    const buf    = a.createBuffer(1, frames, a.sampleRate);
+    const d      = buf.getChannelData(0);
+    for (let j = 0; j < frames; j++) {
+      /* envolvente: ataque rápido, caída suave */
+      const env = j < frames * .1
+        ? j / (frames * .1)
+        : Math.pow(1 - (j - frames * .1) / (frames * .9), 1.8);
+      d[j] = (Math.random() * 2 - 1) * env;
+    }
+    const src = a.createBufferSource(); src.buffer = buf;
+    /* Filtro de paso de banda para timbre de palmada */
+    const bp  = a.createBiquadFilter();
+    bp.type   = 'bandpass';
+    bp.frequency.value = 1200 + Math.random() * 400;
+    bp.Q.value = .8;
+    const g   = a.createGain();
+    /* Volumen crece hacia el final — crowd crescendo */
+    const vol = .28 + i / patron.length * .38;
+    g.gain.setValueAtTime(vol, inicio);
+    g.gain.exponentialRampToValueAtTime(.001, inicio + .1);
+    src.connect(bp); bp.connect(g); g.connect(a.destination);
+    src.start(inicio); src.stop(inicio + .12);
+  });
+}
+
+/* Fanfarria triunfal — trompeta sintetizada + redoble de tambor */
+function sndFanfarria() {
+  if (silenciado) return;
+  const a = audio();
+
+  /* ── Melodía de trompeta (onda de sierra + filtro) ── */
+  const melodia = [
+    /* tiempo, frecuencia, duración, volumen */
+    [0,     523, .18, .35],  /* Do  */
+    [.19,   523, .12, .30],  /* Do  */
+    [.33,   784, .28, .40],  /* Sol */
+    [.63,   659, .18, .32],  /* Mi  */
+    [.83,   784, .18, .32],  /* Sol */
+    [1.03,  880, .45, .45],  /* La  — primer clímax */
+    [1.52,  784, .15, .28],
+    [1.69,  880, .15, .28],
+    [1.86, 1047, .55, .50],  /* Do alta — segundo clímax */
+    [2.45,  880, .20, .35],
+    [2.67,  784, .20, .30],
+    [2.9,   880, .15, .28],
+    [3.07, 1047, .18, .40],
+    [3.27, 1175, .85, .55],  /* Re alta — fanfarria final */
+  ];
+
+  melodia.forEach(([t, freq, dur, vol]) => {
+    const o  = a.createOscillator();
+    const g  = a.createGain();
+    const lp = a.createBiquadFilter();
+    o.type   = 'sawtooth';
+    o.frequency.setValueAtTime(freq, a.currentTime + t);
+    /* vibrato ligero */
+    const lfo = a.createOscillator();
+    const lg  = a.createGain();
+    lfo.frequency.value = 6; lg.gain.value = 4;
+    lfo.connect(lg); lg.connect(o.frequency);
+    lfo.start(a.currentTime + t);
+    lfo.stop(a.currentTime + t + dur + .05);
+    /* filtro de paso bajo para suavizar la sierra */
+    lp.type = 'lowpass'; lp.frequency.value = 2200;
+    /* envolvente ADSR */
+    const ini = a.currentTime + t;
+    g.gain.setValueAtTime(0, ini);
+    g.gain.linearRampToValueAtTime(vol, ini + .04);   /* ataque */
+    g.gain.linearRampToValueAtTime(vol * .75, ini + .12); /* decay */
+    g.gain.setValueAtTime(vol * .75, ini + dur - .06);
+    g.gain.linearRampToValueAtTime(.001, ini + dur);  /* release */
+    o.connect(lp); lp.connect(g); g.connect(a.destination);
+    o.start(ini); o.stop(ini + dur + .05);
+  });
+
+  /* ── Redoble de tambor ── */
+  const golpes = [
+    [0, .55], [.33, .4], [.63, .4], [1.03, .5],
+    [1.52, .4], [1.86, .55], [2.45, .4], [3.07, .5], [3.27, .7],
+  ];
+  golpes.forEach(([t, vol]) => {
+    const ini = a.currentTime + t;
+    const frames = Math.floor(a.sampleRate * .055);
+    const buf    = a.createBuffer(1, frames, a.sampleRate);
+    const d      = buf.getChannelData(0);
+    for (let j = 0; j < frames; j++) {
+      const env = Math.pow(1 - j / frames, 2.5);
+      d[j] = (Math.random() * 2 - 1) * env;
+    }
+    const src = a.createBufferSource(); src.buffer = buf;
+    const lp  = a.createBiquadFilter();
+    lp.type   = 'lowpass'; lp.frequency.value = 280;
+    /* tono grave de tambor */
+    const o   = a.createOscillator();
+    const og  = a.createGain();
+    o.frequency.setValueAtTime(120, ini);
+    o.frequency.exponentialRampToValueAtTime(55, ini + .055);
+    og.gain.setValueAtTime(vol * .6, ini);
+    og.gain.exponentialRampToValueAtTime(.001, ini + .07);
+    o.connect(og); og.connect(a.destination);
+    o.start(ini); o.stop(ini + .08);
+    const ng  = a.createGain();
+    ng.gain.setValueAtTime(vol * .45, ini);
+    ng.gain.exponentialRampToValueAtTime(.001, ini + .06);
+    src.connect(lp); lp.connect(ng); ng.connect(a.destination);
+    src.start(ini); src.stop(ini + .07);
+  });
+}
+
+/* Melodía de victoria simple (se mantiene para el nivel completo) */
 function sndVictoria() {
   if (silenciado) return; const a = audio();
   [523,659,784,880,784,880,1047].forEach((f,i) => {
@@ -703,6 +829,101 @@ function mostrarBannerNuevoBin() {
 
 
 /* ============================================================
+   ANIMALES NADANDO EN EL MAR
+   Se crean al iniciar el nivel y permanecen durante el juego.
+   ============================================================ */
+
+const NADADORES = [
+  { e:'🐠', tam:16 }, { e:'🐡', tam:16 }, { e:'🐟', tam:14 },
+  { e:'🦈', tam:20 }, { e:'🐙', tam:18 }, { e:'🦑', tam:16 },
+  { e:'🐬', tam:20 }, { e:'🐋', tam:24 }, { e:'🦞', tam:14 },
+  { e:'🐚', tam:13 }, { e:'🦀', tam:14 }, { e:'⭐', tam:13 },
+  { e:'🪸', tam:15 }, { e:'🦭', tam:19 }, { e:'🐊', tam:18 },
+];
+
+function crearNadadores() {
+  /* Limpiar nadadores previos */
+  $('area-juego').querySelectorAll('.nadador,.burbuja').forEach(e => e.remove());
+
+  const { H } = obtenerZonas();
+
+  /* Crear nadadores en la zona izquierda y derecha */
+  ['zona-agua-izq','zona-agua-der'].forEach(zonaId => {
+    const zona   = $(zonaId);
+    const rect   = zona.getBoundingClientRect();
+    const anchoZ = rect.width;
+    const area   = $('area-juego').getBoundingClientRect();
+    const offsetX = rect.left - area.left;
+
+    /* 6-8 nadadores por zona */
+    const cantidad = 6 + Math.floor(Math.random() * 3);
+    const usados   = new Set();
+
+    for (let i = 0; i < cantidad; i++) {
+      /* Elegir animal sin repetir demasiado */
+      let idx;
+      do { idx = Math.floor(Math.random() * NADADORES.length); }
+      while (usados.has(idx) && usados.size < NADADORES.length);
+      usados.add(idx);
+      const n = NADADORES[idx];
+
+      const el = document.createElement('div');
+      el.className = 'nadador';
+
+      const y    = H * .08 + Math.random() * (H * .82);
+      const dur  = 6 + Math.random() * 10;
+      const del  = Math.random() * -12; /* retraso negativo → ya en progreso */
+
+      /* Alterna entre nado horizontal y flotación */
+      if (Math.random() > 0.3) {
+        /* Nado horizontal */
+        const vaALaDerecha = Math.random() > 0.5;
+        el.classList.add(vaALaDerecha ? 'nada-der' : 'nada-izq');
+        el.style.cssText = `
+          left: ${offsetX + (vaALaDerecha ? 0 : anchoZ - n.tam)}px;
+          top: ${y}px;
+          font-size: ${n.tam}px;
+          --dur: ${dur}s;
+          --del: ${del}s;
+          --ancho: ${anchoZ}px;
+        `;
+      } else {
+        /* Flotación suave en un punto fijo */
+        el.classList.add('flota');
+        el.style.cssText = `
+          left: ${offsetX + 4 + Math.random() * (anchoZ - n.tam - 8)}px;
+          top: ${y}px;
+          font-size: ${n.tam}px;
+          --dur: ${3 + Math.random() * 3}s;
+          --del: ${del}s;
+        `;
+      }
+      el.textContent = n.e;
+      $('area-juego').appendChild(el);
+    }
+
+    /* 4-6 burbujas por zona */
+    for (let b = 0; b < 4 + Math.floor(Math.random() * 3); b++) {
+      const bel  = document.createElement('div');
+      bel.className = 'burbuja';
+      const tam  = 4 + Math.random() * 7;
+      const bx   = offsetX + 4 + Math.random() * (anchoZ - 12);
+      const by   = H * .2  + Math.random() * (H * .7);
+      const bdur = 3 + Math.random() * 4;
+      const bdel = Math.random() * -6;
+      bel.style.cssText = `
+        left:${bx}px; top:${by}px;
+        width:${tam}px; height:${tam}px;
+        --dur:${bdur}s; --del:${bdel}s;
+        --dist:${-(60 + Math.random()*80)}px;
+      `;
+      $('area-juego').appendChild(bel);
+    }
+  });
+}
+
+
+/* ============================================================
    INICIAR NIVEL
    ============================================================ */
 function iniciarNivel() {
@@ -718,7 +939,7 @@ function iniciarNivel() {
   estado.activo          = true;
   estado.contadorId      = 0;
 
-  $('area-juego').querySelectorAll('.criatura,.grupo-pueblo,.salpicadura,.pts-flotantes,.gota,.eco-burst').forEach(e => e.remove());
+  $('area-juego').querySelectorAll('.criatura,.grupo-pueblo,.salpicadura,.pts-flotantes,.gota,.eco-burst,.nadador,.burbuja').forEach(e => e.remove());
   $('mensaje').classList.remove('visible');
 
   $('val-nivel').textContent    = estado.nivel + 1;
@@ -732,6 +953,7 @@ function iniciarNivel() {
   activarBins(estado.nivel);
   mostrarPantalla('s-game');
   iniciarAmbiente();
+  crearNadadores();
 
   /* Banner de nuevos bins (~1s después de que se vea la pantalla) */
   setTimeout(() => mostrarBannerNuevoBin(), 900);
@@ -884,7 +1106,7 @@ function apareceGrupo() {
   if (estado.gruposCruzados + estado.grupos.length >= nv.gruposNecesarios) return;
   const el = document.createElement('div');
   el.className = 'grupo-pueblo';
-  el.innerHTML = generarMultitud(8 + Math.floor(Math.random()*5));
+  el.innerHTML = generarMultitud(14 + Math.floor(Math.random()*7));
   el.style.top = '-65px';
   estado.grupos.push({ el, y:-65 });
   $('area-juego').appendChild(el);
@@ -1140,7 +1362,13 @@ function nivelCompleto() {
 }
 
 function mostrarVictoria() {
-  detenerAmbiente(); sndVictoria();
+  detenerAmbiente();
+  /* Fanfarria inmediata */
+  sndFanfarria();
+  /* Aplausos con pequeño retraso para que se mezclen bien */
+  setTimeout(() => sndAplausos(), 300);
+  /* Segunda ronda de aplausos al final de la fanfarria */
+  setTimeout(() => { if (!silenciado) sndAplausos(); }, 3200);
   $('win-pts').textContent = estado.puntuacion;
   mostrarPantalla('s-win');
   lanzarConfeti();
