@@ -70,56 +70,56 @@ const BASURA = [
 const NIVELES = [
   {
     nombre:              'El inicio del éxodo',
-    vel:                 50,
-    intervalo:           4000,
+    vel:                 22,   /* muy lento — el niño aprende sin presión */
+    intervalo:           5500,
     maxObjetos:          2,
     rescates:            5,
     gruposNecesarios:    3,
     animalesDisp:        [0,1],
-    basuraDisp:          [0,1,3,11,12],          /* bolsa, vaso, lata + zapato, calcetín */
+    basuraDisp:          [0,1,3,11,12],
     contenedoresActivos: ['amarillo','gris'],
     proporcionBasura:    .25,
   },
   {
     nombre:              'El camino se abre',
-    vel:                 68,
-    intervalo:           3200,
+    vel:                 34,   /* lento — suma el contenedor azul */
+    intervalo:           4500,
     maxObjetos:          2,
     rescates:            7,
     gruposNecesarios:    4,
     animalesDisp:        [0,1,2,3],
-    basuraDisp:          [0,1,2,3,4,5,6,11,12,13], /* + papel/cartón + caña */
+    basuraDisp:          [0,1,2,3,4,5,6,11,12,13],
     contenedoresActivos: ['amarillo','azul','gris'],
     proporcionBasura:    .33,
   },
   {
     nombre:              'Criaturas del abismo',
-    vel:                 90,
-    intervalo:           2500,
+    vel:                 50,   /* medio — el niño ya tiene confianza */
+    intervalo:           3200,
     maxObjetos:          3,
     rescates:            10,
     gruposNecesarios:    5,
     animalesDisp:        [0,1,2,3,4],
-    basuraDisp:          [0,1,2,3,4,5,6,7,8,11,12,13], /* + vidrio */
+    basuraDisp:          [0,1,2,3,4,5,6,7,8,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','gris'],
     proporcionBasura:    .40,
   },
   {
     nombre:              'La gran prueba',
-    vel:                 118,
-    intervalo:           2000,
+    vel:                 78,   /* rápido — todos los contenedores */
+    intervalo:           2200,
     maxObjetos:          3,
     rescates:            12,
     gruposNecesarios:    6,
     animalesDisp:        [0,1,2,3,4,5],
-    basuraDisp:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13], /* todos */
+    basuraDisp:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','marron','gris'],
     proporcionBasura:    .45,
   },
   {
     nombre:              'Paso final',
-    vel:                 148,
-    intervalo:           1650,
+    vel:                 110,  /* exigente — el reto final */
+    intervalo:           1800,
     maxObjetos:          4,
     rescates:            14,
     gruposNecesarios:    7,
@@ -1352,14 +1352,12 @@ function nivelCompleto() {
   $('lu-cita').textContent   = hist.cita;
   $('lu-ref').textContent    = hist.referencia;
 
-  /* Reiniciar animaciones en cascada */
   ['lu-escena','lu-titulo','lu-texto','lu-cita','lu-ref'].forEach(id => {
     const el = $(id); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
   });
 
-  /* Mostrar contenedores del próximo nivel con los nuevos destacados */
-  const nivelSig = estado.nivel + 1;
-  const divProx  = $('proximos-bins');
+  const nivelSig   = estado.nivel + 1;
+  const divProx    = $('proximos-bins');
   if (nivelSig < NIVELES.length) {
     const binsProx    = NIVELES[nivelSig].contenedoresActivos;
     const binsActuales = NIVELES[estado.nivel].contenedoresActivos;
@@ -1375,19 +1373,26 @@ function nivelCompleto() {
   }
 
   mostrarPantalla('s-lu');
+
+  /* Reproducir la narración del nivel con un pequeño retraso
+     para que el niño vea primero la pantalla de celebración */
+  setTimeout(() => {
+    reproducirAudio(AUDIO_NIVELES[Math.min(estado.nivel, AUDIO_NIVELES.length - 2)]);
+  }, 800);
 }
 
 function mostrarVictoria() {
-  detenerAmbiente();
-  /* Fanfarria inmediata */
+  detenerAmbiente(); detenerVoz();
   sndFanfarria();
-  /* Aplausos con pequeño retraso para que se mezclen bien */
   setTimeout(() => sndAplausos(), 300);
-  /* Segunda ronda de aplausos al final de la fanfarria */
   setTimeout(() => { if (!silenciado) sndAplausos(); }, 3200);
   $('win-pts').textContent = estado.puntuacion;
   mostrarPantalla('s-win');
   lanzarConfeti();
+  /* Narración de victoria — Moisés despide al jugador */
+  setTimeout(() => {
+    reproducirAudio(AUDIO_NIVELES[AUDIO_NIVELES.length - 1]);
+  }, 1000);
 }
 
 function lanzarConfeti() {
@@ -1416,105 +1421,119 @@ function lanzarConfeti() {
    INSTRUCCIONES DE MOISÉS — Web Speech API
    ============================================================ */
 
-let vozActiva = true;       /* el niño puede silenciar la voz */
-let utteranceActual = null; /* referencia para cancelar si se avanza */
+/* ============================================================
+   VOZ DE MOISÉS — Archivos MP3 (ElevenLabs)
+   Estructura esperada:
+     audio/instrucciones/moises-0.mp3 … moises-7.mp3
+     audio/niveles/nivel-1.mp3 … nivel-4.mp3
+     audio/niveles/nivel-5-victoria.mp3
+   ============================================================ */
 
-/* Comprueba si el navegador soporta síntesis de voz */
-const hayVoz = 'speechSynthesis' in window;
+let vozActiva  = true;
+let audioActual = null; /* elemento <audio> en reproducción */
 
-/* Habla un texto en español con voz masculina grave */
-function hablar(texto, alTerminar) {
-  if (!hayVoz || !vozActiva) {
+/* Reproduce un archivo MP3. Si la voz está silenciada, no hace nada.
+   alTerminar (opcional) se llama cuando el audio acaba o si está silenciado. */
+function reproducirAudio(ruta, alTerminar) {
+  detenerVoz();
+  if (!vozActiva) {
     if (alTerminar) setTimeout(alTerminar, 200);
     return;
   }
-  window.speechSynthesis.cancel();
-  const u   = new SpeechSynthesisUtterance(texto);
-  u.lang    = 'es-ES';
-  u.rate    = 0.82;   /* más lento → más solemne */
-  u.pitch   = 0.55;   /* muy grave → voz masculina */
-  u.volume  = 1;
-
-  /* Intentar encontrar una voz masculina en español.
-     Los navegadores etiquetan las voces con el nombre;
-     buscamos primero por palabras clave de voz masculina. */
-  const voces = window.speechSynthesis.getVoices();
-
-  const masculinas = voces.filter(v =>
-    v.lang.startsWith('es') &&
-    /male|hombre|jorge|pablo|diego|antonio|carlos|miguel/i.test(v.name)
-  );
-  const espanolas = voces.filter(v => v.lang.startsWith('es'));
-
-  /* Prioridad: voz masculina española → cualquier española → lo que haya */
-  u.voice = masculinas[0] || espanolas[0] || null;
-
-  if (alTerminar) u.onend = alTerminar;
-  utteranceActual = u;
-  window.speechSynthesis.speak(u);
+  const a = new Audio(ruta);
+  audioActual = a;
+  a.onended  = () => { audioActual = null; if (alTerminar) alTerminar(); };
+  a.onerror  = () => {
+    /* Si el archivo no existe, continúa sin audio */
+    audioActual = null;
+    if (alTerminar) setTimeout(alTerminar, 200);
+  };
+  a.play().catch(() => {
+    /* El navegador bloqueó la reproducción automática — continúa sin audio */
+    audioActual = null;
+    if (alTerminar) setTimeout(alTerminar, 200);
+  });
 }
 
+/* Detiene el audio en reproducción */
 function detenerVoz() {
-  if (hayVoz) window.speechSynthesis.cancel();
+  if (audioActual) {
+    audioActual.pause();
+    audioActual.currentTime = 0;
+    audioActual = null;
+  }
 }
+
+/* Rutas de los archivos de instrucciones (un MP3 por paso) */
+const AUDIO_INSTRUCCIONES = [
+  'audio/instrucciones/moises-0.mp3',
+  'audio/instrucciones/moises-1.mp3',
+  'audio/instrucciones/moises-2.mp3',
+  'audio/instrucciones/moises-3.mp3',
+  'audio/instrucciones/moises-4.mp3',
+  'audio/instrucciones/moises-5.mp3',
+  'audio/instrucciones/moises-6.mp3',
+  'audio/instrucciones/moises-7.mp3',
+];
+
+/* Rutas de los audios de nivel (índice 0 = nivel 1, etc.) */
+const AUDIO_NIVELES = [
+  'audio/niveles/nivel-1.mp3',
+  'audio/niveles/nivel-2.mp3',
+  'audio/niveles/nivel-3.mp3',
+  'audio/niveles/nivel-4.mp3',
+  'audio/niveles/nivel-5-victoria.mp3',
+];
 
 /* ─── Pasos de instrucción ─── */
 const PASOS_INSTRUCCION = [
   {
-    tipo:     'intro',
-    icono:    '👋',
-    titulo:   '¡Hola, pequeño ayudante!',
-    objetos:  [],
-    discurso: 'Soy Moisés. Dios ha abierto el Mar Rojo para que mi pueblo pueda cruzar. Pero hay mucha basura en la arena. ¡Necesito tu ayuda para reciclarla correctamente!',
+    tipo:    'intro',
+    icono:   '👋',
+    titulo:  '¡Hola, pequeño ayudante!',
+    objetos: [],
   },
   {
-    tipo:     'animal',
-    icono:    '🐠🌊',
-    titulo:   'Animales al mar',
-    objetos:  ['⭐ Estrellas','🐟 Peces','🦑 Calamares','🐬 Delfines','🦈 Tiburones','🐙 Pulpos','🐋 Ballenas'],
-    discurso: 'Primero: los animales del mar deben volver al agua. Arrástralos hacia los lados, donde ves el mar azul.',
+    tipo:    'animal',
+    icono:   '🐠🌊',
+    titulo:  'Animales al mar',
+    objetos: ['⭐ Estrellas','🐟 Peces','🦑 Calamares','🐬 Delfines','🦈 Tiburones','🐙 Pulpos','🐋 Ballenas'],
   },
   {
-    tipo:     'amarillo',
-    icono:    '🟡',
-    titulo:   'Contenedor Amarillo — Envases',
-    objetos:  ['🛍️ Bolsas','🥤 Vasos plástico','🧴 Botellas plástico','🥫 Latas'],
-    discurso: 'El contenedor amarillo es para envases: bolsas y botellas de plástico, y latas de metal.',
+    tipo:    'amarillo',
+    icono:   '🟡',
+    titulo:  'Contenedor Amarillo — Envases',
+    objetos: ['🛍️ Bolsas','🥤 Vasos plástico','🧴 Botellas plástico','🥫 Latas'],
   },
   {
-    tipo:     'azul',
-    icono:    '🔵',
-    titulo:   'Contenedor Azul — Papel y Cartón',
-    objetos:  ['📦 Cajas','📰 Periódicos','🧃 Tetrabriks'],
-    discurso: 'El contenedor azul es para papel y cartón: cajas, periódicos y envases de cartón como los tetrabriks.',
+    tipo:    'azul',
+    icono:   '🔵',
+    titulo:  'Contenedor Azul — Papel y Cartón',
+    objetos: ['📦 Cajas','📰 Periódicos','🧃 Tetrabriks'],
   },
   {
-    tipo:     'verde',
-    icono:    '🟢',
-    titulo:   'Contenedor Verde — Vidrio',
-    objetos:  ['🍾 Botellas vidrio','🫙 Frascos vidrio'],
-    discurso: 'El contenedor verde es solo para vidrio: botellas y frascos de vidrio. ¡Cuidado, no confundas con el plástico!',
+    tipo:    'verde',
+    icono:   '🟢',
+    titulo:  'Contenedor Verde — Vidrio',
+    objetos: ['🍾 Botellas vidrio','🫙 Frascos vidrio'],
   },
   {
-    tipo:     'marron',
-    icono:    '🟤',
-    titulo:   'Contenedor Marrón — Orgánico',
-    objetos:  ['🪸 Algas muertas','🐚 Conchas rotas'],
-    discurso: 'El contenedor marrón es para residuos orgánicos del mar: algas muertas y conchas rotas. La naturaleza los recicla.',
+    tipo:    'marron',
+    icono:   '🟤',
+    titulo:  'Contenedor Marrón — Orgánico',
+    objetos: ['🪸 Algas muertas','🐚 Conchas rotas'],
   },
   {
-    tipo:     'gris',
-    icono:    '⚫',
-    titulo:   'Contenedor Gris — Resto',
-    objetos:  ['👟 Zapatos','🧦 Calcetines','🎣 Cañas de pesca'],
-    discurso: 'El contenedor gris es para lo que no se puede reciclar: ropa vieja, zapatos y cañas de pesca.',
+    tipo:    'gris',
+    icono:   '⚫',
+    titulo:  'Contenedor Gris — Resto',
+    objetos: ['👟 Zapatos','🧦 Calcetines','🎣 Cañas de pesca'],
   },
   {
-    tipo:     'fin',
-    icono:    '✅',
-    titulo:   '¡Ya lo sabes todo!',
-    objetos:  [],
-    discurso: '¡Perfecto! Recuerda: animales al mar, y basura al contenedor correcto. Si te equivocas, ¡pierdes una vida! ¡Buena suerte!',
+    tipo:    'fin',
+    icono:   '✅',
+    titulo:  '¡Ya lo sabes todo!',
+    objetos: [],
   },
 ];
 
@@ -1524,11 +1543,11 @@ function mostrarPasoInstruccion(indice) {
   const paso = PASOS_INSTRUCCION[indice];
   pasoActual  = indice;
 
-  /* Actualizar bocadillo de Moisés */
+  /* Actualizar bocadillo */
   const bocText = $('bocadillo-texto');
   bocText.style.opacity = '0';
   setTimeout(() => {
-    bocText.textContent = paso.discurso;
+    bocText.textContent = paso.titulo;
     bocText.style.transition = 'opacity .35s';
     bocText.style.opacity = '1';
   }, 150);
@@ -1537,72 +1556,65 @@ function mostrarPasoInstruccion(indice) {
   const tarjeta = $('paso-bin');
   tarjeta.className = 'paso-bin-anim';
   void tarjeta.offsetWidth;
-
   $('paso-bin-icono').textContent = paso.icono;
   $('paso-bin-icono').style.animation = 'none';
   void $('paso-bin-icono').offsetWidth;
   $('paso-bin-icono').style.animation = '';
-
   $('paso-bin-nombre').textContent = paso.titulo;
-
   $('paso-bin-objetos').innerHTML = paso.objetos.map((o, i) =>
     `<span class="obj-pastilla" style="animation-delay:${i*.07}s">${o}</span>`
   ).join('');
-
-  /* Color de la tarjeta según tipo */
   tarjeta.className = paso.tipo;
 
-  /* Actualizar puntos de progreso */
-  const total = PASOS_INSTRUCCION.length;
+  /* Puntos de progreso */
   $('pasos-dots').innerHTML = PASOS_INSTRUCCION.map((_, i) =>
     `<div class="dot ${i < indice ? 'completado' : i === indice ? 'activo' : ''}"></div>`
   ).join('');
 
-  /* Cambiar botón del último paso */
-  const btnSig = $('btn-paso-sig');
-  btnSig.textContent = indice === total - 1 ? '¡Empecemos! 🌊' : 'Siguiente ▶';
+  /* Texto del botón en el último paso */
+  $('btn-paso-sig').textContent =
+    indice === PASOS_INSTRUCCION.length - 1 ? '¡Empecemos! 🌊' : 'Siguiente ▶';
 
-  /* Hablar */
+  /* Reproducir el MP3 correspondiente */
   detenerVoz();
-  hablar(paso.discurso);
+  reproducirAudio(AUDIO_INSTRUCCIONES[indice]);
 }
 
 function iniciarInstrucciones() {
   pasoActual = 0;
-  /* Mostrar/ocultar el control de voz según soporte */
-  $('ctrl-voz').style.display = hayVoz ? 'flex' : 'none';
-  $('btn-voz').className = vozActiva ? '' : 'silenciado';
+  $('ctrl-voz').style.display = 'flex';
+  $('btn-voz').className  = vozActiva ? '' : 'silenciado';
   $('btn-voz').textContent = vozActiva ? '🔊 Voz activada' : '🔇 Voz desactivada';
   mostrarPantalla('s-instrucciones');
-  /* Pequeño retraso para que las voces del navegador se carguen */
   setTimeout(() => mostrarPasoInstruccion(0), 400);
 }
 
-/* Avanzar al siguiente paso */
+/* Siguiente paso */
 $('btn-paso-sig').onclick = () => {
   detenerVoz();
   if (pasoActual < PASOS_INSTRUCCION.length - 1) {
     mostrarPasoInstruccion(pasoActual + 1);
   } else {
-    /* Último paso — empezar el juego */
-    detenerVoz();
     iniciarJuego();
   }
 };
 
-/* Saltar todas las instrucciones */
+/* Saltar instrucciones */
 $('btn-saltar').onclick = () => {
   detenerVoz();
   iniciarJuego();
 };
 
-/* Activar/desactivar la voz */
+/* Silenciar / activar voz */
 $('btn-voz').onclick = () => {
   vozActiva = !vozActiva;
   $('btn-voz').className   = vozActiva ? '' : 'silenciado';
   $('btn-voz').textContent = vozActiva ? '🔊 Voz activada' : '🔇 Voz desactivada';
-  if (!vozActiva) detenerVoz();
-  else hablar(PASOS_INSTRUCCION[pasoActual].discurso);
+  if (!vozActiva) {
+    detenerVoz();
+  } else {
+    reproducirAudio(AUDIO_INSTRUCCIONES[pasoActual]);
+  }
 };
 
 
