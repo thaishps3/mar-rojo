@@ -356,9 +356,19 @@ function figMujer2() {
 const GENERADORES_FIGURAS = [figHombre1, figMujer, figHombre2, figAnciano, figNino, figMujer2];
 
 /* ── GENERADOR DE MULTITUD con animales visibles ── */
-function generarMultitud(n) {
+function generarMultitud(n, anchoDisponible) {
   const ANIMALES_EXODO = ['🐪','🐫','🐐','🐑','🐕','🐈','🫏','🐂'];
-  const PASO = 18; /* un poco más de separación para las figuras más anchas */
+
+  /* Calcular el paso entre figuras:
+     - En escritorio (arena ~400px+): paso=18 → figuras con espacio natural
+     - En móvil (arena ~180px):       paso se comprime hasta 11
+       para que las 14-20 figuras quepan sin desbordar */
+  const PASO_MAX = 18;
+  const PASO_MIN = 11;
+  const margen   = 28;
+  const ancho    = anchoDisponible || 400;
+  const pasoIdeal = Math.floor((ancho - margen) / n);
+  const PASO      = Math.max(PASO_MIN, Math.min(PASO_MAX, pasoIdeal));
 
   /* Mezclar generadores */
   const pool = [];
@@ -1108,17 +1118,13 @@ function apareceGrupo() {
   const el = document.createElement('div');
   el.className = 'grupo-pueblo';
 
-  /* Calcular cuántas figuras caben en la arena sin desbordar */
+  /* Siempre 14-20 figuras. En pantallas estrechas se comprime
+     el espacio entre ellas en lugar de reducir la cantidad. */
+  const n = 14 + Math.floor(Math.random() * 7);
   const { anchoArena } = obtenerZonas();
-  const PASO     = 18;
-  const margen   = 24; /* espacio a cada lado del carril */
-  const maxCaben = Math.max(4, Math.floor((anchoArena - margen) / PASO));
-  const nDeseado = 14 + Math.floor(Math.random() * 7);
-  const n        = Math.min(nDeseado, maxCaben);
-
-  el.innerHTML = generarMultitud(n);
-  el.style.top = '-65px';
-  estado.grupos.push({ el, y:-65 });
+  el.innerHTML = generarMultitud(n, anchoArena);
+  el.style.top = '-68px';
+  estado.grupos.push({ el, y: -68 });
   $('area-juego').appendChild(el);
 }
 

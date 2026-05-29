@@ -426,7 +426,9 @@ body { display: flex; align-items: center; justify-content: center; }
 @keyframes moises-flota { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-5px)} }
 
 #etiqueta-nivel {
-  position: absolute; bottom: clamp(88px, 17vh, 120px); left: 50%; transform: translateX(-50%);
+  position: absolute;
+  bottom: max(132px, calc(env(safe-area-inset-bottom, 0px) + 82px));
+  left: 50%; transform: translateX(-50%);
   background: rgba(0,0,0,.42); color: rgba(255,255,255,.52);
   font-size: clamp(.46em, 1.4vw, .7em); padding: 2px 12px; border-radius: 20px;
   white-space: nowrap; z-index: 30; pointer-events: none;
@@ -439,13 +441,15 @@ body { display: flex; align-items: center; justify-content: center; }
 ══════════════════════════════════════════════════ */
 #contenedores-reciclaje {
   position: absolute;
-  /* Espacio suficiente para la barra de navegación del móvil */
-  bottom: max(clamp(10px, 2.5vh, 22px), env(safe-area-inset-bottom, 10px));
+  /* 62px cubre la mayoría de barras de navegación Android/iOS.
+     env(safe-area-inset-bottom) añade espacio extra en iPhone con
+     barra home. El max() garantiza que siempre se use el mayor valor. */
+  bottom: max(62px, calc(env(safe-area-inset-bottom, 0px) + 12px));
   left: 25%; right: 25%;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  flex-wrap: nowrap;       /* nunca saltar de línea */
+  flex-wrap: nowrap;
   gap: clamp(3px, 1.2vw, 9px);
   z-index: 26;
   pointer-events: none;
