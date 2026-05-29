@@ -924,13 +924,14 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 /* ── SALTO DE DELFÍN ── */
+/* El elemento empieza con top:yInicio (cerca del fondo) y sube */
 @keyframes delfin-salto {
-  0%   { transform: translateY(0)                rotate(0deg);  opacity:0; }
-  5%   { opacity: 1; }
-  30%  { transform: translateY(calc(var(--alto) * -1)) rotate(-38deg); opacity:1; }
-  70%  { transform: translateY(calc(var(--alto) * -1)) rotate(38deg);  opacity:1; }
-  95%  { opacity: 1; }
-  100% { transform: translateY(0)                rotate(0deg);  opacity:0; }
+  0%   { transform: translateY(0)                    rotate(0deg);   opacity:0; }
+  6%   { opacity: 1; }
+  30%  { transform: translateY(calc(var(--alto)*-1))  rotate(-42deg); opacity:1; }
+  70%  { transform: translateY(calc(var(--alto)*-1))  rotate(42deg);  opacity:1; }
+  94%  { opacity: 1; }
+  100% { transform: translateY(0)                    rotate(0deg);   opacity:0; }
 }
 
 /* ── CHAPOTEO DE BALLENA ── */

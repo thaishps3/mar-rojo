@@ -20,9 +20,22 @@ const CONTENEDORES = {
   gris:     { id:'bin-gris',     nombre:'Resto',        emoji:'⚫', color:'#c0c0c0' },
 };
 
+/* SVG de una estrella de mar naranja/roja de 5 brazos */
+function svgEstrellaMar(px) {
+  const c = px / 2;
+  /* Puntos de la estrella: alternar radio externo e interno */
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const ang = (i * 36 - 90) * Math.PI / 180;
+    const r   = i % 2 === 0 ? c * .95 : c * .40;
+    pts.push(`${c + r * Math.cos(ang)},${c + r * Math.sin(ang)}`);
+  }
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${px}' height='${px}' viewBox='0 0 ${px} ${px}'%3E%3Cpolygon points='${pts.join(' ')}' fill='%23e05820' stroke='%23b03010' stroke-width='1.2'/%3E%3Ccircle cx='${c}' cy='${c}' r='${c*.18}' fill='%23c04010'/%3E%3C/svg%3E`;
+}
+
 /* Seres del mar — deben arrastrarse al AGUA */
 const ANIMALES = [
-  { e:'⭐', n:'Estrella de mar', s:32 },
+  { e: null,  svg: svgEstrellaMar(38), n:'Estrella de mar', s:38 }, /* SVG estrella naranja */
   { e:'🐟', n:'Pez',            s:32 },
   { e:'🦑', n:'Calamar',        s:38 },
   { e:'🐬', n:'Delfín',         s:40 },
@@ -1095,8 +1108,15 @@ function crearObjeto(datos, esBasura) {
   const marg = 16;
   const x = z.wl + marg + Math.random() * (z.anchoArena - datos.s - marg*2);
   el.style.left = x + 'px'; el.style.top = y + 'px';
-  el.innerHTML  = `<span class="c-em" style="font-size:${datos.s}px">${datos.e}</span>`
-                + `<span class="c-lb">${datos.n}</span>`;
+
+  /* Estrella de mar → imagen SVG naranja. Resto → emoji */
+  const visualHtml = datos.svg
+    ? `<img src="${datos.svg}" width="${datos.s}" height="${datos.s}"
+           alt="${datos.n}" draggable="false"
+           style="display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">`
+    : `<span class="c-em" style="font-size:${datos.s}px">${datos.e}</span>`;
+
+  el.innerHTML = visualHtml + `<span class="c-lb">${datos.n}</span>`;
 
   const obj = { id, el, x, y, origenX:x, origenY:y, activo:true, datos, esBasura };
   estado.objetos.push(obj);
@@ -1503,34 +1523,57 @@ function detenerGaviotas() {
 }
 
 
-/* Sonido de delfín — serie de clics y silbidos agudos */
+/* Sonido de delfín — silbido característico + trino + clics de ecolocalización */
 function sndDelfin() {
   if (silenciado) return;
   const ctx = audio();
-  /* Silbido ascendente característico */
-  [0, .12, .24, .36].forEach((del, i) => {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sine';
-    const freqBase = 2000 + i * 400;
-    o.frequency.setValueAtTime(freqBase, ctx.currentTime + del);
-    o.frequency.exponentialRampToValueAtTime(freqBase * 1.6, ctx.currentTime + del + .08);
-    o.frequency.exponentialRampToValueAtTime(freqBase * .7, ctx.currentTime + del + .14);
-    g.gain.setValueAtTime(.18, ctx.currentTime + del);
-    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + .16);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + .18);
-  });
-  /* Clic de ecolocalización */
+
+  /* Silbido principal: onda de seno que sube y baja suavemente (600-1400 Hz)
+     Los delfines silban entre 200 Hz y 24 kHz, el rango audible más reconocible
+     está entre 600 y 1400 Hz */
+  const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+  o1.type = 'sine';
+  o1.frequency.setValueAtTime(620, ctx.currentTime);
+  o1.frequency.linearRampToValueAtTime(1380, ctx.currentTime + .22);
+  o1.frequency.linearRampToValueAtTime(820, ctx.currentTime + .45);
+  o1.frequency.linearRampToValueAtTime(1200, ctx.currentTime + .62);
+  g1.gain.setValueAtTime(0, ctx.currentTime);
+  g1.gain.linearRampToValueAtTime(.30, ctx.currentTime + .06);
+  g1.gain.setValueAtTime(.28, ctx.currentTime + .55);
+  g1.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .70);
+  o1.connect(g1); g1.connect(ctx.destination);
+  o1.start(); o1.stop(ctx.currentTime + .72);
+
+  /* Segundo silbido más corto a los 0.5s */
   setTimeout(() => {
     if (silenciado) return;
-    const b = ctx.createBuffer(1, ctx.sampleRate * .025, ctx.sampleRate);
-    const d = b.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1-i/d.length);
-    const ns = ctx.createBufferSource(); ns.buffer = b;
-    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000;
-    const ng = ctx.createGain(); ng.gain.value = .35;
-    ns.connect(hp); hp.connect(ng); ng.connect(ctx.destination); ns.start();
+    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(950, ctx.currentTime);
+    o2.frequency.linearRampToValueAtTime(1500, ctx.currentTime + .18);
+    o2.frequency.linearRampToValueAtTime(700, ctx.currentTime + .32);
+    g2.gain.setValueAtTime(0, ctx.currentTime);
+    g2.gain.linearRampToValueAtTime(.22, ctx.currentTime + .04);
+    g2.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .35);
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.start(); o2.stop(ctx.currentTime + .38);
   }, 500);
+
+  /* Tren de clics de ecolocalización — muy cortos y rápidos */
+  [.1, .18, .25, .31, .36].forEach(del => {
+    if (silenciado) return;
+    setTimeout(() => {
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * .008), ctx.sampleRate);
+      const d   = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++)
+        d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const ns = ctx.createBufferSource(); ns.buffer = buf;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 4;
+      const ng = ctx.createGain(); ng.gain.value = .18;
+      ns.connect(bp); bp.connect(ng); ng.connect(ctx.destination); ns.start();
+    }, del * 1000);
+  });
 }
 
 /* Sonido de ballena — gemido grave y largo */
@@ -1625,66 +1668,63 @@ function saltoCriatura(tipo) {
   if (!estado.activo) return;
   const { wl, wr, W, H } = obtenerZonas();
 
-  const esBalena  = tipo === 'ballena';
-  const emoji     = esBalena ? '🐋' : '🐬';
-  /* Delfín ahora mucho más grande para que se vea bien */
-  const tamano    = esBalena ? 52 : 48;
-  const enIzq     = Math.random() > .5;
+  const esBalena = tipo === 'ballena';
+  const emoji    = esBalena ? '🐋' : '🐬';
+  const tamano   = esBalena ? 52 : 52; /* ambos grandes y visibles */
+  const enIzq    = Math.random() > .5;
 
-  /* Posición X dentro de la zona de agua */
-  const zonaAncho = wl;          /* ancho de la zona de agua */
-  const xBase     = enIzq
-    ? zonaAncho * .3
-    : wr + zonaAncho * .3;
-  const xGotas    = enIzq
+  /* Centro X dentro de la zona de agua — bien adentro */
+  const zonaAncho = wl;
+  const xBase  = enIzq
+    ? zonaAncho * .25
+    : wr + zonaAncho * .25;
+  const xGotas = enIzq
     ? zonaAncho * .5
     : wr + zonaAncho * .5;
 
+  /* Y de inicio: cerca del fondo pero DENTRO del área (overflow:hidden) */
+  const yInicio = H - tamano - 4;
+
   if (esBalena) {
-    /* ── BALLENA: chapotea en el agua, no salta alto ── */
+    /* ── BALLENA: emerge y chapotea, sin saltar ── */
     const el = document.createElement('div');
     el.style.cssText = `
-      position:absolute; left:${xBase - tamano/2}px; bottom:8px;
-      font-size:${tamano}px; z-index:36; pointer-events:none;
-      animation: ballena-chapoteo 2.2s ease-in-out forwards;
+      position:absolute;
+      left:${xBase - tamano/2}px;
+      top:${yInicio}px;
+      font-size:${tamano}px;
+      z-index:36; pointer-events:none;
+      animation: ballena-chapoteo 2.4s ease-in-out forwards;
     `;
     el.textContent = emoji;
     $('area-juego').appendChild(el);
     sndBallena();
-    /* Salpicadura al emerger */
-    setTimeout(() => {
-      salpicaduraGrande(xGotas, H * .7, 10);
-      sndSplashGrande(true);
-    }, 400);
-    /* Salpicadura al hundirse */
-    setTimeout(() => {
-      salpicaduraGrande(xGotas, H * .75, 8);
-    }, 1600);
-    setTimeout(() => el.remove(), 2500);
+    setTimeout(() => { salpicaduraGrande(xGotas, yInicio, 10); sndSplashGrande(true); }, 350);
+    setTimeout(() => { salpicaduraGrande(xGotas, yInicio + 10, 7); }, 1700);
+    setTimeout(() => el.remove(), 2800);
 
   } else {
-    /* ── DELFÍN: arco de salto claro y visible ── */
+    /* ── DELFÍN: arco de salto bien visible ── */
+    const altSalto = Math.floor(H * (.40 + Math.random() * .15));
     const el = document.createElement('div');
-    /* Altura del salto: 35-45% de la altura del campo */
-    const altSalto = H * (.35 + Math.random() * .1);
     el.style.cssText = `
-      position:absolute; left:${xBase - tamano/2}px; bottom:0px;
-      font-size:${tamano}px; z-index:36; pointer-events:none;
+      position:absolute;
+      left:${xBase - tamano/2}px;
+      top:${yInicio}px;
+      font-size:${tamano}px;
+      z-index:36; pointer-events:none;
       --alto:${altSalto}px;
-      animation: delfin-salto 1.6s cubic-bezier(.25,.1,.25,1) forwards;
+      animation: delfin-salto 1.8s cubic-bezier(.3,.05,.7,.95) forwards;
     `;
     el.textContent = emoji;
     $('area-juego').appendChild(el);
-    sndDelfin();
-    /* Salpicadura al salir del agua */
-    salpicaduraGrande(xGotas, H - 20, 8);
+    /* Splash al salir */
+    salpicaduraGrande(xGotas, yInicio + 10, 8);
     sndSplashGrande(false);
-    /* Salpicadura al volver a caer */
-    setTimeout(() => {
-      salpicaduraGrande(xGotas, H - 20, 12);
-      sndSplashGrande(false);
-    }, 1400);
-    setTimeout(() => el.remove(), 2000);
+    sndDelfin();
+    /* Splash al volver */
+    setTimeout(() => { salpicaduraGrande(xGotas, yInicio + 10, 12); sndSplashGrande(false); }, 1550);
+    setTimeout(() => el.remove(), 2200);
   }
 }
 
