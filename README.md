@@ -104,6 +104,18 @@ Visita: `https://thaishps3.github.io/mar-rojo/`
 No requiere servidor, instalación ni conexión a internet (excepto para la fuente de Google Fonts).
 
 ---
+## Sonidos Créditos
+### Delfin:
+Sound Effect by <a href="https://pixabay.com/es/users/sondangsirait419-44635360/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=220055">Sondang Sirait</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=220055">Pixabay</a>
+
+### Ballena:
+Sound Effect by <a href="https://pixabay.com/es/users/dragon-studio-38165424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=382729">DRAGON-STUDIO</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=382729">Pixabay</a>
+
+### gaviota:
+Sound Effect by <a href="https://pixabay.com/es/users/jonathanslattermusic-54702892/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=486871">Jonathan Slatter</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=486871">Pixabay</a>
+
+### foca:
+Sound Effect by <a href="https://pixabay.com/es/users/u_w4utmqapnm-37408805/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=154201">u_w4utmqapnm</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=154201">Pixabay</a>
 
 ## 📖 Referencias bíblicas
 

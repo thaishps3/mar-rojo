@@ -20,28 +20,20 @@ const CONTENEDORES = {
   gris:     { id:'bin-gris',     nombre:'Resto',        emoji:'⚫', color:'#c0c0c0' },
 };
 
-/* SVG de una estrella de mar naranja/roja de 5 brazos */
-function svgEstrellaMar(px) {
-  const c = px / 2;
-  /* Puntos de la estrella: alternar radio externo e interno */
-  const pts = [];
-  for (let i = 0; i < 10; i++) {
-    const ang = (i * 36 - 90) * Math.PI / 180;
-    const r   = i % 2 === 0 ? c * .95 : c * .40;
-    pts.push(`${c + r * Math.cos(ang)},${c + r * Math.sin(ang)}`);
-  }
-  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${px}' height='${px}' viewBox='0 0 ${px} ${px}'%3E%3Cpolygon points='${pts.join(' ')}' fill='%23e05820' stroke='%23b03010' stroke-width='1.2'/%3E%3Ccircle cx='${c}' cy='${c}' r='${c*.18}' fill='%23c04010'/%3E%3C/svg%3E`;
-}
-
 /* Seres del mar — deben arrastrarse al AGUA */
 const ANIMALES = [
-  { e: null,  svg: svgEstrellaMar(38), n:'Estrella de mar', s:38 }, /* SVG estrella naranja */
-  { e:'🐟', n:'Pez',            s:32 },
-  { e:'🦑', n:'Calamar',        s:38 },
-  { e:'🐬', n:'Delfín',         s:40 },
-  { e:'🦈', n:'Tiburón',        s:44 },
-  { e:'🐙', n:'Pulpo',          s:44 },
-  { e:'🐋', n:'Ballena',        s:50 },
+  { e:'🦀', n:'Cangrejo',   s:34 },
+  { e:'🐟', n:'Pez',        s:32 },
+  { e:'🐡', n:'Pez globo',  s:34 },
+  { e:'🦑', n:'Calamar',    s:38 },
+  { e:'🐬', n:'Delfín',     s:40 },
+  { e:'🦈', n:'Tiburón',    s:44 },
+  { e:'🐙', n:'Pulpo',      s:44 },
+  { e:'🐋', n:'Ballena',    s:50 },
+  { e:'🦭', n:'Foca',       s:38 },
+  { e:'🦞', n:'Langosta',   s:34 },
+  { e:'🐢', n:'Tortuga',    s:36 },
+  { e:'🦐', n:'Gamba',      s:28 },
 ];
 
 /* Objetos contaminantes — deben arrastrarse al CONTENEDOR CORRECTO
@@ -88,7 +80,7 @@ const NIVELES = [
     maxObjetos:          3,
     rescates:            8,
     gruposNecesarios:    4,
-    animalesDisp:        [0,1],
+    animalesDisp:        [0,1,2,10,11],           /* cangrejo, pez, pez globo, tortuga, gamba */
     basuraDisp:          [0,1,3,11,12],
     contenedoresActivos: ['amarillo','gris'],
     proporcionBasura:    .30,
@@ -100,7 +92,7 @@ const NIVELES = [
     maxObjetos:          3,
     rescates:            10,
     gruposNecesarios:    5,
-    animalesDisp:        [0,1,2,3],
+    animalesDisp:        [0,1,2,3,9,10,11],       /* + calamar, langosta */
     basuraDisp:          [0,1,2,3,4,5,6,11,12,13],
     contenedoresActivos: ['amarillo','azul','gris'],
     proporcionBasura:    .35,
@@ -112,7 +104,7 @@ const NIVELES = [
     maxObjetos:          4,
     rescates:            12,
     gruposNecesarios:    6,
-    animalesDisp:        [0,1,2,3,4],
+    animalesDisp:        [0,1,2,3,4,7,9,10,11],   /* + delfín, ballena */
     basuraDisp:          [0,1,2,3,4,5,6,7,8,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','gris'],
     proporcionBasura:    .40,
@@ -124,7 +116,7 @@ const NIVELES = [
     maxObjetos:          4,
     rescates:            15,
     gruposNecesarios:    7,
-    animalesDisp:        [0,1,2,3,4,5],
+    animalesDisp:        [0,1,2,3,4,5,6,7,8,9,10,11], /* todos */
     basuraDisp:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','marron','gris'],
     proporcionBasura:    .45,
@@ -136,7 +128,7 @@ const NIVELES = [
     maxObjetos:          5,
     rescates:            18,
     gruposNecesarios:    8,
-    animalesDisp:        [0,1,2,3,4,5,6],
+    animalesDisp:        [0,1,2,3,4,5,6,7,8,9,10,11], /* todos */
     basuraDisp:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','marron','gris'],
     proporcionBasura:    .50,
@@ -860,13 +852,12 @@ const NADADORES = [
   { e:'🐠', tam:16 }, { e:'🐡', tam:16 }, { e:'🐟', tam:14 },
   { e:'🦈', tam:20 }, { e:'🐙', tam:18 }, { e:'🦑', tam:16 },
   { e:'🐬', tam:20 }, { e:'🐋', tam:24 }, { e:'🦞', tam:14 },
-  { e:'🐚', tam:13 }, { e:'🦀', tam:14 }, { e:'⭐', tam:13 },
-  { e:'🪸', tam:15 }, { e:'🦭', tam:19 }, { e:'🐊', tam:18 },
+  { e:'🦀', tam:14 }, { e:'🦭', tam:18 }, { e:'🐡', tam:13 },
+  { e:'🪸', tam:15 }, { e:'🐠', tam:18 }, { e:'🦈', tam:16 },
 ];
 
 function crearNadadores() {
-  /* Limpiar nadadores previos */
-  $('area-juego').querySelectorAll('.nadador,.burbuja').forEach(e => e.remove());
+  $('area-juego').querySelectorAll('.nadador,.burbuja,.coral-deco').forEach(e => e.remove());
 
   const { H } = obtenerZonas();
 
@@ -943,6 +934,30 @@ function crearNadadores() {
       $('area-juego').appendChild(bel);
     }
   });
+
+  /* ── Corales decorativos en la arena ── */
+  const CORALES = ['🪸','🌿','🪸','🌿','🪸'];
+  const { wl, wr, H: altTotal } = obtenerZonas();
+  const anchoArena = wr - wl;
+  const numCorales = 5 + Math.floor(Math.random() * 4);
+  for (let c = 0; c < numCorales; c++) {
+    const coral = document.createElement('div');
+    coral.className = 'coral-deco';
+    const tam = 18 + Math.random() * 16;
+    const cx  = wl + 8 + Math.random() * (anchoArena - 20);
+    const cy  = altTotal * .55 + Math.random() * (altTotal * .38);
+    coral.textContent = CORALES[c % CORALES.length];
+    coral.style.cssText = `
+      position:absolute;
+      left:${cx}px; bottom:${altTotal - cy}px;
+      font-size:${tam}px;
+      z-index:10; pointer-events:none; opacity:.55;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
+      animation: coral-mece ${2.5 + Math.random() * 2}s ease-in-out infinite;
+      animation-delay:${Math.random() * -3}s;
+    `;
+    $('area-juego').appendChild(coral);
+  }
 }
 
 
@@ -961,6 +976,7 @@ function iniciarNivel() {
   estado.arrastre        = null;
   estado.activo          = true;
   estado.contadorId      = 0;
+  colaAnimales           = []; /* reiniciar rotación de animales */
 
   $('area-juego').querySelectorAll('.criatura,.grupo-pueblo,.salpicadura,.pts-flotantes,.gota,.eco-burst,.nadador,.burbuja').forEach(e => e.remove());
   $('mensaje').classList.remove('visible');
@@ -979,6 +995,10 @@ function iniciarNivel() {
   crearNadadores();
   iniciarGaviotas();
   iniciarSaltosCriatura();
+  iniciarMedusas();
+  iniciarTesoros();
+  iniciarOstrasVida();
+  iniciarBancosYFoca();
 
   /* Banner de nuevos bins (~1s después de que se vea la pantalla) */
   setTimeout(() => mostrarBannerNuevoBin(), 900);
@@ -1015,6 +1035,10 @@ function detenerTodo() {
   limpiarResaltado();
   detenerGaviotas();
   detenerSaltosCriatura();
+  detenerMedusas();
+  detenerTesoros();
+  detenerOstrasVida();
+  detenerBancosYFoca();
 }
 
 
@@ -1102,21 +1126,15 @@ function crearObjeto(datos, esBasura) {
 
   const id = estado.contadorId++;
   const el = document.createElement('div');
-  el.className  = 'criatura espera ' + (esBasura ? 'es-basura' : 'es-animal');
+  el.className  = 'criatura espera ' + (esBasura ? 'es-basura' : 'es-animal') + (datos.cls ? ' ' + datos.cls : '');
   el.dataset.cid = id;
 
   const marg = 16;
   const x = z.wl + marg + Math.random() * (z.anchoArena - datos.s - marg*2);
   el.style.left = x + 'px'; el.style.top = y + 'px';
 
-  /* Estrella de mar → imagen SVG naranja. Resto → emoji */
-  const visualHtml = datos.svg
-    ? `<img src="${datos.svg}" width="${datos.s}" height="${datos.s}"
-           alt="${datos.n}" draggable="false"
-           style="display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">`
-    : `<span class="c-em" style="font-size:${datos.s}px">${datos.e}</span>`;
-
-  el.innerHTML = visualHtml + `<span class="c-lb">${datos.n}</span>`;
+  el.innerHTML = `<span class="c-em" style="font-size:${datos.s}px">${datos.e}</span>`
+               + `<span class="c-lb">${datos.n}</span>`;
 
   const obj = { id, el, x, y, origenX:x, origenY:y, activo:true, datos, esBasura };
   estado.objetos.push(obj);
@@ -1125,9 +1143,19 @@ function crearObjeto(datos, esBasura) {
   sndAparicion();
 }
 
+/* Cola de animales para evitar repeticiones — se rota barajando */
+let colaAnimales = [];
+
 function aparecerAnimal() {
-  const nv = NIVELES[estado.nivel];
-  crearObjeto(ANIMALES[nv.animalesDisp[Math.floor(Math.random()*nv.animalesDisp.length)]], false);
+  const nv   = NIVELES[estado.nivel];
+  const disp = nv.animalesDisp;
+
+  /* Rellenar y barajar la cola cuando se vacíe */
+  if (colaAnimales.length === 0) {
+    colaAnimales = [...disp].sort(() => Math.random() - .5);
+  }
+  const idx = colaAnimales.pop();
+  crearObjeto(ANIMALES[idx], false);
 }
 function aparecerBasura() {
   const nv = NIVELES[estado.nivel];
@@ -1297,7 +1325,7 @@ function lugarIncorrecto(obj, razon, binCorrecto) {
   mostrarMensaje(msg, color);
 
   if (estado.vidas <= 0)
-    setTimeout(() => { $('go-pts').textContent = estado.puntuacion; mostrarPantalla('s-go'); }, 700);
+    setTimeout(() => { detenerVoz(); $('go-pts').textContent = estado.puntuacion; mostrarPantalla('s-go'); }, 700);
 }
 
 /* Colisión del pueblo con un objeto */
@@ -1315,7 +1343,7 @@ function manejarColision() {
     { duration:480, easing:'ease-out' }
   );
   if (estado.vidas <= 0) {
-    setTimeout(() => { $('go-pts').textContent = estado.puntuacion; mostrarPantalla('s-go'); }, 700);
+    setTimeout(() => { detenerVoz(); $('go-pts').textContent = estado.puntuacion; mostrarPantalla('s-go'); }, 700);
   } else {
     setTimeout(() => { if (!estado.activo) iniciarNivel(); }, 960);
   }
@@ -1451,162 +1479,28 @@ function lanzarConfeti() {
 }
 
 
-/* ============================================================
-   GAVIOTAS — vuelan de vez en cuando con sonido
-   ============================================================ */
-let timerGaviota = null;
 
-function sndGaviota() {
+/* ── SONIDOS NATURALES — archivos MP3 reales ── */
+
+const AUDIO_ANIMALES = {
+  gaviota: 'audio/animales/gaviota.mp3',
+  delfin:  'audio/animales/delfin.mp3',
+  ballena: 'audio/animales/ballena.mp3',
+  foca:    'audio/animales/foca.mp3',
+};
+
+function reproducirAnimal(tipo) {
   if (silenciado) return;
-  const ctx = audio();
-  /* Graznido de gaviota: modulación rápida de frecuencia */
-  [0, .18, .36].forEach((del, i) => {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sawtooth';
-    o.frequency.setValueAtTime(1200 - i * 120, ctx.currentTime + del);
-    o.frequency.exponentialRampToValueAtTime(600 - i * 60, ctx.currentTime + del + .14);
-    o.frequency.exponentialRampToValueAtTime(1100 - i * 100, ctx.currentTime + del + .22);
-    g.gain.setValueAtTime(.18, ctx.currentTime + del);
-    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + .28);
-    const lp = ctx.createBiquadFilter(); lp.type = 'bandpass';
-    lp.frequency.value = 1400; lp.Q.value = 2;
-    o.connect(lp); lp.connect(g); g.connect(ctx.destination);
-    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + .3);
-  });
+  const ruta = AUDIO_ANIMALES[tipo];
+  if (!ruta) return;
+  const a = new Audio(ruta);
+  a.volume = tipo === 'ballena' ? 0.75 : 0.85;
+  a.play().catch(() => {});
 }
 
-function lanzarGaviota() {
-  if (!estado.activo) return;
-  const area   = $('area-juego');
-  const { H, W } = obtenerZonas();
-  const vaALaDerecha = Math.random() > 0.5;
-
-  const el = document.createElement('div');
-  el.className = 'gaviota';
-  el.textContent = '🕊️';
-  /* altura aleatoria en el tercio superior del campo */
-  const y = H * .05 + Math.random() * H * .28;
-  el.style.cssText = `
-    position:absolute;
-    top:${y}px;
-    font-size:${18 + Math.random() * 10}px;
-    z-index:35;
-    pointer-events:none;
-    ${vaALaDerecha ? 'left:-40px' : 'right:-40px; transform:scaleX(-1)'};
-    animation: gaviota-vuelo ${3.5 + Math.random() * 2}s linear forwards;
-    --dir: ${vaALaDerecha ? W + 60 : -(W + 60)}px;
-  `;
-  area.appendChild(el);
-  sndGaviota();
-  /* segunda gaznada a mitad del vuelo */
-  setTimeout(() => sndGaviota(), 1200);
-  setTimeout(() => el.remove(), 6000);
-}
-
-function iniciarGaviotas() {
-  clearTimeout(timerGaviota);
-  function programarSiguiente() {
-    /* cada 12-25 segundos aparece una gaviota */
-    timerGaviota = setTimeout(() => {
-      if (estado.activo) {
-        lanzarGaviota();
-        programarSiguiente();
-      }
-    }, 12000 + Math.random() * 13000);
-  }
-  programarSiguiente();
-}
-
-function detenerGaviotas() {
-  clearTimeout(timerGaviota);
-  $('area-juego').querySelectorAll('.gaviota').forEach(e => e.remove());
-}
-
-
-/* Sonido de delfín — silbido característico + trino + clics de ecolocalización */
-function sndDelfin() {
-  if (silenciado) return;
-  const ctx = audio();
-
-  /* Silbido principal: onda de seno que sube y baja suavemente (600-1400 Hz)
-     Los delfines silban entre 200 Hz y 24 kHz, el rango audible más reconocible
-     está entre 600 y 1400 Hz */
-  const o1 = ctx.createOscillator(), g1 = ctx.createGain();
-  o1.type = 'sine';
-  o1.frequency.setValueAtTime(620, ctx.currentTime);
-  o1.frequency.linearRampToValueAtTime(1380, ctx.currentTime + .22);
-  o1.frequency.linearRampToValueAtTime(820, ctx.currentTime + .45);
-  o1.frequency.linearRampToValueAtTime(1200, ctx.currentTime + .62);
-  g1.gain.setValueAtTime(0, ctx.currentTime);
-  g1.gain.linearRampToValueAtTime(.30, ctx.currentTime + .06);
-  g1.gain.setValueAtTime(.28, ctx.currentTime + .55);
-  g1.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .70);
-  o1.connect(g1); g1.connect(ctx.destination);
-  o1.start(); o1.stop(ctx.currentTime + .72);
-
-  /* Segundo silbido más corto a los 0.5s */
-  setTimeout(() => {
-    if (silenciado) return;
-    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
-    o2.type = 'sine';
-    o2.frequency.setValueAtTime(950, ctx.currentTime);
-    o2.frequency.linearRampToValueAtTime(1500, ctx.currentTime + .18);
-    o2.frequency.linearRampToValueAtTime(700, ctx.currentTime + .32);
-    g2.gain.setValueAtTime(0, ctx.currentTime);
-    g2.gain.linearRampToValueAtTime(.22, ctx.currentTime + .04);
-    g2.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .35);
-    o2.connect(g2); g2.connect(ctx.destination);
-    o2.start(); o2.stop(ctx.currentTime + .38);
-  }, 500);
-
-  /* Tren de clics de ecolocalización — muy cortos y rápidos */
-  [.1, .18, .25, .31, .36].forEach(del => {
-    if (silenciado) return;
-    setTimeout(() => {
-      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * .008), ctx.sampleRate);
-      const d   = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++)
-        d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
-      const ns = ctx.createBufferSource(); ns.buffer = buf;
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 4;
-      const ng = ctx.createGain(); ng.gain.value = .18;
-      ns.connect(bp); bp.connect(ng); ng.connect(ctx.destination); ns.start();
-    }, del * 1000);
-  });
-}
-
-/* Sonido de ballena — gemido grave y largo */
-function sndBallena() {
-  if (silenciado) return;
-  const ctx = audio();
-  /* Canto profundo característico */
-  [[0, 120, 80, 1.2], [.4, 95, 140, .9], [1.4, 110, 75, 1.0]].forEach(([del, f1, f2, dur]) => {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(f1, ctx.currentTime + del);
-    o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + del + dur * .6);
-    o.frequency.exponentialRampToValueAtTime(f1 * .85, ctx.currentTime + del + dur);
-    /* Vibrato suave */
-    const lfo = ctx.createOscillator(), lg = ctx.createGain();
-    lfo.frequency.value = 3.5; lg.gain.value = 3;
-    lfo.connect(lg); lg.connect(o.frequency); lfo.start(ctx.currentTime + del);
-    lfo.stop(ctx.currentTime + del + dur + .1);
-    g.gain.setValueAtTime(0, ctx.currentTime + del);
-    g.gain.linearRampToValueAtTime(.32, ctx.currentTime + del + .15);
-    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + dur);
-    /* Armónico grave */
-    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
-    o2.type = 'sine'; o2.frequency.value = f1 * .5;
-    g2.gain.setValueAtTime(0, ctx.currentTime + del);
-    g2.gain.linearRampToValueAtTime(.12, ctx.currentTime + del + .15);
-    g2.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + dur);
-    o.connect(g); g.connect(ctx.destination);
-    o2.connect(g2); g2.connect(ctx.destination);
-    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + dur + .1);
-    o2.start(ctx.currentTime + del); o2.stop(ctx.currentTime + del + dur + .1);
-  });
-}
+function sndGaviota()  { reproducirAnimal('gaviota'); }
+function sndDelfin()   { reproducirAnimal('delfin');  }
+function sndBallena()  { reproducirAnimal('ballena'); }
 
 /* Lanza un salto de delfín o ballena desde una zona de agua */
 /* Splash al caer una criatura al agua */
@@ -1759,13 +1653,84 @@ function salpicaduraGrande(x, y, cantidad, esGigante) {
   setTimeout(() => sp.remove(), 900);
 }
 
+
+/* ── GAVIOTAS — vuelan de vez en cuando con su sonido ── */
+
+let timerGaviota = null;
+
+function lanzarGaviota() {
+  if (!estado.activo) return;
+  const { H, W } = obtenerZonas();
+  const vaALaDerecha = Math.random() > .5;
+  const el = document.createElement('div');
+  el.className = 'gaviota';
+  el.textContent = '🕊️';
+  const y   = H * .05 + Math.random() * H * .28;
+  const dur = 3.5 + Math.random() * 2;
+  el.style.cssText = `
+    position:absolute; top:${y}px;
+    font-size:${18 + Math.random() * 10}px;
+    z-index:35; pointer-events:none;
+    ${vaALaDerecha ? 'left:-40px' : 'right:-40px; transform:scaleX(-1)'};
+    --dir:${vaALaDerecha ? W + 60 : -(W + 60)}px;
+    animation: gaviota-vuelo ${dur}s linear forwards;
+  `;
+  $('area-juego').appendChild(el);
+
+  /* Reproducir el graznido y cortarlo cuando la gaviota desaparezca */
+  if (!silenciado) {
+    const a1 = new Audio('audio/animales/gaviota.mp3');
+    a1.volume = 0.75;
+    a1.play().catch(() => {});
+    /* Segundo graznido a mitad del vuelo */
+    const t2 = setTimeout(() => {
+      if (!silenciado) {
+        const a2 = new Audio('audio/animales/gaviota.mp3');
+        a2.volume = 0.6;
+        a2.play().catch(() => {});
+        /* Detener al terminar el vuelo */
+        setTimeout(() => { a2.pause(); a2.currentTime = 0; }, (dur - 1.2) * 1000);
+      }
+    }, 1200);
+    /* Detener el primer audio cuando termina el vuelo */
+    setTimeout(() => {
+      a1.pause();
+      a1.currentTime = 0;
+      clearTimeout(t2);
+    }, dur * 1000);
+  }
+
+  setTimeout(() => el.remove(), (dur + .5) * 1000);
+}
+
+function iniciarGaviotas() {
+  clearTimeout(timerGaviota);
+  function programar() {
+    timerGaviota = setTimeout(() => {
+      if (!estado.activo) return;
+      /* Lanzar 3 gaviotas con pequeño desfase entre ellas */
+      lanzarGaviota();
+      setTimeout(() => { if (estado.activo) lanzarGaviota(); }, 800);
+      setTimeout(() => { if (estado.activo) lanzarGaviota(); }, 1700);
+      programar();
+    }, 12000 + Math.random() * 13000);
+  }
+  programar();
+}
+
+function detenerGaviotas() {
+  clearTimeout(timerGaviota);
+  $('area-juego').querySelectorAll('.gaviota').forEach(e => e.remove());
+}
+
+
 function saltoCriatura(tipo) {
   if (!estado.activo) return;
   const { wl, wr, W, H } = obtenerZonas();
 
   const esBalena = tipo === 'ballena';
   const emoji    = esBalena ? '🐋' : '🐬';
-  const tamano   = esBalena ? 52 : 52; /* ambos grandes y visibles */
+  const tamano   = 52; /* delfín: 52px */
   const enIzq    = Math.random() > .5;
 
   /* Centro X dentro de la zona de agua — bien adentro */
@@ -1782,7 +1747,7 @@ function saltoCriatura(tipo) {
 
   if (esBalena) {
     /* ── BALLENA: salto majestuoso, emerge y cae con gran splash ── */
-    const tamBallena = Math.min(72, Math.floor(H * .14)); /* grande pero proporcional */
+    const tamBallena = Math.min(85, Math.floor(H * .17)); /* ballena más grande que delfín */
     const altSaltoBallena = Math.floor(H * (.30 + Math.random() * .12));
     const yInicioB = H - tamBallena - 6;
 
@@ -1859,6 +1824,502 @@ function detenerSaltosCriatura() {
   clearTimeout(timerSaltoCriatura);
   $('area-juego').querySelectorAll('.salto-criatura').forEach(e => e.remove());
 }
+
+
+/* ============================================================
+   MEDUSAS — suben del fondo cambiando de color con burbujas
+   ============================================================ */
+
+const COLORES_MEDUSA = [
+  ['rgba(255,100,200,.85)', 'rgba(255,50,150,.6)'],
+  ['rgba(100,180,255,.85)', 'rgba(50,120,255,.6)'],
+  ['rgba(140,255,180,.85)', 'rgba(60,200,100,.6)'],
+  ['rgba(220,140,255,.85)', 'rgba(160,60,220,.6)'],
+  ['rgba(255,200,80,.85)',  'rgba(220,140,20,.6)'],
+];
+
+function sndBurbujeo() {
+  if (silenciado) return;
+  const ctx = audio();
+  for (let i = 0; i < 6; i++) {
+    const del = i * .18 + Math.random() * .08;
+    setTimeout(() => {
+      if (silenciado) return;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      const f = 300 + i * 80 + Math.random() * 60;
+      o.frequency.setValueAtTime(f, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(f * 1.8, ctx.currentTime + .08);
+      g.gain.setValueAtTime(.12, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .1);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime + .12);
+    }, del * 1000);
+  }
+}
+
+function lanzarMedusa() {
+  if (!estado.activo) return;
+  const { wl, wr, H } = obtenerZonas();
+  const enIzq = Math.random() > .5;
+  const zonaW = wl;
+  const xPos  = enIzq
+    ? zonaW * (.15 + Math.random() * .6)
+    : wr + zonaW * (.15 + Math.random() * .6);
+  const tam = 48 + Math.random() * 22;
+  const durSubida = 5500 + Math.random() * 4000;
+  let colActual = Math.floor(Math.random() * COLORES_MEDUSA.length);
+  const svgW = tam, svgH = tam * 1.5;
+  const uid  = Date.now();
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `position:absolute;left:${xPos-tam/2}px;top:${H}px;`
+    + `width:${svgW}px;height:${svgH}px;pointer-events:none;z-index:18;`;
+
+  function buildSVG(ci) {
+    return `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="jg${uid}" cx="50%" cy="40%" r="55%">
+          <stop offset="0%"   stop-color="${COLORES_MEDUSA[ci][0]}"/>
+          <stop offset="100%" stop-color="${COLORES_MEDUSA[ci][1]}"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="${svgW/2}" cy="${svgW*.38}" rx="${svgW*.46}" ry="${svgW*.36}"
+               fill="url(#jg${uid})" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+      <ellipse cx="${svgW/2}" cy="${svgW*.3}"  rx="${svgW*.26}" ry="${svgW*.16}"
+               fill="rgba(255,255,255,.18)"/>
+      ${[.22,.38,.52,.68,.78].map((fx, idx) => {
+        const dur = (.9 + idx*.12).toFixed(2);
+        const amp = (6 + idx*2);
+        return `<line x1="${svgW*fx}" y1="${svgW*.7}" x2="${svgW*(fx+(idx%2?.06:-.06))}" y2="${svgH*.97}"
+          stroke="${COLORES_MEDUSA[ci][0]}" stroke-width="${1.5+idx*.2}" stroke-linecap="round" opacity=".85">
+          <animateTransform attributeName="transform" type="rotate"
+            values="0 ${svgW*fx} ${svgW*.7};${amp} ${svgW*fx} ${svgW*.7};-${amp} ${svgW*fx} ${svgW*.7};0 ${svgW*fx} ${svgW*.7}"
+            dur="${dur}s" repeatCount="indefinite"/>
+        </line>`;
+      }).join('')}
+    </svg>`;
+  }
+  wrap.innerHTML = buildSVG(colActual);
+  $('area-juego').appendChild(wrap);
+
+  const pasos = 130;
+  let paso = 0;
+  const intervalo = durSubida / pasos;
+  const animId = setInterval(() => {
+    if (!estado.activo || !wrap.parentNode) { clearInterval(animId); wrap.remove(); return; }
+    paso++;
+    const prog = paso / pasos;
+    const y    = H - prog * (H + svgH + 20);
+    const xOnd = xPos - tam/2 + Math.sin(prog * Math.PI * 7) * 14;
+    const pulso = 1 + Math.sin(prog * Math.PI * 16) * .07;
+    wrap.style.top       = y + 'px';
+    wrap.style.left      = xOnd + 'px';
+    wrap.style.transform = `scaleY(${pulso})`;
+    /* Cambiar color cada ~20 pasos */
+    if (paso % 20 === 0) {
+      colActual = (colActual + 1) % COLORES_MEDUSA.length;
+      wrap.innerHTML = buildSVG(colActual);
+    }
+    /* Burbujas con sonido */
+    if (paso % 16 === 0) {
+      sndBurbujeo();
+      for (let b = 0; b < 4; b++) {
+        const bel = document.createElement('div');
+        const bsz = 5 + Math.random() * 8;
+        bel.style.cssText = `position:absolute;`
+          + `left:${xOnd + Math.random() * svgW}px;`
+          + `top:${y + svgH * .5}px;`
+          + `width:${bsz}px;height:${bsz}px;border-radius:50%;`
+          + `background:rgba(255,255,255,.18);`
+          + `border:1px solid rgba(255,255,255,.38);`
+          + `pointer-events:none;z-index:17;`;
+        $('area-juego').appendChild(bel);
+        bel.animate(
+          [{opacity:.75,transform:'translate(0,0) scale(1)'},
+           {opacity:0, transform:`translate(${(Math.random()-.5)*22}px,${-(35+Math.random()*35)}px) scale(.25)`}],
+          {duration:1100+Math.random()*500, easing:'ease-out', fill:'forwards'}
+        );
+        setTimeout(() => bel.remove(), 1700);
+      }
+    }
+    if (paso >= pasos) { clearInterval(animId); wrap.remove(); }
+  }, intervalo);
+}
+
+let timerMedusa = null;
+function iniciarMedusas() {
+  clearTimeout(timerMedusa);
+  function prog() {
+    timerMedusa = setTimeout(() => { if (estado.activo) { lanzarMedusa(); prog(); } },
+      7000 + Math.random() * 9000);
+  }
+  prog();
+}
+function detenerMedusas() { clearTimeout(timerMedusa); }
+
+
+/* ============================================================
+   CAJAS DE TESORO — bonus, no bloquean el juego
+   ============================================================ */
+
+let timerTesoro = null;
+const BONUS_TESORO = [50, 75, 100];
+
+function sndTesoro() {
+  if (silenciado) return;
+  const ctx = audio();
+  [523, 659, 784, 1047].forEach((f, i) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = f;
+    const t = ctx.currentTime + i * .08;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.28,t+.04);
+    g.gain.exponentialRampToValueAtTime(.001,t+.28);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+.3);
+  });
+}
+
+function spawnTesoro() {
+  if (!estado.activo) return;
+  const z   = obtenerZonas();
+  const x   = z.wl + 20 + Math.random() * (z.anchoArena - 54);
+  const y   = z.H * .15 + Math.random() * (z.H * .62);
+  const pts = BONUS_TESORO[Math.floor(Math.random() * BONUS_TESORO.length)];
+
+  const el = document.createElement('div');
+  el.className = 'tesoro';
+  el.innerHTML = `<span class="tesoro-ico">🦪</span><span class="tesoro-pts">+${pts} 🫧</span>`;
+  el.style.cssText = `position:absolute;left:${x}px;top:${y}px;z-index:19;cursor:pointer;`
+    + `display:flex;flex-direction:column;align-items:center;gap:2px;`;
+  $('area-juego').appendChild(el);
+
+  /* Auto-desaparece a los 8s */
+  const autoTimer = setTimeout(() => {
+    if (!el.parentNode) return;
+    el.animate([{opacity:1},{opacity:0}],{duration:380,fill:'forwards'});
+    setTimeout(() => el.remove(), 380);
+  }, 8000);
+
+  /* Toque del jugador */
+  el.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    clearTimeout(autoTimer);
+    sndTesoro();
+    estado.puntuacion += pts;
+    $('val-puntos').textContent = estado.puntuacion;
+    const pf = document.createElement('div');
+    pf.className = 'pts-flotantes pts-tesoro';
+    pf.textContent = `+${pts} 🫧`;
+    pf.style.cssText = `left:${x}px;top:${y-10}px;`;
+    $('area-juego').appendChild(pf);
+    setTimeout(() => pf.remove(), 1300);
+    el.animate(
+      [{transform:'scale(1)',opacity:1},{transform:'scale(2.4)',opacity:0}],
+      {duration:320,easing:'ease-out',fill:'forwards'}
+    );
+    setTimeout(() => el.remove(), 330);
+  }, {once:true});
+
+  programarTesoro();
+}
+
+function programarTesoro() {
+  clearTimeout(timerTesoro);
+  timerTesoro = setTimeout(() => { if (estado.activo) spawnTesoro(); },
+    8000 + Math.random() * 10000);
+}
+
+function iniciarTesoros() { programarTesoro(); }
+function detenerTesoros() {
+  clearTimeout(timerTesoro);
+  $('area-juego').querySelectorAll('.tesoro,.ostra-vida').forEach(e => e.remove());
+}
+
+
+/* ============================================================
+   OSTRA DE VIDA — aparece en la arena y regala una vida extra
+   ============================================================ */
+
+let timerOstraVida = null;
+
+function sndVidaExtra() {
+  if (silenciado) return;
+  const ctx = audio();
+  /* Melodía ascendente brillante — ¡premio! */
+  [440, 554, 659, 880, 1047].forEach((f, i) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = f;
+    const t = ctx.currentTime + i * .1;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.3, t + .04);
+    g.gain.exponentialRampToValueAtTime(.001, t + .35);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + .38);
+  });
+}
+
+function spawnOstraVida() {
+  if (!estado.activo) return;
+  /* Solo aparece si el jugador tiene menos de 3 vidas */
+  if (estado.vidas >= 3) { programarOstraVida(); return; }
+
+  const z = obtenerZonas();
+  const x = z.wl + 20 + Math.random() * (z.anchoArena - 54);
+  const y = z.H * .15 + Math.random() * (z.H * .62);
+
+  const el = document.createElement('div');
+  el.className = 'ostra-vida';
+  el.innerHTML = `<span class="ostra-ico">🦪</span><span class="ostra-lbl">❤️</span>`;
+  el.style.cssText = `
+    position:absolute; left:${x}px; top:${y}px;
+    z-index:19; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    animation: ostra-pulso 1s ease-in-out infinite;
+  `;
+  $('area-juego').appendChild(el);
+
+  /* Auto-desaparece a los 6 segundos */
+  const autoTimer = setTimeout(() => {
+    if (!el.parentNode) return;
+    el.animate([{opacity:1},{opacity:0}], {duration:380, fill:'forwards'});
+    setTimeout(() => el.remove(), 380);
+  }, 6000);
+
+  el.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    clearTimeout(autoTimer);
+    sndVidaExtra();
+    estado.vidas = Math.min(estado.vidas + 1, 3);
+    $('val-vidas').textContent = '❤️'.repeat(estado.vidas);
+    /* Efecto visual */
+    const pf = document.createElement('div');
+    pf.className = 'pts-flotantes';
+    pf.textContent = '❤️ +1 vida';
+    pf.style.cssText = `left:${x}px; top:${y - 10}px; color:#ff6b8a;`;
+    $('area-juego').appendChild(pf);
+    setTimeout(() => pf.remove(), 1400);
+    el.animate(
+      [{transform:'scale(1)', opacity:1},
+       {transform:'scale(2.4)', opacity:0}],
+      {duration:340, easing:'ease-out', fill:'forwards'}
+    );
+    setTimeout(() => el.remove(), 350);
+  }, {once: true});
+
+  programarOstraVida();
+}
+
+function programarOstraVida() {
+  clearTimeout(timerOstraVida);
+  /* Aparece cada 20-35 segundos */
+  timerOstraVida = setTimeout(() => {
+    if (estado.activo) spawnOstraVida();
+  }, 20000 + Math.random() * 15000);
+}
+
+function iniciarOstrasVida()  { programarOstraVida(); }
+function detenerOstrasVida() {
+  clearTimeout(timerOstraVida);
+  $('area-juego').querySelectorAll('.ostra-vida').forEach(e => e.remove());
+}
+
+
+/* ============================================================
+   BANCO DE PECES + FOCA
+   El banco nada en formación. Desde el nivel 3, la foca
+   aparece, los peces se dispersan y suena foca.mp3
+   ============================================================ */
+
+let timerBancoPeces  = null;
+let timerFoca        = null;
+const bancosActivos  = []; /* referencia a los grupos de peces en pantalla */
+
+function crearBancoPeces(zonaId, offsetX, anchoZ, H) {
+  /* Formación en V: pez líder + dos filas detrás */
+  const FORMACION = [
+    {dx: 0,   dy: 0},
+    {dx:-16,  dy:12}, {dx: 16,  dy:12},
+    {dx:-30,  dy:24}, {dx: 30,  dy:24},
+    {dx:-14,  dy:28}, {dx: 14,  dy:28},
+    {dx: 0,   dy:32},
+  ];
+  const yPos       = H * .18 + Math.random() * H * .55;
+  const vaADerecha = Math.random() > .5;
+  const dur        = 7 + Math.random() * 5; /* segundos para cruzar la zona */
+  const tam        = 12 + Math.random() * 5;
+
+  const grupo = document.createElement('div');
+  grupo.className = 'banco-peces';
+  grupo.style.cssText = `
+    position:absolute;
+    top:${yPos}px;
+    left:${vaADerecha ? offsetX - 60 : offsetX + anchoZ + 20}px;
+    pointer-events:none; z-index:14;
+    width:80px; height:60px;
+  `;
+
+  FORMACION.forEach(({dx, dy}) => {
+    const pez = document.createElement('span');
+    pez.textContent = '🐟';
+    pez.style.cssText = `
+      position:absolute;
+      left:${vaADerecha ? dx + 30 : 50 - dx}px;
+      top:${dy}px;
+      font-size:${tam}px;
+      display:inline-block;
+      transform: scaleX(${vaADerecha ? 1 : -1});
+      transition: transform .3s;
+    `;
+    grupo.appendChild(pez);
+  });
+
+  $('area-juego').appendChild(grupo);
+
+  /* Animación de cruce */
+  const distancia = anchoZ + 140;
+  const dx        = vaADerecha ? distancia : -distancia;
+  grupo.animate(
+    [{ transform:'translateX(0)' }, { transform:`translateX(${dx}px)` }],
+    { duration: dur * 1000, easing:'linear', fill:'forwards' }
+  );
+
+  const ref = { el: grupo, y: yPos, x: offsetX + anchoZ / 2, dispersado: false };
+  bancosActivos.push(ref);
+  setTimeout(() => {
+    grupo.remove();
+    const idx = bancosActivos.indexOf(ref);
+    if (idx !== -1) bancosActivos.splice(idx, 1);
+  }, dur * 1000 + 200);
+}
+
+function dispersarBanco(banco) {
+  if (banco.dispersado) return;
+  banco.dispersado = true;
+  const peces = banco.el.querySelectorAll('span');
+  peces.forEach((pez, i) => {
+    const angulo = (i / peces.length) * Math.PI * 2;
+    const dist   = 40 + Math.random() * 60;
+    pez.animate(
+      [
+        { opacity:1, transform:`scaleX(${pez.style.transform.includes('-1') ? -1 : 1})` },
+        { opacity:0, transform:`translate(${Math.cos(angulo)*dist}px, ${Math.sin(angulo)*dist}px) scale(.3)` }
+      ],
+      { duration: 600 + Math.random()*300, easing:'ease-out', fill:'forwards' }
+    );
+  });
+  setTimeout(() => {
+    banco.el.remove();
+    const idx = bancosActivos.indexOf(banco);
+    if (idx !== -1) bancosActivos.splice(idx, 1);
+  }, 1000);
+}
+
+function lanzarFoca() {
+  if (!estado.activo || estado.nivel < 2) return;
+  const { wl, wr, H } = obtenerZonas();
+
+  /* Zona aleatoria — izquierda o derecha */
+  const enIzq  = Math.random() > .5;
+  const zonaW  = wl;
+  /* X dentro de la zona de agua */
+  const xFoca  = enIzq
+    ? zonaW  * (.15 + Math.random() * .65)
+    : wr + zonaW * (.15 + Math.random() * .65);
+
+  const tamFoca = 52;
+  const durSeg  = 5 + Math.random() * 3; /* segundos subiendo */
+
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position:absolute;
+    left:${xFoca - tamFoca / 2}px;
+    top:${H}px;
+    font-size:${tamFoca}px;
+    z-index:22; pointer-events:none;
+  `;
+  el.textContent = '🦭';
+  $('area-juego').appendChild(el);
+
+  /* Animar de abajo a arriba, ondulando levemente */
+  const totalSubida = H + tamFoca + 20;
+  el.animate(
+    [
+      { transform: 'translateY(0px)    translateX(0px)' },
+      { transform: `translateY(${-totalSubida * .33}px) translateX(8px)`  },
+      { transform: `translateY(${-totalSubida * .66}px) translateX(-8px)` },
+      { transform: `translateY(${-totalSubida}px)       translateX(0px)`  },
+    ],
+    { duration: durSeg * 1000, easing: 'ease-in-out', fill: 'forwards' }
+  );
+
+  /* Sonido cuando lleva ~1s subiendo */
+  setTimeout(() => {
+    if (!silenciado) {
+      const a = new Audio('audio/animales/foca.mp3');
+      a.volume = 0.85;
+      a.play().catch(() => {});
+      setTimeout(() => { a.pause(); a.currentTime = 0; }, (durSeg - 1) * 1000);
+    }
+  }, 1000);
+
+  /* Cada 200ms comprobar si pasa cerca de un banco de peces */
+  const checkId = setInterval(() => {
+    if (!estado.activo) { clearInterval(checkId); return; }
+    const fr  = el.getBoundingClientRect();
+    const fcx = fr.left + fr.width  / 2;
+    const fcy = fr.top  + fr.height / 2;
+    bancosActivos.forEach(banco => {
+      if (banco.dispersado) return;
+      const br  = banco.el.getBoundingClientRect();
+      const bcx = br.left + br.width  / 2;
+      const bcy = br.top  + br.height / 2;
+      if (Math.hypot(fcx - bcx, fcy - bcy) < 110) dispersarBanco(banco);
+    });
+  }, 200);
+
+  setTimeout(() => { clearInterval(checkId); el.remove(); }, (durSeg + .5) * 1000);
+}
+
+function iniciarBancosYFoca() {
+  /* Bancos de peces: aparecen cada 8-14s */
+  clearTimeout(timerBancoPeces);
+  function programarBanco() {
+    timerBancoPeces = setTimeout(() => {
+      if (!estado.activo) return;
+      const { wl, wr, H } = obtenerZonas();
+      /* Crear en zona izquierda o derecha */
+      const enIzq = Math.random() > .5;
+      crearBancoPeces(
+        enIzq ? 'zona-agua-izq' : 'zona-agua-der',
+        enIzq ? 0 : wr,
+        wl, H
+      );
+      programarBanco();
+    }, 8000 + Math.random() * 6000);
+  }
+  programarBanco();
+
+  /* Foca: solo desde nivel 3, cada 18-30s */
+  clearTimeout(timerFoca);
+  if (estado.nivel >= 2) {
+    function programarFoca() {
+      timerFoca = setTimeout(() => {
+        if (!estado.activo) return;
+        lanzarFoca();
+        programarFoca();
+      }, 18000 + Math.random() * 12000);
+    }
+    programarFoca();
+  }
+}
+
+function detenerBancosYFoca() {
+  clearTimeout(timerBancoPeces);
+  clearTimeout(timerFoca);
+  $('area-juego').querySelectorAll('.banco-peces').forEach(e => e.remove());
+  bancosActivos.length = 0;
+}
+
 
 /* ============================================================
    VOZ DE MOISÉS — Archivos MP3 (ElevenLabs)
@@ -2063,6 +2524,6 @@ $('btn-voz').onclick = () => {
 $('btn-inicio').onclick        = () => iniciarInstrucciones();
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
 $('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
-$('btn-nueva-partida').onclick = () => iniciarInstrucciones();
+$('btn-nueva-partida').onclick = () => { detenerVoz(); iniciarInstrucciones(); };
 
 mostrarPantalla('s-start');
