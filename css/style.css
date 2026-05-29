@@ -730,6 +730,29 @@ body { display: flex; align-items: center; justify-content: center; }
     radial-gradient(ellipse 80% 50% at 50% 50%, rgba(30,80,180,.4) 0%, transparent 70%),
     linear-gradient(160deg, #1560c0, #0a3070);
   gap: clamp(.3em, 1.2vh, .8em);
+  /* Permitir scroll si el contenido es más alto que la pantalla (PC con zoom) */
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding-top: clamp(.8em, 2vh, 1.4em);
+  padding-bottom: clamp(.8em, 2vh, 1.4em);
+}
+
+/* Contenedores más grandes en móvil */
+@media (max-width: 600px) {
+  #contenedores-reciclaje {
+    left: 0; right: 0;       /* se extienden sobre el mar — aceptable */
+    bottom: max(58px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+    gap: clamp(4px, 1.5vw, 10px);
+    padding: 0 4px;
+  }
+  .contenedor {
+    max-width: none;
+    flex: 1;
+    padding: 6px 4px;
+  }
+  .bin-color { font-size: 1.5em; }
+  .bin-ico   { font-size: .85em; }
+  .bin-lbl   { font-size: .5em; }
 }
 .lu-titulo {
   font-family: 'Fredoka One', cursive;
@@ -889,6 +912,30 @@ body { display: flex; align-items: center; justify-content: center; }
   font-size: clamp(1.2em, 4vw, 1.8em); color: #f4c750;
   text-shadow: 0 2px 8px rgba(0,0,0,.4);
   animation: sube .5s .2s ease both;
+}
+
+/* ── SALTO DE DELFÍN Y BALLENA ── */
+@keyframes salto-criatura {
+  0%   { transform: translateY(0)     rotate(0deg)   scale(1);   opacity: 0; }
+  10%  { opacity: 1; }
+  35%  { transform: translateY(-55%)  rotate(-35deg) scale(1.1); opacity: 1; }
+  65%  { transform: translateY(-55%)  rotate(35deg)  scale(1.1); opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(0)     rotate(0deg)   scale(1);   opacity: 0; }
+}
+
+/* ── GAVIOTAS ── */
+.gaviota {
+  will-change: transform;
+  animation: gaviota-vuelo 5s linear forwards;
+}
+@keyframes gaviota-vuelo {
+  0%   { transform: translateX(0) translateY(0); }
+  20%  { transform: translateX(calc(var(--dir) * .2)) translateY(-12px); }
+  40%  { transform: translateX(calc(var(--dir) * .4)) translateY(4px); }
+  60%  { transform: translateX(calc(var(--dir) * .6)) translateY(-10px); }
+  80%  { transform: translateX(calc(var(--dir) * .8)) translateY(2px); }
+  100% { transform: translateX(var(--dir)) translateY(0); }
 }
 
 /* ── BOTÓN DE SONIDO ── */

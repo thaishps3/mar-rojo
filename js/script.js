@@ -70,35 +70,35 @@ const BASURA = [
 const NIVELES = [
   {
     nombre:              'El inicio del éxodo',
-    vel:                 22,   /* muy lento — el niño aprende sin presión */
-    intervalo:           5500,
-    maxObjetos:          2,
-    rescates:            5,
-    gruposNecesarios:    3,
+    vel:                 18,
+    intervalo:           3800,
+    maxObjetos:          3,
+    rescates:            8,
+    gruposNecesarios:    4,
     animalesDisp:        [0,1],
     basuraDisp:          [0,1,3,11,12],
     contenedoresActivos: ['amarillo','gris'],
-    proporcionBasura:    .25,
+    proporcionBasura:    .30,
   },
   {
     nombre:              'El camino se abre',
-    vel:                 34,   /* lento — suma el contenedor azul */
-    intervalo:           4500,
-    maxObjetos:          2,
-    rescates:            7,
-    gruposNecesarios:    4,
-    animalesDisp:        [0,1,2,3],
-    basuraDisp:          [0,1,2,3,4,5,6,11,12,13],
-    contenedoresActivos: ['amarillo','azul','gris'],
-    proporcionBasura:    .33,
-  },
-  {
-    nombre:              'Criaturas del abismo',
-    vel:                 50,   /* medio — el niño ya tiene confianza */
-    intervalo:           3200,
+    vel:                 22,
+    intervalo:           3400,
     maxObjetos:          3,
     rescates:            10,
     gruposNecesarios:    5,
+    animalesDisp:        [0,1,2,3],
+    basuraDisp:          [0,1,2,3,4,5,6,11,12,13],
+    contenedoresActivos: ['amarillo','azul','gris'],
+    proporcionBasura:    .35,
+  },
+  {
+    nombre:              'Criaturas del abismo',
+    vel:                 28,
+    intervalo:           3000,
+    maxObjetos:          4,
+    rescates:            12,
+    gruposNecesarios:    6,
     animalesDisp:        [0,1,2,3,4],
     basuraDisp:          [0,1,2,3,4,5,6,7,8,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','gris'],
@@ -106,11 +106,11 @@ const NIVELES = [
   },
   {
     nombre:              'La gran prueba',
-    vel:                 78,   /* rápido — todos los contenedores */
-    intervalo:           2200,
-    maxObjetos:          3,
-    rescates:            12,
-    gruposNecesarios:    6,
+    vel:                 34,
+    intervalo:           2600,
+    maxObjetos:          4,
+    rescates:            15,
+    gruposNecesarios:    7,
     animalesDisp:        [0,1,2,3,4,5],
     basuraDisp:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','marron','gris'],
@@ -118,11 +118,11 @@ const NIVELES = [
   },
   {
     nombre:              'Paso final',
-    vel:                 110,  /* exigente — el reto final */
-    intervalo:           1800,
-    maxObjetos:          4,
-    rescates:            14,
-    gruposNecesarios:    7,
+    vel:                 42,
+    intervalo:           2200,
+    maxObjetos:          5,
+    rescates:            18,
+    gruposNecesarios:    8,
     animalesDisp:        [0,1,2,3,4,5,6],
     basuraDisp:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
     contenedoresActivos: ['amarillo','azul','verde','marron','gris'],
@@ -964,6 +964,8 @@ function iniciarNivel() {
   mostrarPantalla('s-game');
   iniciarAmbiente();
   crearNadadores();
+  iniciarGaviotas();
+  iniciarSaltosCriatura();
 
   /* Banner de nuevos bins (~1s después de que se vea la pantalla) */
   setTimeout(() => mostrarBannerNuevoBin(), 900);
@@ -998,6 +1000,8 @@ function detenerTodo() {
   clearTimeout(estado.timerSpawn);
   clearInterval(estado.timerPeligro);
   limpiarResaltado();
+  detenerGaviotas();
+  detenerSaltosCriatura();
 }
 
 
@@ -1333,8 +1337,18 @@ function flotarPuntos(sx, sy, txt, cls) {
 }
 
 function comprobarNivelCompleto() {
-  if (estado.rescatados >= NIVELES[estado.nivel].rescates)
-    setTimeout(() => { if (estado.activo) nivelCompleto(); }, 420);
+  if (estado.rescatados >= NIVELES[estado.nivel].rescates) {
+    setTimeout(() => {
+      if (!estado.activo) return;
+      /* Último nivel → victoria directa, sin pantalla de historia */
+      if (estado.nivel >= NIVELES.length - 1) {
+        detenerTodo(); detenerAmbiente(); detenerVoz();
+        mostrarVictoria();
+      } else {
+        nivelCompleto();
+      }
+    }, 420);
+  }
 }
 
 
@@ -1418,8 +1432,193 @@ function lanzarConfeti() {
 
 
 /* ============================================================
-   INSTRUCCIONES DE MOISÉS — Web Speech API
+   GAVIOTAS — vuelan de vez en cuando con sonido
    ============================================================ */
+let timerGaviota = null;
+
+function sndGaviota() {
+  if (silenciado) return;
+  const ctx = audio();
+  /* Graznido de gaviota: modulación rápida de frecuencia */
+  [0, .18, .36].forEach((del, i) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(1200 - i * 120, ctx.currentTime + del);
+    o.frequency.exponentialRampToValueAtTime(600 - i * 60, ctx.currentTime + del + .14);
+    o.frequency.exponentialRampToValueAtTime(1100 - i * 100, ctx.currentTime + del + .22);
+    g.gain.setValueAtTime(.18, ctx.currentTime + del);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + .28);
+    const lp = ctx.createBiquadFilter(); lp.type = 'bandpass';
+    lp.frequency.value = 1400; lp.Q.value = 2;
+    o.connect(lp); lp.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + .3);
+  });
+}
+
+function lanzarGaviota() {
+  if (!estado.activo) return;
+  const area   = $('area-juego');
+  const { H, W } = obtenerZonas();
+  const vaALaDerecha = Math.random() > 0.5;
+
+  const el = document.createElement('div');
+  el.className = 'gaviota';
+  el.textContent = '🕊️';
+  /* altura aleatoria en el tercio superior del campo */
+  const y = H * .05 + Math.random() * H * .28;
+  el.style.cssText = `
+    position:absolute;
+    top:${y}px;
+    font-size:${18 + Math.random() * 10}px;
+    z-index:35;
+    pointer-events:none;
+    ${vaALaDerecha ? 'left:-40px' : 'right:-40px; transform:scaleX(-1)'};
+    animation: gaviota-vuelo ${3.5 + Math.random() * 2}s linear forwards;
+    --dir: ${vaALaDerecha ? W + 60 : -(W + 60)}px;
+  `;
+  area.appendChild(el);
+  sndGaviota();
+  /* segunda gaznada a mitad del vuelo */
+  setTimeout(() => sndGaviota(), 1200);
+  setTimeout(() => el.remove(), 6000);
+}
+
+function iniciarGaviotas() {
+  clearTimeout(timerGaviota);
+  function programarSiguiente() {
+    /* cada 12-25 segundos aparece una gaviota */
+    timerGaviota = setTimeout(() => {
+      if (estado.activo) {
+        lanzarGaviota();
+        programarSiguiente();
+      }
+    }, 12000 + Math.random() * 13000);
+  }
+  programarSiguiente();
+}
+
+function detenerGaviotas() {
+  clearTimeout(timerGaviota);
+  $('area-juego').querySelectorAll('.gaviota').forEach(e => e.remove());
+}
+
+
+/* Sonido de delfín — serie de clics y silbidos agudos */
+function sndDelfin() {
+  if (silenciado) return;
+  const ctx = audio();
+  /* Silbido ascendente característico */
+  [0, .12, .24, .36].forEach((del, i) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    const freqBase = 2000 + i * 400;
+    o.frequency.setValueAtTime(freqBase, ctx.currentTime + del);
+    o.frequency.exponentialRampToValueAtTime(freqBase * 1.6, ctx.currentTime + del + .08);
+    o.frequency.exponentialRampToValueAtTime(freqBase * .7, ctx.currentTime + del + .14);
+    g.gain.setValueAtTime(.18, ctx.currentTime + del);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + .16);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + .18);
+  });
+  /* Clic de ecolocalización */
+  setTimeout(() => {
+    if (silenciado) return;
+    const b = ctx.createBuffer(1, ctx.sampleRate * .025, ctx.sampleRate);
+    const d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1-i/d.length);
+    const ns = ctx.createBufferSource(); ns.buffer = b;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000;
+    const ng = ctx.createGain(); ng.gain.value = .35;
+    ns.connect(hp); hp.connect(ng); ng.connect(ctx.destination); ns.start();
+  }, 500);
+}
+
+/* Sonido de ballena — gemido grave y largo */
+function sndBallena() {
+  if (silenciado) return;
+  const ctx = audio();
+  /* Canto profundo característico */
+  [[0, 120, 80, 1.2], [.4, 95, 140, .9], [1.4, 110, 75, 1.0]].forEach(([del, f1, f2, dur]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(f1, ctx.currentTime + del);
+    o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + del + dur * .6);
+    o.frequency.exponentialRampToValueAtTime(f1 * .85, ctx.currentTime + del + dur);
+    /* Vibrato suave */
+    const lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = 3.5; lg.gain.value = 3;
+    lfo.connect(lg); lg.connect(o.frequency); lfo.start(ctx.currentTime + del);
+    lfo.stop(ctx.currentTime + del + dur + .1);
+    g.gain.setValueAtTime(0, ctx.currentTime + del);
+    g.gain.linearRampToValueAtTime(.32, ctx.currentTime + del + .15);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + dur);
+    /* Armónico grave */
+    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+    o2.type = 'sine'; o2.frequency.value = f1 * .5;
+    g2.gain.setValueAtTime(0, ctx.currentTime + del);
+    g2.gain.linearRampToValueAtTime(.12, ctx.currentTime + del + .15);
+    g2.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + del + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o2.connect(g2); g2.connect(ctx.destination);
+    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + dur + .1);
+    o2.start(ctx.currentTime + del); o2.stop(ctx.currentTime + del + dur + .1);
+  });
+}
+
+/* Lanza un salto de delfín o ballena desde una zona de agua */
+function saltoCriatura(tipo) {
+  if (!estado.activo) return;
+  const { r, wl, wr, W, H } = obtenerZonas();
+
+  /* Elegir zona: izquierda o derecha */
+  const enIzquierda = Math.random() > .5;
+  const xCentro     = enIzquierda
+    ? r.left + wl * .5
+    : r.left + wr + (W - wr) * .5;
+
+  const emoji  = tipo === 'ballena' ? '🐋' : '🐬';
+  const tamano = tipo === 'ballena' ? 38  : 28;
+
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position:absolute;
+    left:${(enIzquierda ? wl*.3 : wr + (W-wr)*.2)}px;
+    bottom:0px;
+    font-size:${tamano}px;
+    z-index:36;
+    pointer-events:none;
+    transform-origin: bottom center;
+    animation: salto-criatura ${tipo === 'ballena' ? 1.8 : 1.3}s ease-in-out forwards;
+  `;
+  el.textContent = emoji;
+  $('area-juego').appendChild(el);
+
+  /* Sonido */
+  if (tipo === 'ballena') sndBallena(); else sndDelfin();
+  setTimeout(() => el.remove(), 2200);
+}
+
+let timerSaltoCriatura = null;
+
+function iniciarSaltosCriatura() {
+  clearTimeout(timerSaltoCriatura);
+  function programar() {
+    /* Cada 10-20 segundos */
+    timerSaltoCriatura = setTimeout(() => {
+      if (!estado.activo) return;
+      /* En nivel 5 hay posibilidad de ballena, en el resto solo delfín */
+      const tipo = (estado.nivel >= 4 && Math.random() > .5) ? 'ballena' : 'delfin';
+      saltoCriatura(tipo);
+      programar();
+    }, 10000 + Math.random() * 10000);
+  }
+  programar();
+}
+
+function detenerSaltosCriatura() {
+  clearTimeout(timerSaltoCriatura);
+  $('area-juego').querySelectorAll('.salto-criatura').forEach(e => e.remove());
+}
 
 /* ============================================================
    VOZ DE MOISÉS — Archivos MP3 (ElevenLabs)
@@ -1623,7 +1822,7 @@ $('btn-voz').onclick = () => {
    ============================================================ */
 $('btn-inicio').onclick        = () => iniciarInstrucciones();
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
-$('btn-siguiente').onclick     = () => siguienteNivel();
+$('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
 $('btn-nueva-partida').onclick = () => iniciarInstrucciones();
 
 mostrarPantalla('s-start');
