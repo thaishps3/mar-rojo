@@ -94,7 +94,7 @@ No se utilizan librerías externas. El juego funciona con un solo archivo HTML, 
 ## 🚀 Cómo ejecutar el juego
 
 ### Opción 1 — Directamente en GitHub Pages
-Visita: `https://[tu-usuario].github.io/el-mar-rojo`
+Visita: `https://thaishps3.github.io/mar-rojo/`
 
 ### Opción 2 — En local
 1. Clona o descarga el repositorio
