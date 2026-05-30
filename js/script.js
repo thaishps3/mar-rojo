@@ -364,16 +364,22 @@ const GENERADORES_FIGURAS = [figHombre1, figMujer, figHombre2, figAnciano, figNi
 function generarMultitud(n, anchoDisponible) {
   const ANIMALES_EXODO = ['🐪','🐫','🐐','🐑','🐕','🐈','🫏','🐂'];
 
-  /* Calcular el paso entre figuras:
-     - En escritorio (arena ~400px+): paso=18 → figuras con espacio natural
-     - En móvil (arena ~180px):       paso se comprime hasta 11
-       para que las 14-20 figuras quepan sin desbordar */
-  const PASO_MAX = 18;
+  const ancho    = anchoDisponible || 400;
+
+  /* Escala proporcional para PC: figuras más grandes en pantallas anchas.
+     Base: 380px de arena (móvil). Máximo: 1.7× en pantallas grandes. */
+  const escala   = Math.min(1.7, Math.max(1.0, ancho / 380));
+
+  /* Paso entre figuras — comprimido en móvil, natural en PC */
+  const PASO_MAX = Math.round(18 * escala);
   const PASO_MIN = 11;
   const margen   = 28;
-  const ancho    = anchoDisponible || 400;
   const pasoIdeal = Math.floor((ancho - margen) / n);
   const PASO      = Math.max(PASO_MIN, Math.min(PASO_MAX, pasoIdeal));
+
+  /* Tamaño de la figura SVG escalado */
+  const figW = Math.round(28 * escala);
+  const figH = Math.round(52 * escala);
 
   /* Mezclar generadores */
   const pool = [];
@@ -388,38 +394,39 @@ function generarMultitud(n, anchoDisponible) {
   }
 
   /* Ancho total del grupo */
-  const anchoTotal = (n - 1) * PASO + 32;
+  const anchoTotal = (n - 1) * PASO + figW + 4;
 
-  /* ── Personas primero (z-index 1) ── */
+  /* ── Personas primero ── */
   let htmlPersonas = '', pIdx = 0;
   for (let i = 0; i < n; i++) {
     if (!posicionesAnimal.has(i)) {
-      const cls = i % 2 === 0 ? 'figura' : 'figura figura-par';
-      const gen = pool[pIdx % pool.length];
-      /* figNino es más pequeña — ajustamos la posición vertical */
+      const cls  = i % 2 === 0 ? 'figura' : 'figura figura-par';
+      const gen  = pool[pIdx % pool.length];
       const esNino = gen === figNino;
-      const top    = esNino ? 'top:8px' : 'top:0';
-      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:1;position:absolute">${gen()}</div>`;
+      const top  = esNino ? `top:${Math.round(8*escala)}px` : 'top:0';
+      /* Generar SVG y escalar con width/height CSS */
+      const svgOriginal = gen();
+      const svgEscalado = svgOriginal
+        .replace(/width="(\d+)"/, `width="${figW}"`)
+        .replace(/height="(\d+)"/, `height="${gen === figAnciano ? Math.round(56*escala) : figH}"`);
+      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:1;position:absolute">${svgEscalado}</div>`;
       pIdx++;
     }
   }
 
-  /* ── Animales después (z-index 3, siempre encima) ──
-     Se colocan ligeramente por delante (top mayor) para
-     simular que caminan a los pies del grupo */
+  /* ── Animales después (z-index 3, siempre encima) ── */
   let htmlAnimales = '';
   for (const i of posicionesAnimal) {
-    const cls   = i % 2 === 0 ? 'figura' : 'figura figura-par';
-    const emoji = ANIMALES_EXODO[Math.floor(Math.random() * ANIMALES_EXODO.length)];
+    const cls      = i % 2 === 0 ? 'figura' : 'figura figura-par';
+    const emoji    = ANIMALES_EXODO[Math.floor(Math.random() * ANIMALES_EXODO.length)];
     const esGrande = ['🐪','🐫','🐂'].includes(emoji);
-    const size  = esGrande ? 22 : 17;
-    const top   = esGrande ? 14 : 24;
-    /* desplazamiento horizontal ligero para que no quede exactamente detrás */
-    const offsetX = (Math.random() > 0.5 ? 4 : -3);
+    const size     = Math.round((esGrande ? 22 : 17) * escala);
+    const top      = Math.round((esGrande ? 14 : 24) * escala);
+    const offsetX  = (Math.random() > 0.5 ? 4 : -3);
     htmlAnimales += `<div class="${cls}" style="left:${i*PASO + offsetX}px;top:${top}px;font-size:${size}px;line-height:1;z-index:3;position:absolute;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${emoji}</div>`;
   }
 
-  return `<div style="position:relative;width:${anchoTotal}px;height:58px">${htmlPersonas}${htmlAnimales}</div>`;
+  return `<div style="position:relative;width:${anchoTotal}px;height:${figH+6}px">${htmlPersonas}${htmlAnimales}</div>`;
 }
 
 
@@ -708,8 +715,10 @@ $('btn-sonido').onclick = () => {
   if (silenciado) {
     detenerAmbiente();
     detenerVoz();
-  } else if (estado.pantalla === 'game') {
-    iniciarAmbiente();
+  } else {
+    /* Reanudar la voz que estaba sonando antes de silenciar */
+    if (ultimaRuta) reproducirAudio(ultimaRuta);
+    if (estado.pantalla === 'game') iniciarAmbiente();
   }
 };
 
@@ -1736,7 +1745,7 @@ function saltoCriatura(tipo) {
 
   if (esBalena) {
     /* ── BALLENA: salto majestuoso, emerge y cae con gran splash ── */
-    const tamBallena = Math.min(85, Math.floor(H * .17)); /* ballena más grande que delfín */
+    const tamBallena = Math.min(100, Math.floor(Math.max(W, H) * .12));
     const altSaltoBallena = Math.floor(H * (.30 + Math.random() * .12));
     const yInicioB = H - tamBallena - 6;
 
@@ -2156,7 +2165,9 @@ function crearBancoPeces(zonaId, offsetX, anchoZ, H) {
       top:${dy}px;
       font-size:${tam}px;
       display:inline-block;
-      transform: scaleX(${vaADerecha ? 1 : -1});
+      /* 🐟 naturalmente mira a la izquierda.
+         Cuando va a la derecha hay que voltear con scaleX(-1). */
+      transform: scaleX(${vaADerecha ? -1 : 1});
       transition: transform .3s;
     `;
     grupo.appendChild(pez);
@@ -2320,11 +2331,13 @@ function detenerBancosYFoca() {
    del juego — el botón 🔊 del HUD lo controla todo.
    ============================================================ */
 
-let audioActual = null;
+let audioActual  = null;
+let ultimaRuta   = null; /* última ruta reproducida — para reanudar al activar voz */
 
 /* Reproduce un archivo MP3. Respeta el botón de silencio global. */
 function reproducirAudio(ruta, alTerminar) {
   detenerVoz();
+  ultimaRuta = ruta;
   if (silenciado) {
     if (alTerminar) setTimeout(alTerminar, 200);
     return;
