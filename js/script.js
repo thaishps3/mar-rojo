@@ -705,8 +705,12 @@ function sndPuntos() {
 $('btn-sonido').onclick = () => {
   silenciado = !silenciado;
   $('btn-sonido').textContent = silenciado ? '🔇' : '🔊';
-  if (silenciado) detenerAmbiente();
-  else if (estado.pantalla === 'game') iniciarAmbiente();
+  if (silenciado) {
+    detenerAmbiente();
+    detenerVoz();
+  } else if (estado.pantalla === 'game') {
+    iniciarAmbiente();
+  }
 };
 
 
@@ -857,7 +861,7 @@ const NADADORES = [
 ];
 
 function crearNadadores() {
-  $('area-juego').querySelectorAll('.nadador,.burbuja,.coral-deco').forEach(e => e.remove());
+  $('area-juego').querySelectorAll('.nadador,.burbuja').forEach(e => e.remove());
 
   const { H } = obtenerZonas();
 
@@ -890,7 +894,7 @@ function crearNadadores() {
 
       /* Alterna entre nado horizontal y flotación */
       if (Math.random() > 0.3) {
-        /* Nado horizontal */
+        /* Nado horizontal — emojis acuáticos miran a la derecha por defecto */
         const vaALaDerecha = Math.random() > 0.5;
         el.classList.add(vaALaDerecha ? 'nada-der' : 'nada-izq');
         el.style.cssText = `
@@ -901,6 +905,8 @@ function crearNadadores() {
           --del: ${del}s;
           --ancho: ${anchoZ}px;
         `;
+        /* Voltear cuando nada hacia la izquierda */
+        if (!vaALaDerecha) el.style.transform = 'scaleX(-1)';
       } else {
         /* Flotación suave en un punto fijo */
         el.classList.add('flota');
@@ -934,30 +940,6 @@ function crearNadadores() {
       $('area-juego').appendChild(bel);
     }
   });
-
-  /* ── Corales decorativos en la arena ── */
-  const CORALES = ['🪸','🌿','🪸','🌿','🪸'];
-  const { wl, wr, H: altTotal } = obtenerZonas();
-  const anchoArena = wr - wl;
-  const numCorales = 5 + Math.floor(Math.random() * 4);
-  for (let c = 0; c < numCorales; c++) {
-    const coral = document.createElement('div');
-    coral.className = 'coral-deco';
-    const tam = 18 + Math.random() * 16;
-    const cx  = wl + 8 + Math.random() * (anchoArena - 20);
-    const cy  = altTotal * .55 + Math.random() * (altTotal * .38);
-    coral.textContent = CORALES[c % CORALES.length];
-    coral.style.cssText = `
-      position:absolute;
-      left:${cx}px; bottom:${altTotal - cy}px;
-      font-size:${tam}px;
-      z-index:10; pointer-events:none; opacity:.55;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
-      animation: coral-mece ${2.5 + Math.random() * 2}s ease-in-out infinite;
-      animation-delay:${Math.random() * -3}s;
-    `;
-    $('area-juego').appendChild(coral);
-  }
 }
 
 
@@ -1124,16 +1106,21 @@ function crearObjeto(datos, esBasura) {
   const y = posicionSegura(z, datos.s);
   if (y === null) return;
 
+  /* En pantallas grandes (PC), escalar los objetos proporcionalmente.
+     Base de diseño: 400px de arena. En PC puede ser el doble o más. */
+  const escala   = Math.min(2.0, Math.max(1.0, z.anchoArena / 380));
+  const tamano   = Math.round(datos.s * escala);
+
   const id = estado.contadorId++;
   const el = document.createElement('div');
   el.className  = 'criatura espera ' + (esBasura ? 'es-basura' : 'es-animal') + (datos.cls ? ' ' + datos.cls : '');
   el.dataset.cid = id;
 
   const marg = 16;
-  const x = z.wl + marg + Math.random() * (z.anchoArena - datos.s - marg*2);
+  const x = z.wl + marg + Math.random() * (z.anchoArena - tamano - marg*2);
   el.style.left = x + 'px'; el.style.top = y + 'px';
 
-  el.innerHTML = `<span class="c-em" style="font-size:${datos.s}px">${datos.e}</span>`
+  el.innerHTML = `<span class="c-em" style="font-size:${tamano}px">${datos.e}</span>`
                + `<span class="c-lb">${datos.n}</span>`;
 
   const obj = { id, el, x, y, origenX:x, origenY:y, activo:true, datos, esBasura };
@@ -1667,11 +1654,13 @@ function lanzarGaviota() {
   el.textContent = '🕊️';
   const y   = H * .05 + Math.random() * H * .28;
   const dur = 3.5 + Math.random() * 2;
+  /* 🕊️ naturalmente mira a la izquierda.
+     Cuando va a la derecha hay que voltearla con scaleX(-1). */
   el.style.cssText = `
     position:absolute; top:${y}px;
     font-size:${18 + Math.random() * 10}px;
     z-index:35; pointer-events:none;
-    ${vaALaDerecha ? 'left:-40px' : 'right:-40px; transform:scaleX(-1)'};
+    ${vaALaDerecha ? 'left:-40px; transform:scaleX(-1)' : 'right:-40px'};
     --dir:${vaALaDerecha ? W + 60 : -(W + 60)}px;
     animation: gaviota-vuelo ${dur}s linear forwards;
   `;
@@ -1874,7 +1863,7 @@ function lanzarMedusa() {
 
   const wrap = document.createElement('div');
   wrap.style.cssText = `position:absolute;left:${xPos-tam/2}px;top:${H}px;`
-    + `width:${svgW}px;height:${svgH}px;pointer-events:none;z-index:18;`;
+    + `width:${svgW}px;height:${svgH}px;pointer-events:none;z-index:13;`;
 
   function buildSVG(ci) {
     return `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
@@ -2154,7 +2143,7 @@ function crearBancoPeces(zonaId, offsetX, anchoZ, H) {
     position:absolute;
     top:${yPos}px;
     left:${vaADerecha ? offsetX - 60 : offsetX + anchoZ + 20}px;
-    pointer-events:none; z-index:14;
+    pointer-events:none; z-index:12;
     width:80px; height:60px;
   `;
 
@@ -2327,32 +2316,24 @@ function detenerBancosYFoca() {
      audio/instrucciones/moises-0.mp3 … moises-7.mp3
      audio/niveles/nivel-1.mp3 … nivel-4.mp3
      audio/niveles/nivel-5-victoria.mp3
+   La voz usa la misma variable `silenciado` que el resto
+   del juego — el botón 🔊 del HUD lo controla todo.
    ============================================================ */
 
-let vozActiva  = true;
-let audioActual = null; /* elemento <audio> en reproducción */
+let audioActual = null;
 
-/* Reproduce un archivo MP3. Si la voz está silenciada, no hace nada.
-   alTerminar (opcional) se llama cuando el audio acaba o si está silenciado. */
+/* Reproduce un archivo MP3. Respeta el botón de silencio global. */
 function reproducirAudio(ruta, alTerminar) {
   detenerVoz();
-  if (!vozActiva) {
+  if (silenciado) {
     if (alTerminar) setTimeout(alTerminar, 200);
     return;
   }
   const a = new Audio(ruta);
   audioActual = a;
   a.onended  = () => { audioActual = null; if (alTerminar) alTerminar(); };
-  a.onerror  = () => {
-    /* Si el archivo no existe, continúa sin audio */
-    audioActual = null;
-    if (alTerminar) setTimeout(alTerminar, 200);
-  };
-  a.play().catch(() => {
-    /* El navegador bloqueó la reproducción automática — continúa sin audio */
-    audioActual = null;
-    if (alTerminar) setTimeout(alTerminar, 200);
-  });
+  a.onerror  = () => { audioActual = null; if (alTerminar) setTimeout(alTerminar, 200); };
+  a.play().catch(() => { audioActual = null; if (alTerminar) setTimeout(alTerminar, 200); });
 }
 
 /* Detiene el audio en reproducción */
@@ -2471,7 +2452,10 @@ function mostrarPasoInstruccion(indice) {
     `<div class="dot ${i < indice ? 'completado' : i === indice ? 'activo' : ''}"></div>`
   ).join('');
 
-  /* Texto del botón en el último paso */
+  /* Texto del botón "Anterior" — en el paso 0 muestra "Inicio" */
+  $('btn-anterior').textContent = pasoActual === 0 ? '← Inicio' : '◀ Anterior';
+
+  /* Texto del botón Siguiente en el último paso */
   $('btn-paso-sig').textContent =
     indice === PASOS_INSTRUCCION.length - 1 ? '¡Empecemos! 🌊' : 'Siguiente ▶';
 
@@ -2482,9 +2466,6 @@ function mostrarPasoInstruccion(indice) {
 
 function iniciarInstrucciones() {
   pasoActual = 0;
-  $('ctrl-voz').style.display = 'flex';
-  $('btn-voz').className  = vozActiva ? '' : 'silenciado';
-  $('btn-voz').textContent = vozActiva ? '🔊 Voz activada' : '🔇 Voz desactivada';
   mostrarPantalla('s-instrucciones');
   setTimeout(() => mostrarPasoInstruccion(0), 400);
 }
@@ -2499,22 +2480,26 @@ $('btn-paso-sig').onclick = () => {
   }
 };
 
-/* Saltar instrucciones */
+/* Paso anterior — en paso 0 vuelve al inicio */
+$('btn-anterior').onclick = () => {
+  detenerVoz();
+  if (pasoActual === 0) {
+    mostrarPantalla('s-start');
+  } else {
+    mostrarPasoInstruccion(pasoActual - 1);
+  }
+};
+
+/* Repetir instrucción actual */
+$('btn-repetir').onclick = () => {
+  detenerVoz();
+  reproducirAudio(AUDIO_INSTRUCCIONES[pasoActual]);
+};
+
+/* Saltar todas las instrucciones */
 $('btn-saltar').onclick = () => {
   detenerVoz();
   iniciarJuego();
-};
-
-/* Silenciar / activar voz */
-$('btn-voz').onclick = () => {
-  vozActiva = !vozActiva;
-  $('btn-voz').className   = vozActiva ? '' : 'silenciado';
-  $('btn-voz').textContent = vozActiva ? '🔊 Voz activada' : '🔇 Voz desactivada';
-  if (!vozActiva) {
-    detenerVoz();
-  } else {
-    reproducirAudio(AUDIO_INSTRUCCIONES[pasoActual]);
-  }
 };
 
 
