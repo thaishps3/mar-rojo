@@ -864,63 +864,12 @@ function mostrarBannerNuevoBin() {
    Se crean al iniciar el nivel y permanecen durante el juego.
    ============================================================ */
 
-/* Pez monstruo — pez linterna morado con antena, ojos saltones y dientes */
-function svgPezMonstruo(px) {
-  const h = Math.round(px * .78);
-  const cx = Math.round(px * .48);  /* centro del cuerpo */
-  const cy = Math.round(h  * .56);
-  const rx = Math.round(px * .42);
-  const ry = Math.round(h  * .40);
-  return `<svg width="${px}" height="${h}" viewBox="0 0 ${px} ${h}" xmlns="http://www.w3.org/2000/svg">
-    <!-- cola -->
-    <polygon points="${px*.76},${h*.38} ${px*.98},${h*.12} ${px*.98},${h*.88} ${px*.76},${h*.64}"
-             fill="#6b1a7a"/>
-    <line x1="${px*.84}" y1="${h*.28}" x2="${px*.94}" y2="${h*.5}" stroke="#4a0f58" stroke-width="1.5" opacity=".6"/>
-    <line x1="${px*.84}" y1="${h*.5}"  x2="${px*.96}" y2="${h*.5}" stroke="#4a0f58" stroke-width="1.5" opacity=".6"/>
-    <line x1="${px*.84}" y1="${h*.72}" x2="${px*.94}" y2="${h*.5}" stroke="#4a0f58" stroke-width="1.5" opacity=".6"/>
-    <!-- cuerpo principal -->
-    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#7a1e8a"/>
-    <!-- vientre más claro -->
-    <ellipse cx="${Math.round(cx*.9)}" cy="${Math.round(cy*1.05)}" rx="${Math.round(rx*.6)}" ry="${Math.round(ry*.5)}" fill="#922099" opacity=".5"/>
-    <!-- aleta dorsal -->
-    <path d="M${px*.22},${h*.18} Q${px*.38},${h*.02} ${px*.58},${h*.08} L${px*.55},${h*.22} L${px*.18},${h*.24} Z"
-          fill="#6b1a7a"/>
-    <!-- aleta pectoral -->
-    <ellipse cx="${px*.52}" cy="${h*.68}" rx="${px*.14}" ry="${h*.1}"
-             fill="#8a2298" transform="rotate(20 ${px*.52} ${h*.68})"/>
-    <!-- boca grande abierta -->
-    <path d="M${px*.04},${h*.52} Q${px*.10},${h*.78} ${px*.32},${h*.74} L${px*.32},${h*.52} Z"
-          fill="#c0392b"/>
-    <!-- dientes grandes -->
-    <rect x="${px*.05}" y="${h*.50}" width="${px*.06}" height="${h*.22}" rx="${px*.02}" fill="#f5f0d0"/>
-    <rect x="${px*.13}" y="${h*.50}" width="${px*.05}" height="${h*.18}" rx="${px*.02}" fill="#f5f0d0"/>
-    <rect x="${px*.20}" y="${h*.50}" width="${px*.05}" height="${h*.14}" rx="${px*.02}" fill="#f5f0d0"/>
-    <!-- dientes mandíbula inferior -->
-    <rect x="${px*.07}" y="${h*.70}" width="${px*.05}" height="${h*.14}" rx="${px*.02}" fill="#e8e0c0" transform="rotate(180 ${px*.095} ${h*.77})"/>
-    <rect x="${px*.16}" y="${h*.68}" width="${px*.04}" height="${h*.11}" rx="${px*.02}" fill="#e8e0c0" transform="rotate(180 ${px*.18} ${h*.735})"/>
-    <!-- ojos saltones — ojo izquierdo -->
-    <circle cx="${px*.26}" cy="${h*.36}" r="${px*.11}" fill="#fff" stroke="#4a0f58" stroke-width="1.5"/>
-    <circle cx="${px*.28}" cy="${h*.37}" r="${px*.065}" fill="#1a1a1a"/>
-    <circle cx="${px*.30}" cy="${h*.34}" r="${px*.025}" fill="#fff"/>
-    <!-- ojo derecho (más atrás) -->
-    <circle cx="${px*.40}" cy="${h*.32}" r="${px*.085}" fill="#fff" stroke="#4a0f58" stroke-width="1.2"/>
-    <circle cx="${px*.41}" cy="${h*.33}" r="${px*.05}" fill="#1a1a1a"/>
-    <circle cx="${px*.43}" cy="${h*.31}" r="${px*.02}" fill="#fff"/>
-    <!-- antena con luz (esca) -->
-    <path d="M${px*.34},${h*.14} Q${px*.20},${h*.00} ${px*.12},${h*.08}"
-          stroke="#4a0f58" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <circle cx="${px*.10}" cy="${h*.07}" r="${px*.05}" fill="#f0c000"/>
-    <circle cx="${px*.10}" cy="${h*.07}" r="${px*.08}" fill="rgba(240,192,0,.25)"/>
-  </svg>`;
-}
-
 const NADADORES = [
   { e:'🐠', tam:16 }, { e:'🐡', tam:16 }, { e:'🐟', tam:14 },
   { e:'🦈', tam:20 }, { e:'🐙', tam:18 }, { e:'🦑', tam:16 },
   { e:'🐬', tam:20 }, { e:'🐋', tam:24 }, { e:'🦞', tam:14 },
   { e:'🦀', tam:14 }, { e:'🦭', tam:18 }, { e:'🐡', tam:13 },
   { e:'🪸', tam:15 }, { e:'🐠', tam:18 }, { e:'🦈', tam:16 },
-  { svg: true, fn: svgPezMonstruo, tam:38, n:'Pez monstruo' },
 ];
 
 /* ============================================================
@@ -1942,39 +1891,86 @@ function saltoCriatura(tipo) {
 let timerSaltoCriatura = null;
 let timerPezMonstruo   = null;
 
+/* Pez diablo — sin dientes, luz bioluminiscente que pulsa */
+function svgPezMonstruo(px) {
+  const h  = Math.round(px * .75);
+  const cx = Math.round(px * .48);
+  const cy = Math.round(h  * .54);
+  const rx = Math.round(px * .40);
+  const ry = Math.round(h  * .38);
+  return `<svg width="${px}" height="${h}" viewBox="0 0 ${px} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <!-- cola -->
+    <polygon points="${px*.76},${h*.38} ${px*.98},${h*.12} ${px*.98},${h*.88} ${px*.76},${h*.64}" fill="#5a1268"/>
+    <line x1="${px*.84}" y1="${h*.28}" x2="${px*.94}" y2="${h*.5}" stroke="#3a0848" stroke-width="1.5" opacity=".6"/>
+    <line x1="${px*.84}" y1="${h*.5}"  x2="${px*.96}" y2="${h*.5}" stroke="#3a0848" stroke-width="1.5" opacity=".6"/>
+    <line x1="${px*.84}" y1="${h*.72}" x2="${px*.94}" y2="${h*.5}" stroke="#3a0848" stroke-width="1.5" opacity=".6"/>
+    <!-- cuerpo -->
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#6a1278"/>
+    <ellipse cx="${Math.round(cx*.88)}" cy="${Math.round(cy*1.06)}" rx="${Math.round(rx*.58)}" ry="${Math.round(ry*.48)}" fill="#7e1890" opacity=".5"/>
+    <!-- aleta dorsal -->
+    <path d="M${px*.22},${h*.18} Q${px*.38},${h*.02} ${px*.58},${h*.08} L${px*.55},${h*.22} L${px*.18},${h*.24} Z" fill="#5a1268"/>
+    <!-- aleta pectoral -->
+    <ellipse cx="${px*.52}" cy="${h*.68}" rx="${px*.13}" ry="${h*.09}" fill="#7a1888" transform="rotate(20 ${px*.52} ${h*.68})"/>
+    <!-- boca cerrada -->
+    <path d="M${px*.04},${h*.58} Q${px*.14},${h*.65} ${px*.28},${h*.60}" stroke="#3a0848" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- ojos -->
+    <circle cx="${px*.26}" cy="${h*.36}" r="${px*.11}" fill="#fff" stroke="#3a0848" stroke-width="1.5"/>
+    <circle cx="${px*.28}" cy="${h*.37}" r="${px*.065}" fill="#1a0a1a"/>
+    <circle cx="${px*.30}" cy="${h*.34}" r="${px*.025}" fill="#fff"/>
+    <circle cx="${px*.40}" cy="${h*.32}" r="${px*.08}" fill="#fff" stroke="#3a0848" stroke-width="1.2"/>
+    <circle cx="${px*.41}" cy="${h*.33}" r="${px*.048}" fill="#1a0a1a"/>
+    <circle cx="${px*.43}" cy="${h*.31}" r="${px*.018}" fill="#fff"/>
+    <!-- antena -->
+    <path d="M${px*.32},${h*.14} Q${px*.18},${h*-.02} ${px*.10},${h*.06}" stroke="#3a0848" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <!-- luz pulsante -->
+    <circle cx="${px*.09}" cy="${h*.05}" r="${px*.10}" fill="rgba(80,255,180,.12)">
+      <animate attributeName="r" values="${px*.10};${px*.18};${px*.10}" dur="1.1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="${px*.09}" cy="${h*.05}" r="${px*.06}" fill="rgba(100,255,200,.28)">
+      <animate attributeName="r" values="${px*.06};${px*.11};${px*.06}" dur="1.1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="${px*.09}" cy="${h*.05}" r="${px*.034}" fill="#7fffcc">
+      <animate attributeName="opacity" values="1;.6;1" dur="1.1s" repeatCount="indefinite"/>
+    </circle>
+  </svg>`;
+}
+
 function lanzarPezMonstruo() {
   if (!estado.activo || estado.nivel < 2) return;
-  const { wl, wr, H, W } = obtenerZonas();
+  const { wl, wr, H } = obtenerZonas();
 
-  const vaADerecha = Math.random() > .5;
-  const tam        = 52 + Math.random() * 20; /* grande y visible */
-  const y          = H * .12 + Math.random() * H * .65;
-  const dur        = 5 + Math.random() * 4;
+  const enIzq     = Math.random() > .5;
+  const zonaAncho = wl;
+  const xInicio   = enIzq ? 0 : wr;
+  const vaADer    = enIzq;                 /* izq→derecha, der→izquierda */
+  const tam       = 54 + Math.random() * 18;
+  const y         = H * .10 + Math.random() * (H * .65);
+  const dur       = 6 + Math.random() * 4;
+  const sx        = vaADer ? 1 : -1;
+  const dist      = zonaAncho + tam + 8;
 
   const wrap = document.createElement('div');
   wrap.style.cssText = `
-    position:absolute;
-    top:${y}px;
-    ${vaADerecha ? `left:${-tam}px` : `right:${-tam}px`};
-    z-index:22; pointer-events:none;
-    ${vaADerecha ? '' : 'transform:scaleX(-1)'};
+    position:absolute; top:${y}px;
+    left:${vaADer ? xInicio - tam : xInicio + zonaAncho + 4}px;
+    z-index:13; pointer-events:none; opacity:0;
   `;
   wrap.innerHTML = svgPezMonstruo(tam);
   $('area-juego').appendChild(wrap);
 
-  /* Nado horizontal ondulante */
-  const dist = W + tam * 2;
+  /* Fade in al entrar, movimiento, fade out al salir */
   wrap.animate(
     [
-      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(0) translateY(0)` },
-      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(${dist*.33}px) translateY(-8px)` },
-      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(${dist*.66}px) translateY(6px)` },
-      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(${vaADerecha ? dist : -dist}px) translateY(0)` },
+      { opacity:0, transform:`scaleX(${sx}) translateX(0)` },
+      { opacity:1, transform:`scaleX(${sx}) translateX(${dist*.10}px)` },
+      { opacity:1, transform:`scaleX(${sx}) translateX(${dist*.50}px)` },
+      { opacity:1, transform:`scaleX(${sx}) translateX(${dist*.90}px)` },
+      { opacity:0, transform:`scaleX(${sx}) translateX(${dist}px)` },
     ],
     { duration: dur * 1000, easing: 'ease-in-out', fill: 'forwards' }
   );
 
-  setTimeout(() => wrap.remove(), (dur + .5) * 1000);
+  setTimeout(() => wrap.remove(), (dur + .3) * 1000);
 }
 
 function iniciarSaltosCriatura() {
