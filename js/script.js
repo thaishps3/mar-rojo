@@ -1070,7 +1070,6 @@ function iniciarNivel() {
   crearNadadores();
   iniciarGaviotas();
   iniciarSaltosCriatura();
-  iniciarPezMonstruo();
   iniciarMedusas();
   iniciarTesoros();
   iniciarOstrasVida();
@@ -1117,7 +1116,6 @@ function detenerTodo() {
   detenerOstrasVida();
   detenerBancosYFoca();
   detenerCaballitos();
-  clearTimeout(timerPezMonstruo);
 }
 
 
@@ -1889,123 +1887,6 @@ function saltoCriatura(tipo) {
 }
 
 let timerSaltoCriatura = null;
-let timerPezMonstruo   = null;
-
-/* Pez diablo — sin dientes, luz bioluminiscente que pulsa */
-function svgPezMonstruo(px) {
-  const h  = Math.round(px * .75);
-  const cx = Math.round(px * .48);
-  const cy = Math.round(h  * .54);
-  const rx = Math.round(px * .40);
-  const ry = Math.round(h  * .38);
-  return `<svg width="${px}" height="${h}" viewBox="0 0 ${px} ${h}" xmlns="http://www.w3.org/2000/svg">
-    <!-- cola -->
-    <polygon points="${px*.76},${h*.38} ${px*.98},${h*.12} ${px*.98},${h*.88} ${px*.76},${h*.64}" fill="#5a1268"/>
-    <line x1="${px*.84}" y1="${h*.28}" x2="${px*.94}" y2="${h*.5}" stroke="#3a0848" stroke-width="1.5" opacity=".6"/>
-    <line x1="${px*.84}" y1="${h*.5}"  x2="${px*.96}" y2="${h*.5}" stroke="#3a0848" stroke-width="1.5" opacity=".6"/>
-    <line x1="${px*.84}" y1="${h*.72}" x2="${px*.94}" y2="${h*.5}" stroke="#3a0848" stroke-width="1.5" opacity=".6"/>
-    <!-- cuerpo -->
-    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#6a1278"/>
-    <ellipse cx="${Math.round(cx*.88)}" cy="${Math.round(cy*1.06)}" rx="${Math.round(rx*.58)}" ry="${Math.round(ry*.48)}" fill="#7e1890" opacity=".5"/>
-    <!-- aleta dorsal -->
-    <path d="M${px*.22},${h*.18} Q${px*.38},${h*.02} ${px*.58},${h*.08} L${px*.55},${h*.22} L${px*.18},${h*.24} Z" fill="#5a1268"/>
-    <!-- aleta pectoral -->
-    <ellipse cx="${px*.52}" cy="${h*.68}" rx="${px*.13}" ry="${h*.09}" fill="#7a1888" transform="rotate(20 ${px*.52} ${h*.68})"/>
-    <!-- boca cerrada -->
-    <path d="M${px*.04},${h*.58} Q${px*.14},${h*.65} ${px*.28},${h*.60}" stroke="#3a0848" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <!-- ojos -->
-    <circle cx="${px*.26}" cy="${h*.36}" r="${px*.11}" fill="#fff" stroke="#3a0848" stroke-width="1.5"/>
-    <circle cx="${px*.28}" cy="${h*.37}" r="${px*.065}" fill="#1a0a1a"/>
-    <circle cx="${px*.30}" cy="${h*.34}" r="${px*.025}" fill="#fff"/>
-    <circle cx="${px*.40}" cy="${h*.32}" r="${px*.08}" fill="#fff" stroke="#3a0848" stroke-width="1.2"/>
-    <circle cx="${px*.41}" cy="${h*.33}" r="${px*.048}" fill="#1a0a1a"/>
-    <circle cx="${px*.43}" cy="${h*.31}" r="${px*.018}" fill="#fff"/>
-    <!-- antena -->
-    <path d="M${px*.32},${h*.14} Q${px*.18},${h*-.02} ${px*.10},${h*.06}" stroke="#3a0848" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <!-- luz pulsante -->
-    <circle cx="${px*.09}" cy="${h*.05}" r="${px*.10}" fill="rgba(80,255,180,.12)">
-      <animate attributeName="r" values="${px*.10};${px*.18};${px*.10}" dur="1.1s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="${px*.09}" cy="${h*.05}" r="${px*.06}" fill="rgba(100,255,200,.28)">
-      <animate attributeName="r" values="${px*.06};${px*.11};${px*.06}" dur="1.1s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="${px*.09}" cy="${h*.05}" r="${px*.034}" fill="#7fffcc">
-      <animate attributeName="opacity" values="1;.6;1" dur="1.1s" repeatCount="indefinite"/>
-    </circle>
-  </svg>`;
-}
-
-function lanzarPezMonstruo() {
-  if (!estado.activo || estado.nivel < 2) return;
-  const { wl, wr, H } = obtenerZonas();
-
-  const enIzq     = Math.random() > .5;
-  const zonaAncho = wl;
-  const xInicio   = enIzq ? 0 : wr;
-  const vaADer    = enIzq;                 /* izq→derecha, der→izquierda */
-  const tam       = 54 + Math.random() * 18;
-  const y         = H * .10 + Math.random() * (H * .65);
-  const dur       = 6 + Math.random() * 4;
-  const sx        = vaADer ? 1 : -1;
-  const dist      = zonaAncho + tam + 8;
-
-  const wrap = document.createElement('div');
-  wrap.style.cssText = `
-    position:absolute; top:${y}px;
-    left:${vaADer ? xInicio - tam : xInicio + zonaAncho + 4}px;
-    z-index:13; pointer-events:none; opacity:0;
-  `;
-  wrap.innerHTML = svgPezMonstruo(tam);
-  $('area-juego').appendChild(wrap);
-
-  /* Fade in al entrar, movimiento, fade out al salir */
-  wrap.animate(
-    [
-      { opacity:0, transform:`scaleX(${sx}) translateX(0)` },
-      { opacity:1, transform:`scaleX(${sx}) translateX(${dist*.10}px)` },
-      { opacity:1, transform:`scaleX(${sx}) translateX(${dist*.50}px)` },
-      { opacity:1, transform:`scaleX(${sx}) translateX(${dist*.90}px)` },
-      { opacity:0, transform:`scaleX(${sx}) translateX(${dist}px)` },
-    ],
-    { duration: dur * 1000, easing: 'ease-in-out', fill: 'forwards' }
-  );
-
-  setTimeout(() => wrap.remove(), (dur + .3) * 1000);
-}
-
-function iniciarSaltosCriatura() {
-  clearTimeout(timerSaltoCriatura);
-  function programar() {
-    /* Cada 10-20 segundos */
-    timerSaltoCriatura = setTimeout(() => {
-      if (!estado.activo) return;
-      /* Ballena desde nivel 4, delfín en los anteriores */
-      const tipo = (estado.nivel >= 3 && Math.random() > .5) ? 'ballena' : 'delfin';
-      saltoCriatura(tipo);
-      programar();
-    }, 10000 + Math.random() * 10000);
-  }
-  programar();
-}
-
-function detenerSaltosCriatura() {
-  clearTimeout(timerSaltoCriatura);
-  clearTimeout(timerPezMonstruo);
-  $('area-juego').querySelectorAll('.salto-criatura').forEach(e => e.remove());
-}
-
-function iniciarPezMonstruo() {
-  clearTimeout(timerPezMonstruo);
-  if (estado.nivel < 2) return; /* solo desde nivel 3 */
-  function programar() {
-    timerPezMonstruo = setTimeout(() => {
-      if (!estado.activo) return;
-      lanzarPezMonstruo();
-      programar();
-    }, 15000 + Math.random() * 15000); /* cada 15-30s */
-  }
-  programar();
-}
 
 
 /* ============================================================
