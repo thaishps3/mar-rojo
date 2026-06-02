@@ -2697,37 +2697,45 @@ function apCriarNadadores(contenedor, wallW, H) {
   const cantidad = Math.max(6, Math.floor(wallW / 38));
 
   for (let i = 0; i < cantidad; i++) {
-    const n      = LISTA[i % LISTA.length];
-    const el     = document.createElement('div');
+    const n    = LISTA[i % LISTA.length];
+    const el   = document.createElement('div');
     el.className = 'ap-nadador';
     const vaADer = Math.random() > .5;
     const y      = H * .05 + Math.random() * H * .88;
-    const dur    = 6 + Math.random() * 9;
-    const del    = -(Math.random() * dur);
+    const durMs  = (6 + Math.random() * 9) * 1000;
+    const delMs  = -(Math.random() * durMs);
     const fs     = Math.round(n.t * Math.min(1.3, wallW / 190));
+    const dist   = wallW + fs * 2 + 20;
+
+    el.style.cssText = `top:${y}px; left:0; font-size:${fs}px;`;
+    el.textContent   = n.e;
 
     if (Math.random() > .25) {
-      el.classList.add(vaADer ? 'der' : 'izq');
-      el.style.cssText = `
-        top:${y}px;
-        left:${vaADer ? -fs - 10 : wallW + 10}px;
-        font-size:${fs}px;
-        --dur:${dur}s; --del:${del}s; --ancho:${wallW + fs + 20}px;
-      `;
+      /* 🐟 faces LEFT by default.
+         Going RIGHT: scaleX(-1) flips it. With scaleX(-1),
+         translateX(+N) moves visually LEFT so we negate. */
+      const sx    = vaADer ? -1 : 1;
+      const startX = vaADer ?  (fs + 10)       : (wallW + fs + 10);
+      const endX   = vaADer ? -(wallW + fs + 10) : -(fs + 10);
+
+      el.animate(
+        [
+          { transform:`scaleX(${sx}) translateX(${startX}px)`, opacity:0 },
+          { transform:`scaleX(${sx}) translateX(${startX}px)`, opacity:1, offset:0.05 },
+          { transform:`scaleX(${sx}) translateX(${endX}px)`,   opacity:1, offset:0.90 },
+          { transform:`scaleX(${sx}) translateX(${endX}px)`,   opacity:0 },
+        ],
+        { duration:durMs, delay:delMs, iterations:Infinity, easing:'linear' }
+      );
     } else {
       el.classList.add('flota');
-      el.style.cssText = `
-        top:${y}px;
-        left:${fs + Math.random() * (wallW - fs * 2)}px;
-        font-size:${fs}px;
-        --dur:${3 + Math.random() * 3}s; --del:${del}s;
-      `;
+      el.style.left = `${fs + Math.random() * (wallW - fs * 2)}px`;
+      el.style.setProperty('--dur', `${3 + Math.random() * 3}s`);
+      el.style.setProperty('--del', `${delMs/1000}s`);
     }
-    el.textContent = n.e;
     contenedor.appendChild(el);
   }
 
-  /* Burbujas */
   for (let b = 0; b < 10; b++) {
     const bel = document.createElement('div');
     bel.className = 'ap-burbuja';
@@ -2743,6 +2751,39 @@ function apCriarNadadores(contenedor, wallW, H) {
     contenedor.appendChild(bel);
   }
 }
+
+/* Espuma ondulada animada — SVG con 3 ondas desfasadas */
+function apCriarEspuma(foamDiv) {
+  foamDiv.innerHTML = `
+    <svg viewBox="0 0 28 600" preserveAspectRatio="none"
+         style="position:absolute;top:0;left:0;width:100%;height:100%"
+         xmlns="http://www.w3.org/2000/svg">
+      <path d="M14,0 C4,18 24,36 14,54 C4,72 24,90 14,108 C4,126 24,144 14,162
+               C4,180 24,198 14,216 C4,234 24,252 14,270 C4,288 24,306 14,324
+               C4,342 24,360 14,378 C4,396 24,414 14,432 C4,450 24,468 14,486
+               C4,504 24,522 14,540 C4,558 24,576 14,600"
+            stroke="rgba(255,255,255,.85)" stroke-width="3.5" fill="none" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 0,54; 0,0" dur="1.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M21,0 C13,15 26,30 20,45 C14,60 26,75 20,90 C14,105 26,120 20,135
+               C14,150 26,165 20,180 C14,195 26,210 20,225 C14,240 26,255 20,270
+               C14,285 26,300 20,315 C14,330 26,345 20,360 C14,375 26,390 20,405
+               C14,420 26,435 20,450 C14,465 26,480 20,495 C14,510 26,525 20,540"
+            stroke="rgba(255,255,255,.45)" stroke-width="2.5" fill="none" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,-27; 0,27; 0,-27" dur="2.1s" repeatCount="indefinite"/>
+      </path>
+      <path d="M7,0 C-1,20 18,40 8,60 C0,80 18,100 8,120 C0,140 18,160 8,180
+               C0,200 18,220 8,240 C0,260 18,280 8,300 C0,320 18,340 8,360
+               C0,380 18,400 8,420 C0,440 18,460 8,480 C0,500 18,520 8,540"
+            stroke="rgba(255,255,255,.22)" stroke-width="6" fill="none" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,15; 0,-45; 0,15" dur="2.8s" repeatCount="indefinite"/>
+      </path>
+    </svg>`;
+}
+
 
 function apCriarAlgas(contenedor, wallW, H) {
   const altMax = Math.min(Math.round(H * .42), 130);
@@ -2813,38 +2854,59 @@ function iniciarApertura() {
       const pared = $(id);
       apCriarNadadores(pared.querySelector('.ap-criaturas'), wW, H);
       apCriarAlgas(pared.querySelector('.ap-algas'), wW, H);
+      apCriarEspuma(pared.querySelector('.ap-foam'));
     });
   }, 80);
 
-  /* Voz de Moisés */
-  reproducirAudio('audio/apertura/moises-abre-mar.mp3');
+  /* Voz de Moisés — el mar se abre SOLO cuando termina de hablar */
+  const vozMoises = new Audio('audio/apertura/moises-abre-mar.mp3');
+  let marAbierto  = false;
 
-  /* 2.5s → sonido olas + mar se abre */
-  setTimeout(() => {
+  function abrirMar() {
+    if (marAbierto) return;   /* evitar doble disparo */
+    marAbierto = true;
+
+    /* Sonido de olas */
     apAudioOlas = new Audio('audio/apertura/olas-del-mar.mp3');
-    apAudioOlas.volume = 0.75;
-    apAudioOlas.play().catch(() => {});
+    apAudioOlas.volume = 0.8;
+    if (!silenciado) apAudioOlas.play().catch(() => {});
+
+    /* Animación de apertura */
     $('ap-ola-izq').classList.add('ap-abierto');
     $('ap-ola-der').classList.add('ap-abierto');
-  }, 2500);
 
-  /* 5.5s → aparece Moisés sobre la arena */
-  setTimeout(() => {
-    /* Usar figAnciano del juego, escalado para la apertura */
-    const escala = Math.min(2.2, H / 260);
-    const w = Math.round(28 * escala), h = Math.round(56 * escala);
-    const svg = figAnciano()
-      .replace(/width="28"/, `width="${w}"`)
-      .replace(/height="56"/, `height="${h}"`);
-    $('ap-moises').innerHTML = svg;
-    $('ap-moises').classList.add('visible');
-  }, 5500);
+    /* Moisés aparece en la orilla 3.5s después */
+    setTimeout(() => {
+      const escala = Math.min(2.2, H / 260);
+      const w = Math.round(28 * escala), h = Math.round(56 * escala);
+      const svg = figAnciano()
+        .replace(/width="28"/, `width="${w}"`)
+        .replace(/height="56"/, `height="${h}"`);
+      $('ap-moises').innerHTML = svg;
+      $('ap-moises').classList.add('visible');
+    }, 3500);
 
-  /* 8.5s → instrucciones */
-  setTimeout(() => {
-    if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
-    iniciarInstrucciones();
-  }, 8500);
+    /* Instrucciones 9s después — tiempo para ver la escena */
+    setTimeout(() => {
+      if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
+      iniciarInstrucciones();
+    }, 9000);
+  }
+
+  if (!silenciado) {
+    vozMoises.volume = 1.0;
+    /* Solo abrirMar cuando el audio termina — nunca antes */
+    vozMoises.onended = () => abrirMar();
+    /* Si el archivo no existe, abrir después de 5s */
+    vozMoises.onerror = () => setTimeout(abrirMar, 500);
+    vozMoises.play().catch(() => {
+      /* El navegador bloqueó el audio → esperar 5s y abrir */
+      setTimeout(abrirMar, 5000);
+    });
+  } else {
+    /* Silenciado → abrir directamente */
+    setTimeout(abrirMar, 1000);
+  }
 }
 
 $('btn-inicio').onclick = () => iniciarApertura();
