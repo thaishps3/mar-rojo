@@ -268,22 +268,54 @@ body { display: flex; align-items: center; justify-content: center; }
 ══════════════════════════════════════════════════ */
 #s-apertura { padding:0; }
 
-/* Arena de fondo — todo el ancho, siempre detrás */
+/* Franja de tierra — parte superior, siempre visible, Moisés está aquí */
+#ap-tierra {
+  position:absolute; top:0; left:0; right:0;
+  height:22%; z-index:10;
+  background:linear-gradient(180deg,#6b4410 0%,#8a5c18 40%,#a87025 70%,#c08030 100%);
+  /* Borde inferior irregular con sombra */
+  border-bottom:3px solid rgba(80,40,0,.4);
+  box-shadow:0 4px 16px rgba(80,40,0,.35);
+}
+/* Textura de tierra */
+#ap-tierra::after {
+  content:''; position:absolute; inset:0;
+  background-image:
+    radial-gradient(ellipse 2px 2px at 15% 60%, rgba(255,200,80,.15) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 2px at 38% 75%, rgba(255,200,80,.12) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 2px at 62% 55%, rgba(255,200,80,.15) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 2px at 85% 70%, rgba(255,200,80,.12) 0%, transparent 100%);
+}
+
+/* Moisés — dentro de la franja de tierra */
+#ap-moises {
+  position:absolute; bottom:8%; left:50%;
+  transform:translateX(-50%) translateY(6px);
+  z-index:2; opacity:0;
+  transition: opacity .8s ease, transform .8s ease;
+  pointer-events:none;
+}
+#ap-moises.visible {
+  opacity:1; transform:translateX(-50%) translateY(0);
+}
+
+/* Arena — debajo de la tierra, todo el ancho */
 #ap-arena {
-  position:absolute; inset:0; z-index:1;
+  position:absolute; top:22%; left:0; right:0; bottom:0;
+  z-index:1;
   background:linear-gradient(180deg,#d4a040 0%,#c08030 100%);
 }
 
-/* Paredes de agua — cubren todo al inicio */
+/* Paredes de agua — empiezan debajo de la franja de tierra */
 #ap-ola-izq, #ap-ola-der {
-  position:absolute; top:0; bottom:0; z-index:4;
+  position:absolute; top:22%; bottom:0; z-index:4;
   overflow:hidden;
   transition: transform 3.2s cubic-bezier(.4,0,.2,1);
 }
 #ap-ola-izq { left:0;  width:50%; }
 #ap-ola-der { right:0; width:50%; }
 
-/* Las paredes se abren parcialmente — quedan visibles a los lados */
+/* Las paredes se abren mostrando un camino — agua visible a los lados */
 #ap-ola-izq.ap-abierto { transform: translateX(-40%); }
 #ap-ola-der.ap-abierto { transform: translateX(40%);  }
 
@@ -320,7 +352,7 @@ body { display: flex; align-items: center; justify-content: center; }
 .ap-algas     { position:absolute; inset:0; z-index:3; pointer-events:none; }
 
 /* Espuma en el borde interior — curva blanca ondulada */
-/* Espuma — SVG animado inyectado por JS, oculto hasta apertura */
+/* Espuma — SVG estático ondulado inyectado por JS */
 .ap-foam {
   position:absolute; top:0; bottom:0; width:28px; z-index:6;
   overflow:hidden; opacity:0;
@@ -331,12 +363,8 @@ body { display: flex; align-items: center; justify-content: center; }
 #ap-ola-izq.ap-abierto .ap-foam,
 #ap-ola-der.ap-abierto .ap-foam { opacity:1; }
 
-/* Nadadores — Web Animations API los mueve, este class solo posiciona */
-.ap-nadador {
-  position:absolute; pointer-events:none; z-index:4;
-}
-
-/* Flotadores estáticos con bobbing */
+/* Nadadores */
+.ap-nadador { position:absolute; pointer-events:none; z-index:4; }
 .ap-nadador.flota {
   animation:ap-flota var(--dur,4s) var(--del,0s) ease-in-out infinite;
 }
@@ -345,7 +373,7 @@ body { display: flex; align-items: center; justify-content: center; }
   50%     { transform:translateY(-5px); }
 }
 
-/* Burbujas en el agua */
+/* Burbujas */
 .ap-burbuja {
   position:absolute; border-radius:50%; z-index:3; pointer-events:none;
   background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3);
@@ -354,18 +382,6 @@ body { display: flex; align-items: center; justify-content: center; }
 @keyframes ap-bur-sub {
   0%   { transform:translateY(0) scale(1); opacity:.65; }
   100% { transform:translateY(var(--dist,-80px)) scale(.2); opacity:0; }
-}
-
-/* Moisés — borde SUPERIOR del camino seco, comanda la apertura */
-#ap-moises {
-  position:absolute; top:14%; left:50%;
-  transform:translateX(-50%) translateY(-10px);
-  z-index:8; opacity:0;
-  transition: opacity .8s ease, transform .8s ease;
-  pointer-events:none;
-}
-#ap-moises.visible {
-  opacity:1; transform:translateX(-50%) translateY(0);
 }
 
 /* Título */

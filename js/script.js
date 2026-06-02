@@ -2702,7 +2702,7 @@ function apCriarNadadores(contenedor, wallW, H) {
     el.className = 'ap-nadador';
     const vaADer = Math.random() > .5;
     const y      = H * .05 + Math.random() * H * .88;
-    const durMs  = (6 + Math.random() * 9) * 1000;
+    const durMs  = (14 + Math.random() * 14) * 1000;  /* 14-28s — nado suave */
     const delMs  = -(Math.random() * durMs);
     const fs     = Math.round(n.t * Math.min(1.3, wallW / 190));
     const dist   = wallW + fs * 2 + 20;
@@ -2752,35 +2752,30 @@ function apCriarNadadores(contenedor, wallW, H) {
   }
 }
 
-/* Espuma ondulada animada — SVG con 3 ondas desfasadas */
+/* Espuma estática ondulada — curvas blancas sin animación */
 function apCriarEspuma(foamDiv) {
   foamDiv.innerHTML = `
     <svg viewBox="0 0 28 600" preserveAspectRatio="none"
          style="position:absolute;top:0;left:0;width:100%;height:100%"
          xmlns="http://www.w3.org/2000/svg">
+      <!-- Onda principal -->
       <path d="M14,0 C4,18 24,36 14,54 C4,72 24,90 14,108 C4,126 24,144 14,162
                C4,180 24,198 14,216 C4,234 24,252 14,270 C4,288 24,306 14,324
                C4,342 24,360 14,378 C4,396 24,414 14,432 C4,450 24,468 14,486
                C4,504 24,522 14,540 C4,558 24,576 14,600"
-            stroke="rgba(255,255,255,.85)" stroke-width="3.5" fill="none" stroke-linecap="round">
-        <animateTransform attributeName="transform" type="translate"
-          values="0,0; 0,54; 0,0" dur="1.6s" repeatCount="indefinite"/>
-      </path>
+            stroke="rgba(255,255,255,.82)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Onda secundaria -->
       <path d="M21,0 C13,15 26,30 20,45 C14,60 26,75 20,90 C14,105 26,120 20,135
                C14,150 26,165 20,180 C14,195 26,210 20,225 C14,240 26,255 20,270
                C14,285 26,300 20,315 C14,330 26,345 20,360 C14,375 26,390 20,405
                C14,420 26,435 20,450 C14,465 26,480 20,495 C14,510 26,525 20,540"
-            stroke="rgba(255,255,255,.45)" stroke-width="2.5" fill="none" stroke-linecap="round">
-        <animateTransform attributeName="transform" type="translate"
-          values="0,-27; 0,27; 0,-27" dur="2.1s" repeatCount="indefinite"/>
-      </path>
-      <path d="M7,0 C-1,20 18,40 8,60 C0,80 18,100 8,120 C0,140 18,160 8,180
-               C0,200 18,220 8,240 C0,260 18,280 8,300 C0,320 18,340 8,360
-               C0,380 18,400 8,420 C0,440 18,460 8,480 C0,500 18,520 8,540"
-            stroke="rgba(255,255,255,.22)" stroke-width="6" fill="none" stroke-linecap="round">
-        <animateTransform attributeName="transform" type="translate"
-          values="0,15; 0,-45; 0,15" dur="2.8s" repeatCount="indefinite"/>
-      </path>
+            stroke="rgba(255,255,255,.38)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Relleno semitransparente -->
+      <path d="M14,0 C4,18 24,36 14,54 C4,72 24,90 14,108 C4,126 24,144 14,162
+               C4,180 24,198 14,216 C4,234 24,252 14,270 C4,288 24,306 14,324
+               C4,342 24,360 14,378 C4,396 24,414 14,432 C4,450 24,468 14,486
+               C4,504 24,522 14,540 C4,558 24,576 14,600 L28,600 L28,0 Z"
+            fill="rgba(255,255,255,.12)"/>
     </svg>`;
 }
 
@@ -2875,9 +2870,11 @@ function iniciarApertura() {
     $('ap-ola-izq').classList.add('ap-abierto');
     $('ap-ola-der').classList.add('ap-abierto');
 
-    /* Moisés aparece en la orilla 3.5s después */
+    /* Moisés aparece en la franja de tierra (ya dentro de #ap-tierra en el HTML) */
     setTimeout(() => {
-      const escala = Math.min(2.2, H / 260);
+      const tierra  = $('ap-tierra');
+      const tH      = tierra.offsetHeight || 80;
+      const escala  = Math.min(1.8, tH / 68);
       const w = Math.round(28 * escala), h = Math.round(56 * escala);
       const svg = figAnciano()
         .replace(/width="28"/, `width="${w}"`)
