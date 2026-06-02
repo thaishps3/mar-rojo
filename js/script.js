@@ -709,6 +709,9 @@ function sndPuntos() {
 }
 
 /* Botón de silencio */
+let audioActual = null;
+let ultimaRuta  = null;
+
 $('btn-sonido').onclick = () => {
   silenciado = !silenciado;
   $('btn-sonido').textContent = silenciado ? '🔇' : '🔊';
@@ -861,16 +864,141 @@ function mostrarBannerNuevoBin() {
    Se crean al iniciar el nivel y permanecen durante el juego.
    ============================================================ */
 
+/* Pez monstruo — pez linterna morado con antena, ojos saltones y dientes */
+function svgPezMonstruo(px) {
+  const h = Math.round(px * .78);
+  const cx = Math.round(px * .48);  /* centro del cuerpo */
+  const cy = Math.round(h  * .56);
+  const rx = Math.round(px * .42);
+  const ry = Math.round(h  * .40);
+  return `<svg width="${px}" height="${h}" viewBox="0 0 ${px} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <!-- cola -->
+    <polygon points="${px*.76},${h*.38} ${px*.98},${h*.12} ${px*.98},${h*.88} ${px*.76},${h*.64}"
+             fill="#6b1a7a"/>
+    <line x1="${px*.84}" y1="${h*.28}" x2="${px*.94}" y2="${h*.5}" stroke="#4a0f58" stroke-width="1.5" opacity=".6"/>
+    <line x1="${px*.84}" y1="${h*.5}"  x2="${px*.96}" y2="${h*.5}" stroke="#4a0f58" stroke-width="1.5" opacity=".6"/>
+    <line x1="${px*.84}" y1="${h*.72}" x2="${px*.94}" y2="${h*.5}" stroke="#4a0f58" stroke-width="1.5" opacity=".6"/>
+    <!-- cuerpo principal -->
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#7a1e8a"/>
+    <!-- vientre más claro -->
+    <ellipse cx="${Math.round(cx*.9)}" cy="${Math.round(cy*1.05)}" rx="${Math.round(rx*.6)}" ry="${Math.round(ry*.5)}" fill="#922099" opacity=".5"/>
+    <!-- aleta dorsal -->
+    <path d="M${px*.22},${h*.18} Q${px*.38},${h*.02} ${px*.58},${h*.08} L${px*.55},${h*.22} L${px*.18},${h*.24} Z"
+          fill="#6b1a7a"/>
+    <!-- aleta pectoral -->
+    <ellipse cx="${px*.52}" cy="${h*.68}" rx="${px*.14}" ry="${h*.1}"
+             fill="#8a2298" transform="rotate(20 ${px*.52} ${h*.68})"/>
+    <!-- boca grande abierta -->
+    <path d="M${px*.04},${h*.52} Q${px*.10},${h*.78} ${px*.32},${h*.74} L${px*.32},${h*.52} Z"
+          fill="#c0392b"/>
+    <!-- dientes grandes -->
+    <rect x="${px*.05}" y="${h*.50}" width="${px*.06}" height="${h*.22}" rx="${px*.02}" fill="#f5f0d0"/>
+    <rect x="${px*.13}" y="${h*.50}" width="${px*.05}" height="${h*.18}" rx="${px*.02}" fill="#f5f0d0"/>
+    <rect x="${px*.20}" y="${h*.50}" width="${px*.05}" height="${h*.14}" rx="${px*.02}" fill="#f5f0d0"/>
+    <!-- dientes mandíbula inferior -->
+    <rect x="${px*.07}" y="${h*.70}" width="${px*.05}" height="${h*.14}" rx="${px*.02}" fill="#e8e0c0" transform="rotate(180 ${px*.095} ${h*.77})"/>
+    <rect x="${px*.16}" y="${h*.68}" width="${px*.04}" height="${h*.11}" rx="${px*.02}" fill="#e8e0c0" transform="rotate(180 ${px*.18} ${h*.735})"/>
+    <!-- ojos saltones — ojo izquierdo -->
+    <circle cx="${px*.26}" cy="${h*.36}" r="${px*.11}" fill="#fff" stroke="#4a0f58" stroke-width="1.5"/>
+    <circle cx="${px*.28}" cy="${h*.37}" r="${px*.065}" fill="#1a1a1a"/>
+    <circle cx="${px*.30}" cy="${h*.34}" r="${px*.025}" fill="#fff"/>
+    <!-- ojo derecho (más atrás) -->
+    <circle cx="${px*.40}" cy="${h*.32}" r="${px*.085}" fill="#fff" stroke="#4a0f58" stroke-width="1.2"/>
+    <circle cx="${px*.41}" cy="${h*.33}" r="${px*.05}" fill="#1a1a1a"/>
+    <circle cx="${px*.43}" cy="${h*.31}" r="${px*.02}" fill="#fff"/>
+    <!-- antena con luz (esca) -->
+    <path d="M${px*.34},${h*.14} Q${px*.20},${h*.00} ${px*.12},${h*.08}"
+          stroke="#4a0f58" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="${px*.10}" cy="${h*.07}" r="${px*.05}" fill="#f0c000"/>
+    <circle cx="${px*.10}" cy="${h*.07}" r="${px*.08}" fill="rgba(240,192,0,.25)"/>
+  </svg>`;
+}
+
 const NADADORES = [
   { e:'🐠', tam:16 }, { e:'🐡', tam:16 }, { e:'🐟', tam:14 },
   { e:'🦈', tam:20 }, { e:'🐙', tam:18 }, { e:'🦑', tam:16 },
   { e:'🐬', tam:20 }, { e:'🐋', tam:24 }, { e:'🦞', tam:14 },
   { e:'🦀', tam:14 }, { e:'🦭', tam:18 }, { e:'🐡', tam:13 },
   { e:'🪸', tam:15 }, { e:'🐠', tam:18 }, { e:'🦈', tam:16 },
+  { svg: true, fn: svgPezMonstruo, tam:38, n:'Pez monstruo' },
 ];
 
+/* ============================================================
+   FONDO DEL MAR — algas verdes ondulantes + corales naranjas
+   Todos los elementos crecen desde y=altMax (fondo del SVG).
+   ============================================================ */
+
+function crearFondoMar() {
+  ['zona-agua-izq', 'zona-agua-der'].forEach(zonaId => {
+    const zona = $(zonaId);
+    zona.querySelectorAll('.fondo-mar').forEach(e => e.remove());
+
+    const rect   = zona.getBoundingClientRect();
+    const ZW     = rect.width;
+    const ZH     = rect.height;
+    if (!ZW || !ZH) return;
+
+    const altMax = Math.min(Math.round(ZH * .55), 155);
+    const SVG_W  = 110;
+    const mid    = SVG_W / 2;
+
+    const FRONDAS = [
+      { dx:-28, h:Math.round(altMax*.70), c:'#3aaa86', sc:'#1d6e52', d:3.2, del:0,   dir: 1 },
+      { dx:-14, h:Math.round(altMax*.86), c:'#1d8a6a', sc:'#0a4835', d:3.9, del:.5,  dir:-1 },
+      { dx:  0, h:altMax,                 c:'#136050', sc:'#062c22', d:4.4, del:1.0,  dir: 1 },
+      { dx: 14, h:Math.round(altMax*.83), c:'#4db89a', sc:'#1a7060', d:3.5, del:1.5,  dir:-1 },
+      { dx: 27, h:Math.round(altMax*.66), c:'#2a9878', sc:'#0d5040', d:2.8, del:.3,   dir: 1 },
+    ];
+
+    function buildGrupo(xCentro) {
+      let inner = '';
+
+      FRONDAS.forEach(f => {
+        const cx = mid + f.dx;
+        const a  = 12 * f.dir;
+        const B  = altMax;
+        const path = `M${cx},${B} C${cx-a},${B-Math.round(f.h*.28)} ${cx-a},${B-Math.round(f.h*.48)} ${cx},${B-Math.round(f.h*.5)} C${cx+a},${B-Math.round(f.h*.52)} ${cx+a},${B-Math.round(f.h*.82)} ${cx},${B-f.h}`;
+        const a1 = (-4*f.dir).toFixed(1), a2 = (4*f.dir).toFixed(1);
+        inner += `<g>
+          <animateTransform attributeName="transform" type="rotate"
+            values="${a1} ${cx} ${B};${a2} ${cx} ${B};${a1} ${cx} ${B}"
+            dur="${f.d}s" begin="${f.del}s" repeatCount="indefinite"/>
+          <path d="${path}" stroke="${f.c}" stroke-width="16" fill="none" stroke-linecap="round"/>
+          <path d="${path}" stroke="${f.sc}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".4"/>
+        </g>`;
+      });
+
+      /* Coral naranja */
+      const cc = mid - 42, hc = Math.round(altMax*.52), B = altMax;
+      inner += `<g>
+        <animateTransform attributeName="transform" type="rotate"
+          values="-4 ${cc} ${B};4 ${cc} ${B};-4 ${cc} ${B}"
+          dur="3s" begin=".4s" repeatCount="indefinite"/>
+        <path d="M${cc},${B} L${cc},${B-Math.round(hc*.56)}" stroke="#d06420" stroke-width="5" stroke-linecap="round"/>
+        <path d="M${cc},${B-Math.round(hc*.38)} Q${cc-16},${B-Math.round(hc*.58)} ${cc-22},${B-Math.round(hc*.78)}" stroke="#d06420" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M${cc},${B-Math.round(hc*.45)} Q${cc+16},${B-Math.round(hc*.63)} ${cc+20},${B-Math.round(hc*.82)}" stroke="#d06420" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <circle cx="${cc-22}" cy="${B-Math.round(hc*.78)}" r="5" fill="#e88040"/>
+        <circle cx="${cc+20}" cy="${B-Math.round(hc*.82)}" r="5" fill="#e88040"/>
+        <circle cx="${cc-10}" cy="${B-Math.round(hc*.46)}" r="3" fill="#f09050"/>
+      </g>`;
+
+      const el = document.createElement('div');
+      el.className = 'fondo-mar';
+      el.style.cssText = `position:absolute;left:${Math.round(xCentro - SVG_W/2)}px;bottom:0;z-index:2;pointer-events:none;`;
+      el.innerHTML = `<svg width="${SVG_W}" height="${altMax}" viewBox="0 0 ${SVG_W} ${altMax}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;display:block">${inner}</svg>`;
+      zona.appendChild(el);
+    }
+
+    const num = ZW > 70 ? 2 : 1;
+    for (let i = 0; i < num; i++) {
+      buildGrupo((ZW / (num + 1)) * (i + 1));
+    }
+  });
+}
+
+
 function crearNadadores() {
-  $('area-juego').querySelectorAll('.nadador,.burbuja').forEach(e => e.remove());
+  $('area-juego').querySelectorAll('.nadador,.burbuja,.fondo-mar').forEach(e => e.remove());
 
   const { H } = obtenerZonas();
 
@@ -927,7 +1055,11 @@ function crearNadadores() {
           --del: ${del}s;
         `;
       }
-      el.textContent = n.e;
+      if (n.svg) {
+        el.innerHTML = n.fn(n.tam);
+      } else {
+        el.textContent = n.e;
+      }
       $('area-juego').appendChild(el);
     }
 
@@ -983,13 +1115,18 @@ function iniciarNivel() {
   activarBins(estado.nivel);
   mostrarPantalla('s-game');
   iniciarAmbiente();
+  /* Pequeño retraso para que el navegador renderice las zonas
+     antes de medir con getBoundingClientRect */
+  setTimeout(() => crearFondoMar(), 80);
   crearNadadores();
   iniciarGaviotas();
   iniciarSaltosCriatura();
+  iniciarPezMonstruo();
   iniciarMedusas();
   iniciarTesoros();
   iniciarOstrasVida();
   iniciarBancosYFoca();
+  iniciarCaballitos();
 
   /* Banner de nuevos bins (~1s después de que se vea la pantalla) */
   setTimeout(() => mostrarBannerNuevoBin(), 900);
@@ -1030,6 +1167,8 @@ function detenerTodo() {
   detenerTesoros();
   detenerOstrasVida();
   detenerBancosYFoca();
+  detenerCaballitos();
+  clearTimeout(timerPezMonstruo);
 }
 
 
@@ -1658,47 +1797,46 @@ function lanzarGaviota() {
   if (!estado.activo) return;
   const { H, W } = obtenerZonas();
   const vaALaDerecha = Math.random() > .5;
-  const el = document.createElement('div');
-  el.className = 'gaviota';
-  el.textContent = '🕊️';
-  const y   = H * .05 + Math.random() * H * .28;
-  const dur = 3.5 + Math.random() * 2;
-  /* 🕊️ naturalmente mira a la izquierda.
-     Cuando va a la derecha hay que voltearla con scaleX(-1). */
-  el.style.cssText = `
-    position:absolute; top:${y}px;
+
+  /* Contenedor que solo hace el flip — NO anima */
+  const contenedor = document.createElement('div');
+  contenedor.style.cssText = `
+    position:absolute; top:${H * .05 + Math.random() * H * .28}px;
+    ${vaALaDerecha ? 'left:-40px' : 'right:-40px'};
     font-size:${18 + Math.random() * 10}px;
     z-index:35; pointer-events:none;
-    ${vaALaDerecha ? 'left:-40px; transform:scaleX(-1)' : 'right:-40px'};
-    --dir:${vaALaDerecha ? W + 60 : -(W + 60)}px;
-    animation: gaviota-vuelo ${dur}s linear forwards;
+    transform: scaleX(${vaALaDerecha ? -1 : 1});
   `;
-  $('area-juego').appendChild(el);
 
+  /* Elemento interior que solo anima el movimiento horizontal */
+  const el = document.createElement('div');
+  el.textContent = '🕊️';
+  el.style.cssText = `
+    display:inline-block;
+    --dir:${vaALaDerecha ? W + 60 : -(W + 60)}px;
+  `;
+  el.className = 'gaviota';
+  const dur = 3.5 + Math.random() * 2;
+  el.style.animationDuration = dur + 's';
+  contenedor.appendChild(el);
+  $('area-juego').appendChild(contenedor);
   /* Reproducir el graznido y cortarlo cuando la gaviota desaparezca */
   if (!silenciado) {
     const a1 = new Audio('audio/animales/gaviota.mp3');
     a1.volume = 0.75;
     a1.play().catch(() => {});
-    /* Segundo graznido a mitad del vuelo */
     const t2 = setTimeout(() => {
       if (!silenciado) {
         const a2 = new Audio('audio/animales/gaviota.mp3');
         a2.volume = 0.6;
         a2.play().catch(() => {});
-        /* Detener al terminar el vuelo */
         setTimeout(() => { a2.pause(); a2.currentTime = 0; }, (dur - 1.2) * 1000);
       }
     }, 1200);
-    /* Detener el primer audio cuando termina el vuelo */
-    setTimeout(() => {
-      a1.pause();
-      a1.currentTime = 0;
-      clearTimeout(t2);
-    }, dur * 1000);
+    setTimeout(() => { a1.pause(); a1.currentTime = 0; clearTimeout(t2); }, dur * 1000);
   }
 
-  setTimeout(() => el.remove(), (dur + .5) * 1000);
+  setTimeout(() => contenedor.remove(), (dur + .5) * 1000);
 }
 
 function iniciarGaviotas() {
@@ -1802,6 +1940,42 @@ function saltoCriatura(tipo) {
 }
 
 let timerSaltoCriatura = null;
+let timerPezMonstruo   = null;
+
+function lanzarPezMonstruo() {
+  if (!estado.activo || estado.nivel < 2) return;
+  const { wl, wr, H, W } = obtenerZonas();
+
+  const vaADerecha = Math.random() > .5;
+  const tam        = 52 + Math.random() * 20; /* grande y visible */
+  const y          = H * .12 + Math.random() * H * .65;
+  const dur        = 5 + Math.random() * 4;
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `
+    position:absolute;
+    top:${y}px;
+    ${vaADerecha ? `left:${-tam}px` : `right:${-tam}px`};
+    z-index:22; pointer-events:none;
+    ${vaADerecha ? '' : 'transform:scaleX(-1)'};
+  `;
+  wrap.innerHTML = svgPezMonstruo(tam);
+  $('area-juego').appendChild(wrap);
+
+  /* Nado horizontal ondulante */
+  const dist = W + tam * 2;
+  wrap.animate(
+    [
+      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(0) translateY(0)` },
+      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(${dist*.33}px) translateY(-8px)` },
+      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(${dist*.66}px) translateY(6px)` },
+      { transform: `${vaADerecha ? '' : 'scaleX(-1)'} translateX(${vaADerecha ? dist : -dist}px) translateY(0)` },
+    ],
+    { duration: dur * 1000, easing: 'ease-in-out', fill: 'forwards' }
+  );
+
+  setTimeout(() => wrap.remove(), (dur + .5) * 1000);
+}
 
 function iniciarSaltosCriatura() {
   clearTimeout(timerSaltoCriatura);
@@ -1809,8 +1983,8 @@ function iniciarSaltosCriatura() {
     /* Cada 10-20 segundos */
     timerSaltoCriatura = setTimeout(() => {
       if (!estado.activo) return;
-      /* En nivel 5 hay posibilidad de ballena, en el resto solo delfín */
-      const tipo = (estado.nivel >= 4 && Math.random() > .5) ? 'ballena' : 'delfin';
+      /* Ballena desde nivel 4, delfín en los anteriores */
+      const tipo = (estado.nivel >= 3 && Math.random() > .5) ? 'ballena' : 'delfin';
       saltoCriatura(tipo);
       programar();
     }, 10000 + Math.random() * 10000);
@@ -1820,7 +1994,21 @@ function iniciarSaltosCriatura() {
 
 function detenerSaltosCriatura() {
   clearTimeout(timerSaltoCriatura);
+  clearTimeout(timerPezMonstruo);
   $('area-juego').querySelectorAll('.salto-criatura').forEach(e => e.remove());
+}
+
+function iniciarPezMonstruo() {
+  clearTimeout(timerPezMonstruo);
+  if (estado.nivel < 2) return; /* solo desde nivel 3 */
+  function programar() {
+    timerPezMonstruo = setTimeout(() => {
+      if (!estado.activo) return;
+      lanzarPezMonstruo();
+      programar();
+    }, 15000 + Math.random() * 15000); /* cada 15-30s */
+  }
+  programar();
 }
 
 
@@ -2130,6 +2318,7 @@ function detenerOstrasVida() {
 
 let timerBancoPeces  = null;
 let timerFoca        = null;
+let audioFoca        = null; /* referencia para parar el sonido al cambiar nivel */
 const bancosActivos  = []; /* referencia a los grupos de peces en pantalla */
 
 function crearBancoPeces(zonaId, offsetX, anchoZ, H) {
@@ -2159,16 +2348,15 @@ function crearBancoPeces(zonaId, offsetX, anchoZ, H) {
   FORMACION.forEach(({dx, dy}) => {
     const pez = document.createElement('span');
     pez.textContent = '🐟';
+    /* 🐟 mira a la izquierda por defecto.
+       --sx se usa en la animación pez-oscila para mantener la dirección. */
     pez.style.cssText = `
       position:absolute;
       left:${vaADerecha ? dx + 30 : 50 - dx}px;
       top:${dy}px;
       font-size:${tam}px;
       display:inline-block;
-      /* 🐟 naturalmente mira a la izquierda.
-         Cuando va a la derecha hay que voltear con scaleX(-1). */
-      transform: scaleX(${vaADerecha ? -1 : 1});
-      transition: transform .3s;
+      --sx:${vaADerecha ? -1 : 1};
     `;
     grupo.appendChild(pez);
   });
@@ -2256,9 +2444,10 @@ function lanzarFoca() {
   setTimeout(() => {
     if (!silenciado) {
       const a = new Audio('audio/animales/foca.mp3');
+      audioFoca = a;
       a.volume = 0.85;
       a.play().catch(() => {});
-      setTimeout(() => { a.pause(); a.currentTime = 0; }, (durSeg - 1) * 1000);
+      setTimeout(() => { if (audioFoca === a) { a.pause(); a.currentTime = 0; audioFoca = null; } }, (durSeg - 1) * 1000);
     }
   }, 1000);
 
@@ -2313,9 +2502,88 @@ function iniciarBancosYFoca() {
   }
 }
 
+/* Caballito de mar: SVG vertical que sube del fondo */
+function svgCaballitoMar(px) {
+  const w = Math.round(px * .6), h = px;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <!-- cola enroscada -->
+    <path d="M${w*.5},${h*.98} Q${w*.85},${h*.9} ${w*.8},${h*.75} Q${w*.75},${h*.6} ${w*.5},${h*.62}"
+          fill="none" stroke="#c06030" stroke-width="${w*.14}" stroke-linecap="round"/>
+    <!-- cuerpo -->
+    <ellipse cx="${w*.45}" cy="${h*.52}" rx="${w*.28}" ry="${h*.2}" fill="#e08040"/>
+    <!-- pecho -->
+    <ellipse cx="${w*.38}" cy="${h*.44}" rx="${w*.22}" ry="${h*.14}" fill="#e89050"/>
+    <!-- cuello -->
+    <rect x="${w*.3}" y="${h*.28}" width="${w*.25}" height="${h*.18}" rx="${w*.1}" fill="#e08040"/>
+    <!-- cabeza -->
+    <ellipse cx="${w*.35}" cy="${h*.22}" rx="${w*.22}" ry="${h*.15}" fill="#e08040"/>
+    <!-- hocico largo -->
+    <path d="M${w*.15},${h*.22} L${w*.04},${h*.18}" stroke="#c06030" stroke-width="${w*.1}" stroke-linecap="round"/>
+    <!-- ojo -->
+    <circle cx="${w*.27}" cy="${h*.19}" r="${w*.07}" fill="#fff"/>
+    <circle cx="${w*.27}" cy="${h*.19}" r="${w*.04}" fill="#1a1a2e"/>
+    <!-- cresta dorsal -->
+    <path d="M${w*.55},${h*.3} Q${w*.72},${h*.22} ${w*.68},${h*.45} Q${w*.62},${h*.55} ${w*.55},${h*.52}"
+          fill="#d07030" opacity=".7"/>
+    <!-- aleta pectoral -->
+    <ellipse cx="${w*.62}" cy="${h*.46}" rx="${w*.14}" ry="${h*.07}" fill="#e89050" opacity=".8"
+             transform="rotate(-20,${w*.62},${h*.46})"/>
+  </svg>`;
+}
+
+function lanzarCaballitoMar() {
+  if (!estado.activo) return;
+  const { wl, wr, H } = obtenerZonas();
+
+  /* Caballitos solo en zonas de agua */
+  const enIzq  = Math.random() > .5;
+  const zonaW  = wl;
+  const x      = enIzq
+    ? 4 + Math.random() * (zonaW - 30)
+    : wr + 4 + Math.random() * (zonaW - 30);
+  const tam    = 32 + Math.random() * 16;
+  const durSeg = 6 + Math.random() * 5;
+
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position:absolute; left:${x}px; top:${H}px;
+    z-index:14; pointer-events:none;
+    ${Math.random() > .5 ? 'transform:scaleX(-1)' : ''};
+  `;
+  el.innerHTML = svgCaballitoMar(tam);
+  $('area-juego').appendChild(el);
+
+  el.animate(
+    [
+      { transform: `${el.style.transform || ''} translateY(0) translateX(0)` },
+      { transform: `${el.style.transform || ''} translateY(${-H*.35}px) translateX(${(Math.random()-.5)*20}px)` },
+      { transform: `${el.style.transform || ''} translateY(${-H*.7}px)  translateX(${(Math.random()-.5)*20}px)` },
+      { transform: `${el.style.transform || ''} translateY(${-(H+tam+10)}px) translateX(0)` },
+    ],
+    { duration: durSeg * 1000, easing: 'ease-in-out', fill: 'forwards' }
+  );
+
+  setTimeout(() => el.remove(), (durSeg + .5) * 1000);
+}
+
+let timerCaballito = null;
+function iniciarCaballitos() {
+  clearTimeout(timerCaballito);
+  function programar() {
+    timerCaballito = setTimeout(() => {
+      if (estado.activo) { lanzarCaballitoMar(); programar(); }
+    }, 10000 + Math.random() * 12000);
+  }
+  programar();
+}
+function detenerCaballitos() {
+  clearTimeout(timerCaballito);
+}
+
 function detenerBancosYFoca() {
   clearTimeout(timerBancoPeces);
   clearTimeout(timerFoca);
+  if (audioFoca) { audioFoca.pause(); audioFoca.currentTime = 0; audioFoca = null; }
   $('area-juego').querySelectorAll('.banco-peces').forEach(e => e.remove());
   bancosActivos.length = 0;
 }
@@ -2330,9 +2598,6 @@ function detenerBancosYFoca() {
    La voz usa la misma variable `silenciado` que el resto
    del juego — el botón 🔊 del HUD lo controla todo.
    ============================================================ */
-
-let audioActual  = null;
-let ultimaRuta   = null; /* última ruta reproducida — para reanudar al activar voz */
 
 /* Reproduce un archivo MP3. Respeta el botón de silencio global. */
 function reproducirAudio(ruta, alTerminar) {
