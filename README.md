@@ -117,6 +117,10 @@ Sound Effect by <a href="https://pixabay.com/es/users/jonathanslattermusic-54702
 ### foca:
 Sound Effect by <a href="https://pixabay.com/es/users/u_w4utmqapnm-37408805/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=154201">u_w4utmqapnm</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=154201">Pixabay</a>
 
+### Olas del mar
+
+Sound Effect by <a href="https://pixabay.com/es/users/kokoreli777-39793239/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=169411">michael koreli</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=169411">Pixabay</a>
+
 ## 📖 Referencias bíblicas
 
 - **Éxodo 3:7-8** — La llamada de Dios a Moisés

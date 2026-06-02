@@ -44,18 +44,31 @@
        luego lanza iniciarInstrucciones().
   ══════════════════════════════════════ -->
   <section id="s-apertura" class="pantalla oculta">
-    <!-- Paso 1: solo el mar con criaturas nadando -->
-    <div id="ap-mar">
-      <div id="ap-olas"></div>
-      <div id="ap-luz"></div>
-      <div id="ap-prof"></div>
-      <!-- Las criaturas se inyectan desde JS -->
-      <div id="ap-criaturas"></div>
-      <!-- Algas en el fondo -->
-      <div id="ap-fondo-mar"></div>
-      <!-- Título -->
-      <div id="ap-titulo">🌊 El Mar Rojo se abre 🌊</div>
+    <!-- Arena de fondo — siempre presente, se revela al abrirse el mar -->
+    <div id="ap-arena"></div>
+    <!-- Pared izquierda de agua -->
+    <div id="ap-ola-izq">
+      <div class="ap-agua"></div>
+      <div class="ap-olas-h"></div>
+      <div class="ap-luz"></div>
+      <div class="ap-prof"></div>
+      <div class="ap-criaturas"></div>
+      <div class="ap-algas"></div>
+      <div class="ap-foam ap-foam-r"></div>
     </div>
+    <!-- Pared derecha de agua -->
+    <div id="ap-ola-der">
+      <div class="ap-agua"></div>
+      <div class="ap-olas-h"></div>
+      <div class="ap-luz"></div>
+      <div class="ap-prof"></div>
+      <div class="ap-criaturas"></div>
+      <div class="ap-algas"></div>
+      <div class="ap-foam ap-foam-l"></div>
+    </div>
+    <!-- Solo Moisés -->
+    <div id="ap-moises"></div>
+    <div id="ap-titulo">El Mar Rojo se abre</div>
   </section>
 
   <!-- ══════════════════════════════════════

@@ -2679,11 +2679,175 @@ $('btn-saltar').onclick = () => {
 /* ============================================================
    BOTONES Y ARRANQUE
    ============================================================ */
-$('btn-inicio').onclick = () => {
+/* ============================================================
+   PANTALLA APERTURA — El Mar Rojo se abre
+   Secuencia:
+     0s   → Voz de Moisés (moises-abre-mar.mp3)
+     2.5s → Sonido olas (olas-del-mar.mp3) + mar se abre
+     5.5s → Solo Moisés aparece sobre la arena
+     8.5s → Instrucciones
+   ============================================================ */
+
+function apCriarNadadores(contenedor, wallW, H) {
+  const LISTA = [
+    { e:'🐠',t:16 },{ e:'🐟',t:14 },{ e:'🐡',t:16 },
+    { e:'🦑',t:15 },{ e:'🐬',t:18 },{ e:'🦞',t:13 },
+    { e:'🦀',t:13 },{ e:'🦭',t:16 },{ e:'🐠',t:12 },
+  ];
+  const cantidad = Math.max(6, Math.floor(wallW / 38));
+
+  for (let i = 0; i < cantidad; i++) {
+    const n      = LISTA[i % LISTA.length];
+    const el     = document.createElement('div');
+    el.className = 'ap-nadador';
+    const vaADer = Math.random() > .5;
+    const y      = H * .05 + Math.random() * H * .88;
+    const dur    = 6 + Math.random() * 9;
+    const del    = -(Math.random() * dur);
+    const fs     = Math.round(n.t * Math.min(1.3, wallW / 190));
+
+    if (Math.random() > .25) {
+      el.classList.add(vaADer ? 'der' : 'izq');
+      el.style.cssText = `
+        top:${y}px;
+        left:${vaADer ? -fs - 10 : wallW + 10}px;
+        font-size:${fs}px;
+        --dur:${dur}s; --del:${del}s; --ancho:${wallW + fs + 20}px;
+      `;
+    } else {
+      el.classList.add('flota');
+      el.style.cssText = `
+        top:${y}px;
+        left:${fs + Math.random() * (wallW - fs * 2)}px;
+        font-size:${fs}px;
+        --dur:${3 + Math.random() * 3}s; --del:${del}s;
+      `;
+    }
+    el.textContent = n.e;
+    contenedor.appendChild(el);
+  }
+
+  /* Burbujas */
+  for (let b = 0; b < 10; b++) {
+    const bel = document.createElement('div');
+    bel.className = 'ap-burbuja';
+    const tam = 3 + Math.random() * 7;
+    const dur = 3 + Math.random() * 4;
+    bel.style.cssText = `
+      left:${Math.random() * wallW}px;
+      top:${H * .1 + Math.random() * H * .85}px;
+      width:${tam}px; height:${tam}px;
+      --dur:${dur}s; --del:${-(Math.random() * dur)}s;
+      --dist:${-(50 + Math.random() * 70)}px;
+    `;
+    contenedor.appendChild(bel);
+  }
+}
+
+function apCriarAlgas(contenedor, wallW, H) {
+  const altMax = Math.min(Math.round(H * .42), 130);
+  const SVG_W  = 100, mid = SVG_W / 2;
+  const FRONDAS = [
+    { dx:-22, h:Math.round(altMax*.72), c:'#3aaa86', sc:'#1d6e52', d:3.2, del:0,   dir: 1 },
+    { dx: -8, h:Math.round(altMax*.88), c:'#1d8a6a', sc:'#0a4835', d:3.9, del:.5,  dir:-1 },
+    { dx:  6, h:altMax,                 c:'#136050', sc:'#062c22', d:4.4, del:1.0,  dir: 1 },
+    { dx: 20, h:Math.round(altMax*.80), c:'#4db89a', sc:'#1a7060', d:3.5, del:1.5,  dir:-1 },
+  ];
+  const B = altMax;
+  const numGrupos = Math.max(1, Math.floor(wallW / 110));
+
+  for (let g = 0; g < numGrupos; g++) {
+    const xC = (wallW / (numGrupos + 1)) * (g + 1);
+    let inner = '';
+    FRONDAS.forEach(f => {
+      const cx = mid + f.dx;
+      const a  = 11 * f.dir;
+      const path = `M${cx},${B} C${cx-a},${B-Math.round(f.h*.28)} ${cx-a},${B-Math.round(f.h*.48)} ${cx},${B-Math.round(f.h*.5)} C${cx+a},${B-Math.round(f.h*.52)} ${cx+a},${B-Math.round(f.h*.82)} ${cx},${B-f.h}`;
+      const a1 = (-4*f.dir).toFixed(1), a2 = (4*f.dir).toFixed(1);
+      inner += `<g><animateTransform attributeName="transform" type="rotate" values="${a1} ${cx} ${B};${a2} ${cx} ${B};${a1} ${cx} ${B}" dur="${f.d}s" begin="${f.del}s" repeatCount="indefinite"/>
+        <path d="${path}" stroke="${f.c}" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <path d="${path}" stroke="${f.sc}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".4"/>
+      </g>`;
+    });
+    /* coral naranja */
+    const cc = mid - 34, hc = Math.round(altMax*.50);
+    inner += `<g><animateTransform attributeName="transform" type="rotate" values="-4 ${cc} ${B};4 ${cc} ${B};-4 ${cc} ${B}" dur="3s" begin=".4s" repeatCount="indefinite"/>
+      <path d="M${cc},${B} L${cc},${B-Math.round(hc*.56)}" stroke="#d06420" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M${cc},${B-Math.round(hc*.38)} Q${cc-13},${B-Math.round(hc*.58)} ${cc-18},${B-Math.round(hc*.78)}" stroke="#d06420" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M${cc},${B-Math.round(hc*.45)} Q${cc+13},${B-Math.round(hc*.63)} ${cc+17},${B-Math.round(hc*.82)}" stroke="#d06420" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="${cc-18}" cy="${B-Math.round(hc*.78)}" r="4" fill="#e88040"/>
+      <circle cx="${cc+17}" cy="${B-Math.round(hc*.82)}" r="4" fill="#e88040"/>
+    </g>`;
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:absolute;left:${Math.round(xC-SVG_W/2)}px;bottom:0;pointer-events:none;`;
+    wrap.innerHTML = `<svg width="${SVG_W}" height="${altMax}" viewBox="0 0 ${SVG_W} ${altMax}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;display:block">${inner}</svg>`;
+    contenedor.appendChild(wrap);
+  }
+}
+
+let apAudioOlas = null;
+
+function iniciarApertura() {
   mostrarPantalla('s-apertura');
-  /* La animación dura ~5s — al terminar lanza las instrucciones */
-  setTimeout(() => iniciarInstrucciones(), 5200);
-};
+
+  /* Dimensiones reales */
+  const W  = $('s-apertura').offsetWidth  || window.innerWidth;
+  const H  = $('s-apertura').offsetHeight || window.innerHeight;
+  const wW = Math.floor(W / 2); /* ancho de cada pared */
+
+  /* Limpiar estado anterior */
+  ['ap-ola-izq','ap-ola-der'].forEach(id => {
+    const pared = $(id);
+    pared.classList.remove('ap-abierto');
+    pared.querySelector('.ap-criaturas').innerHTML = '';
+    pared.querySelector('.ap-algas').innerHTML = '';
+  });
+  $('ap-moises').classList.remove('visible');
+  $('ap-moises').innerHTML = '';
+  if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
+
+  /* Poblar cada pared con criaturas y algas */
+  setTimeout(() => {
+    ['ap-ola-izq','ap-ola-der'].forEach(id => {
+      const pared = $(id);
+      apCriarNadadores(pared.querySelector('.ap-criaturas'), wW, H);
+      apCriarAlgas(pared.querySelector('.ap-algas'), wW, H);
+    });
+  }, 80);
+
+  /* Voz de Moisés */
+  reproducirAudio('audio/apertura/moises-abre-mar.mp3');
+
+  /* 2.5s → sonido olas + mar se abre */
+  setTimeout(() => {
+    apAudioOlas = new Audio('audio/apertura/olas-del-mar.mp3');
+    apAudioOlas.volume = 0.75;
+    apAudioOlas.play().catch(() => {});
+    $('ap-ola-izq').classList.add('ap-abierto');
+    $('ap-ola-der').classList.add('ap-abierto');
+  }, 2500);
+
+  /* 5.5s → aparece Moisés sobre la arena */
+  setTimeout(() => {
+    /* Usar figAnciano del juego, escalado para la apertura */
+    const escala = Math.min(2.2, H / 260);
+    const w = Math.round(28 * escala), h = Math.round(56 * escala);
+    const svg = figAnciano()
+      .replace(/width="28"/, `width="${w}"`)
+      .replace(/height="56"/, `height="${h}"`);
+    $('ap-moises').innerHTML = svg;
+    $('ap-moises').classList.add('visible');
+  }, 5500);
+
+  /* 8.5s → instrucciones */
+  setTimeout(() => {
+    if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
+    iniciarInstrucciones();
+  }, 8500);
+}
+
+$('btn-inicio').onclick = () => iniciarApertura();
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
 $('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
 $('btn-nueva-partida').onclick = () => { detenerVoz(); iniciarInstrucciones(); };

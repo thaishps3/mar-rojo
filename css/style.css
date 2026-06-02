@@ -264,168 +264,154 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 /* ══════════════════════════════════════════════════
-   PANTALLA APERTURA — El Mar Rojo se abre
+   PANTALLA APERTURA — Paso 2: Mar se abre
 ══════════════════════════════════════════════════ */
 #s-apertura { padding:0; }
 
-#apertura-escena {
-  position:relative; width:100%; height:100%;
-  background:linear-gradient(180deg,#0a0520 0%,#1a0a40 35%,#0d1a50 100%);
-  overflow:hidden; display:flex; align-items:flex-end; justify-content:center;
-}
-
-/* Cielo */
-#ap-cielo {
-  position:absolute; inset:0;
-  background:linear-gradient(180deg,#0a0520 0%,#1a2860 100%);
-}
-.ap-estrella {
-  position:absolute; width:2px; height:2px;
-  background:#fff; border-radius:50%;
-  animation:ap-titilar var(--d,2s) var(--del,0s) ease-in-out infinite;
-}
-@keyframes ap-titilar{0%,100%{opacity:.8}50%{opacity:.2}}
-#ap-luna {
-  position:absolute; top:12px; right:18px;
-  width:20px; height:20px; border-radius:50%;
-  background:#f8e8a0;
-  box-shadow:0 0 10px rgba(248,232,160,.4);
-}
-
-/* Columna de fuego */
-#ap-columna {
-  position:absolute; left:50%; top:18px;
-  transform:translateX(-50%);
-  width:16px;
-  animation:ap-columna-pulso 1.2s ease-in-out infinite;
-}
-@keyframes ap-columna-pulso{
-  0%,100%{transform:translateX(-50%) scaleX(1)}
-  50%{transform:translateX(-50%) scaleX(1.2)}
-}
-#ap-columna-fuego {
-  width:16px; height:50px;
-  background:linear-gradient(180deg,#fff8e0 0%,#ffaa00 50%,#ff4400 100%);
-  border-radius:50% 50% 30% 30%;
-}
-#ap-columna-halo {
-  position:absolute; top:-10px; left:-18px; right:-18px; bottom:-4px;
-  background:radial-gradient(ellipse,rgba(255,160,0,.4),transparent 70%);
-  border-radius:50%;
-}
-
-/* Texto título */
-#ap-titulo {
-  position:absolute; top:20px; left:0; right:0;
-  text-align:center;
-  font-family:'Fredoka One',cursive;
-  font-size:clamp(1em,4vw,1.6em);
-  color:#f4c750;
-  text-shadow:0 0 14px rgba(244,199,80,.7);
-  animation:ap-texto-entra .8s .1s ease both;
-  z-index:10;
-}
-@keyframes ap-texto-entra{
-  from{opacity:0;transform:translateY(-10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* Muros de agua */
-#ap-muro-izq, #ap-muro-der {
-  position:absolute; bottom:0; width:50%; top:18%;
-  overflow:hidden;
-}
-#ap-muro-izq {
-  left:0;
-  background:linear-gradient(90deg,#0b3a78,#1a6ab8);
-  border-right:3px solid rgba(140,220,255,.6);
-  animation:ap-abrir-izq 2.2s 1.2s ease-in-out forwards;
-}
-#ap-muro-der {
-  right:0;
-  background:linear-gradient(270deg,#0b3a78,#1a6ab8);
-  border-left:3px solid rgba(140,220,255,.6);
-  animation:ap-abrir-der 2.2s 1.2s ease-in-out forwards;
-}
-@keyframes ap-abrir-izq{0%{transform:translateX(0)}100%{transform:translateX(-32%)}}
-@keyframes ap-abrir-der{0%{transform:translateX(0)}100%{transform:translateX(32%)}}
-
-/* Olas en los muros */
-#ap-muro-izq::after, #ap-muro-der::after {
-  content:''; position:absolute; inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='10'%3E%3Cpath d='M0,5 C10,1 20,9 40,5 C60,1 70,9 80,5' stroke='rgba(255,255,255,0.12)' stroke-width='1.2' fill='none'/%3E%3C/svg%3E");
-  background-size:80px 10px;
-  animation:ap-ola-move 2s linear infinite;
-}
-@keyframes ap-ola-move{from{background-position:0 0}to{background-position:80px 0}}
-
-/* Arena seca */
+/* Arena de fondo — todo el ancho, siempre detrás */
 #ap-arena {
-  position:absolute; bottom:0;
-  left:50%; transform:translateX(-50%);
-  height:48%; width:0%;
-  background:linear-gradient(180deg,#d4a040,#c08030);
-  animation:ap-arena 1.8s 1.5s ease-out forwards;
-  z-index:2;
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,#d4a040 0%,#c08030 100%);
 }
-@keyframes ap-arena{0%{width:0%;opacity:0}100%{width:36%;opacity:1}}
 
-/* Moisés */
+/* Paredes de agua — cubren todo al inicio */
+#ap-ola-izq, #ap-ola-der {
+  position:absolute; top:0; bottom:0; z-index:4;
+  overflow:hidden;
+  transition: transform 3.2s cubic-bezier(.4,0,.2,1);
+}
+#ap-ola-izq { left:0;  width:50%; }
+#ap-ola-der { right:0; width:50%; }
+
+/* Parting animation — triggered by JS adding class */
+#ap-ola-izq.ap-abierto { transform: translateX(-100%); }
+#ap-ola-der.ap-abierto { transform: translateX(100%);  }
+
+/* Fondo del agua */
+.ap-agua {
+  position:absolute; inset:0;
+  background:linear-gradient(180deg,#1a7ac8 0%,#0e4a90 45%,#0a2860 100%);
+}
+.ap-luz {
+  position:absolute; top:0; left:0; right:0; height:32%; z-index:2;
+  background:radial-gradient(ellipse at 50% 0%, rgba(140,210,255,.28) 0%, transparent 70%);
+}
+.ap-prof {
+  position:absolute; inset:0; z-index:2;
+  background:linear-gradient(180deg, transparent 30%, rgba(5,15,60,.5) 100%);
+}
+
+/* Olas horizontales dentro de cada pared */
+.ap-olas-h {
+  position:absolute; inset:0; z-index:2;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='26'%3E%3Cpath d='M0,13 C25,0 50,26 100,13 C150,0 175,26 200,13' stroke='rgba(255,255,255,0.15)' stroke-width='2.5' fill='none'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='18'%3E%3Cpath d='M0,9 C15,0 30,18 60,9 C90,0 105,18 120,9' stroke='rgba(255,255,255,0.07)' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-size:200px 26px, 120px 18px;
+  animation:ap-olas-mov 3s linear infinite;
+}
+@keyframes ap-olas-mov {
+  from { background-position:0 0, 0 0; }
+  to   { background-position:200px 26px, -120px 18px; }
+}
+
+/* Criaturas y algas dentro de cada pared */
+.ap-criaturas { position:absolute; inset:0; z-index:3; }
+.ap-algas     { position:absolute; inset:0; z-index:3; pointer-events:none; }
+
+/* Espuma en el borde interior — curva blanca ondulada */
+.ap-foam {
+  position:absolute; top:0; bottom:0; width:20px; z-index:6;
+}
+.ap-foam-r { right:0; } /* borde derecho de la pared izquierda */
+.ap-foam-l { left:0;  } /* borde izquierdo de la pared derecha */
+.ap-foam::before, .ap-foam::after {
+  content:''; position:absolute; top:0; bottom:0;
+  background:rgba(255,255,255,.55);
+  width:4px; border-radius:4px;
+}
+.ap-foam-r::before { right:2px;  }
+.ap-foam-r::after  { right:8px; opacity:.35; }
+.ap-foam-l::before { left:2px;  }
+.ap-foam-l::after  { left:8px; opacity:.35; }
+
+/* Burbujas de espuma animadas */
+.ap-foam-bur {
+  position:absolute; border-radius:50%;
+  background:rgba(255,255,255,.65);
+  animation:ap-bur var(--bd,2s) var(--bdel,0s) ease-in infinite;
+}
+@keyframes ap-bur {
+  0%   { transform:translateY(0) scale(1); opacity:.65; }
+  100% { transform:translateY(-120px) scale(.1); opacity:0; }
+}
+
+/* Nadadores dentro de las paredes */
+.ap-nadador {
+  position:absolute; pointer-events:none; z-index:4;
+}
+.ap-nadador.der {
+  animation:ap-swim-der var(--dur,8s) var(--del,0s) linear infinite;
+}
+.ap-nadador.izq {
+  animation:ap-swim-izq var(--dur,8s) var(--del,0s) linear infinite;
+}
+.ap-nadador.flota {
+  animation:ap-flota var(--dur,4s) var(--del,0s) ease-in-out infinite;
+}
+@keyframes ap-swim-der {
+  0%   { transform:scaleX(-1) translateX(0);               opacity:0; }
+  5%   { opacity:1; }
+  90%  { opacity:1; }
+  100% { transform:scaleX(-1) translateX(var(--ancho,200px)); opacity:0; }
+}
+@keyframes ap-swim-izq {
+  0%   { transform:translateX(var(--ancho,200px));  opacity:0; }
+  5%   { opacity:1; }
+  90%  { opacity:1; }
+  100% { transform:translateX(0); opacity:0; }
+}
+@keyframes ap-flota {
+  0%,100% { transform:translateY(0); }
+  50%     { transform:translateY(-5px); }
+}
+
+/* Burbujas en el agua */
+.ap-burbuja {
+  position:absolute; border-radius:50%; z-index:3; pointer-events:none;
+  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3);
+  animation:ap-bur-sub var(--dur,3s) var(--del,0s) ease-in infinite;
+}
+@keyframes ap-bur-sub {
+  0%   { transform:translateY(0) scale(1); opacity:.65; }
+  100% { transform:translateY(var(--dist,-80px)) scale(.2); opacity:0; }
+}
+
+/* Moisés — aparece sobre la arena al abrirse el mar */
 #ap-moises {
-  position:absolute; left:50%; bottom:49%;
-  transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center;
-  opacity:0; z-index:4;
-  animation:ap-entra .8s 3.2s ease both;
+  position:absolute; bottom:30%; left:50%;
+  transform:translateX(-50%) translateY(10px);
+  z-index:8; opacity:0;
+  transition: opacity .8s ease, transform .8s ease;
+  pointer-events:none;
 }
-@keyframes ap-entra{
-  from{opacity:0;transform:translateX(-50%) translateY(-12px)}
-  to{opacity:1;transform:translateX(-50%) translateY(0)}
-}
-#ap-m-turbante {
-  position:absolute; top:-12px; left:-1px;
-  width:14px; height:9px;
-  background:#f0d040; border-radius:50% 50% 0 0;
-}
-#ap-m-cabeza {width:12px;height:12px;border-radius:50%;background:#d4a060;margin-bottom:1px}
-#ap-m-cuerpo {
-  width:14px; height:20px;
-  background:#f0d880; border-radius:4px 4px 0 0; position:relative;
-}
-#ap-m-baculo {
-  position:absolute; right:-7px; top:0;
-  width:2px; height:24px;
-  background:#7a4020; border-radius:1px;
-  transform:rotate(6deg);
+#ap-moises.visible {
+  opacity:1; transform:translateX(-50%) translateY(0);
 }
 
-/* Pueblo */
-#ap-pueblo {
-  position:absolute; bottom:calc(49% - 6px);
-  left:50%; transform:translateX(-50%);
-  display:flex; gap:3px; align-items:flex-end;
-  opacity:0; z-index:4;
-  animation:ap-entra .8s 3.8s ease both;
-}
-.ap-fig{display:flex;flex-direction:column;align-items:center;gap:1px}
-.ap-fc{width:8px;height:8px;border-radius:50%}
-.ap-fb{width:10px;height:13px;border-radius:3px 3px 0 0}
-.ap-fig:nth-child(odd) .ap-fc{animation:ap-bob .55s ease-in-out infinite}
-.ap-fig:nth-child(even) .ap-fc{animation:ap-bob .55s .27s ease-in-out infinite}
-@keyframes ap-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.ap-animal{font-size:12px;line-height:1;animation:ap-bob .6s .1s ease-in-out infinite}
-
-/* Subtítulo */
-#ap-subtitulo {
-  position:absolute; bottom:14px; left:0; right:0;
-  text-align:center;
+/* Título */
+#ap-titulo {
+  position:absolute; top:clamp(12px,2.5vh,22px); left:0; right:0;
+  text-align:center; z-index:10;
   font-family:'Fredoka One',cursive;
-  font-size:clamp(.55em,1.6vw,.8em);
-  color:rgba(255,255,255,.6);
-  letter-spacing:.06em;
-  opacity:0;
-  animation:ap-entra .8s 4.0s ease both;
-  z-index:10;
+  font-size:clamp(.9em,4.5vw,1.4em);
+  color:#f4c750;
+  text-shadow:0 0 16px rgba(244,199,80,.8);
+  animation:ap-tit .7s .2s ease both;
+}
+@keyframes ap-tit {
+  from { opacity:0; transform:translateY(-8px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
 /* ── PANTALLA DE INICIO ── */
