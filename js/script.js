@@ -2867,7 +2867,7 @@ function iniciarApertura() {
       const pared = $(id);
       apCriarNadadores(pared.querySelector('.ap-criaturas'), wW, Math.round(H * .78));
       apCriarAlgas(pared.querySelector('.ap-algas'), wW, Math.round(H * .78));
-      apCriarEspuma(pared.querySelector('.ap-foam'));
+      /* espuma manejada por CSS */
     });
   }, 100);
 
