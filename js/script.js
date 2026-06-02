@@ -2827,38 +2827,56 @@ let apAudioOlas = null;
 function iniciarApertura() {
   mostrarPantalla('s-apertura');
 
-  /* Dimensiones reales */
   const W  = $('s-apertura').offsetWidth  || window.innerWidth;
   const H  = $('s-apertura').offsetHeight || window.innerHeight;
-  const wW = Math.floor(W / 2); /* ancho de cada pared */
+  const wW = Math.floor(W / 2);
 
   /* Limpiar estado anterior */
   ['ap-ola-izq','ap-ola-der'].forEach(id => {
     const pared = $(id);
     pared.classList.remove('ap-abierto');
     pared.querySelector('.ap-criaturas').innerHTML = '';
-    pared.querySelector('.ap-algas').innerHTML = '';
+    pared.querySelector('.ap-algas').innerHTML     = '';
   });
-  $('ap-moises').classList.remove('visible');
-  $('ap-moises').innerHTML = '';
+  $('ap-israelitas').innerHTML = '';
+  $('ap-moises').innerHTML     = '';
   if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
 
-  /* Poblar cada pared con criaturas y algas */
+  /* ── Israelitas e israelitas aparecen INMEDIATAMENTE en la tierra ── */
+  setTimeout(() => {
+    const tierra = $('ap-tierra');
+    const tH     = tierra.offsetHeight || Math.round(H * .22);
+    const tW     = W;
+
+    /* Multitud usando el mismo generador del juego */
+    const n = 14 + Math.floor(Math.random() * 7);
+    $('ap-israelitas').innerHTML = generarMultitud(n, tW - 40);
+
+    /* Moisés — más grande que el resto, con vara y aura dorada */
+    const escala = Math.min(2.0, tH / 60);
+    const mW = Math.round(28 * escala), mH = Math.round(56 * escala);
+    /* figAnciano ya tiene báculo — solo escalamos más grande */
+    $('ap-moises').innerHTML = figAnciano()
+      .replace(/width="28"/, `width="${mW}"`)
+      .replace(/height="56"/, `height="${mH}"`);
+  }, 80);
+
+  /* ── Criaturas y algas en las paredes de agua ── */
   setTimeout(() => {
     ['ap-ola-izq','ap-ola-der'].forEach(id => {
       const pared = $(id);
-      apCriarNadadores(pared.querySelector('.ap-criaturas'), wW, H);
-      apCriarAlgas(pared.querySelector('.ap-algas'), wW, H);
+      apCriarNadadores(pared.querySelector('.ap-criaturas'), wW, Math.round(H * .78));
+      apCriarAlgas(pared.querySelector('.ap-algas'), wW, Math.round(H * .78));
       apCriarEspuma(pared.querySelector('.ap-foam'));
     });
-  }, 80);
+  }, 100);
 
-  /* Voz de Moisés — el mar se abre SOLO cuando termina de hablar */
+  /* ── Voz de Moisés — el mar se abre cuando termina ── */
   const vozMoises = new Audio('audio/apertura/moises-abre-mar.mp3');
   let marAbierto  = false;
 
   function abrirMar() {
-    if (marAbierto) return;   /* evitar doble disparo */
+    if (marAbierto) return;
     marAbierto = true;
 
     /* Sonido de olas */
@@ -2866,43 +2884,24 @@ function iniciarApertura() {
     apAudioOlas.volume = 0.8;
     if (!silenciado) apAudioOlas.play().catch(() => {});
 
-    /* Animación de apertura */
+    /* Mar se abre */
     $('ap-ola-izq').classList.add('ap-abierto');
     $('ap-ola-der').classList.add('ap-abierto');
 
-    /* Moisés aparece en la franja de tierra (ya dentro de #ap-tierra en el HTML) */
-    setTimeout(() => {
-      const tierra  = $('ap-tierra');
-      const tH      = tierra.offsetHeight || 80;
-      const escala  = Math.min(1.8, tH / 68);
-      const w = Math.round(28 * escala), h = Math.round(56 * escala);
-      const svg = figAnciano()
-        .replace(/width="28"/, `width="${w}"`)
-        .replace(/height="56"/, `height="${h}"`);
-      $('ap-moises').innerHTML = svg;
-      $('ap-moises').classList.add('visible');
-    }, 3500);
-
-    /* Instrucciones 9s después — tiempo para ver la escena */
+    /* Pasar a instrucciones justo al terminar la transición (3.4s) */
     setTimeout(() => {
       if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
       iniciarInstrucciones();
-    }, 9000);
+    }, 3400);
   }
 
   if (!silenciado) {
     vozMoises.volume = 1.0;
-    /* Solo abrirMar cuando el audio termina — nunca antes */
     vozMoises.onended = () => abrirMar();
-    /* Si el archivo no existe, abrir después de 5s */
     vozMoises.onerror = () => setTimeout(abrirMar, 500);
-    vozMoises.play().catch(() => {
-      /* El navegador bloqueó el audio → esperar 5s y abrir */
-      setTimeout(abrirMar, 5000);
-    });
+    vozMoises.play().catch(() => setTimeout(abrirMar, 5000));
   } else {
-    /* Silenciado → abrir directamente */
-    setTimeout(abrirMar, 1000);
+    setTimeout(abrirMar, 800);
   }
 }
 

@@ -287,16 +287,19 @@ body { display: flex; align-items: center; justify-content: center; }
     radial-gradient(ellipse 2px 2px at 85% 70%, rgba(255,200,80,.12) 0%, transparent 100%);
 }
 
-/* Moisés — dentro de la franja de tierra */
-#ap-moises {
-  position:absolute; bottom:8%; left:50%;
-  transform:translateX(-50%) translateY(6px);
-  z-index:2; opacity:0;
-  transition: opacity .8s ease, transform .8s ease;
-  pointer-events:none;
+/* Israelitas — al fondo de la franja de tierra */
+#ap-israelitas {
+  position:absolute; bottom:4px; left:50%;
+  transform:translateX(-50%);
+  z-index:1; pointer-events:none;
 }
-#ap-moises.visible {
-  opacity:1; transform:translateX(-50%) translateY(0);
+
+/* Moisés — al frente, más grande, inmediatamente visible */
+#ap-moises {
+  position:absolute; bottom:0; left:50%;
+  transform:translateX(-50%);
+  z-index:3; pointer-events:none;
+  filter:drop-shadow(0 0 6px rgba(255,200,80,.5));
 }
 
 /* Arena — debajo de la tierra, todo el ancho */
