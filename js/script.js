@@ -1888,6 +1888,24 @@ function saltoCriatura(tipo) {
 
 let timerSaltoCriatura = null;
 
+function iniciarSaltosCriatura() {
+  clearTimeout(timerSaltoCriatura);
+  function programar() {
+    timerSaltoCriatura = setTimeout(() => {
+      if (!estado.activo) return;
+      /* Ballena desde nivel 4, delfín en los anteriores */
+      const tipo = (estado.nivel >= 3 && Math.random() > .5) ? 'ballena' : 'delfin';
+      saltoCriatura(tipo);
+      programar();
+    }, 10000 + Math.random() * 10000);
+  }
+  programar();
+}
+
+function detenerSaltosCriatura() {
+  clearTimeout(timerSaltoCriatura);
+}
+
 
 /* ============================================================
    MEDUSAS — suben del fondo cambiando de color con burbujas
@@ -2661,7 +2679,11 @@ $('btn-saltar').onclick = () => {
 /* ============================================================
    BOTONES Y ARRANQUE
    ============================================================ */
-$('btn-inicio').onclick        = () => iniciarInstrucciones();
+$('btn-inicio').onclick = () => {
+  mostrarPantalla('s-apertura');
+  /* La animación dura ~5s — al terminar lanza las instrucciones */
+  setTimeout(() => iniciarInstrucciones(), 5200);
+};
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
 $('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
 $('btn-nueva-partida').onclick = () => { detenerVoz(); iniciarInstrucciones(); };
