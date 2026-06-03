@@ -414,6 +414,12 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 
 
+/* ── SALPICADURA DE PANTALLA — cuando el mar se abre ── */
+@keyframes agua-flash {
+  0%   { opacity:.42; }
+  100% { opacity:0; pointer-events:none; }
+}
+
 /* ── PANTALLA DE INICIO ── */
 #s-start {
   background:

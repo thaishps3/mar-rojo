@@ -2752,6 +2752,72 @@ function apCriarNadadores(contenedor, wallW, H) {
   }
 }
 
+function salpicarPantalla() {
+  /* Flash azul — el mar golpea la pantalla */
+  const flash = document.createElement('div');
+  flash.style.cssText = `
+    position:fixed;inset:0;z-index:9999;pointer-events:none;
+    background:rgba(20,90,200,.42);
+    animation:agua-flash .55s ease-out forwards;
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 700);
+
+  /* Gotas resbalando por la pantalla */
+  const total = 30 + Math.floor(Math.random() * 16);
+  for (let i = 0; i < total; i++) {
+    const gota = document.createElement('div');
+    const tam  = 7 + Math.random() * 20;
+    const x    = Math.random() * 96;
+    const y    = Math.random() * 55;
+    const dur  = (2.2 + Math.random() * 3.5) * 1000;
+    const del  = Math.random() * 1400;
+    const dist = 80 + Math.random() * (window.innerHeight * .55);
+
+    gota.style.cssText = `
+      position:fixed;left:${x}vw;top:${y}vh;
+      width:${tam}px;height:${Math.round(tam*1.25)}px;
+      border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+      background:radial-gradient(ellipse at 32% 28%,
+        rgba(255,255,255,.88) 0%,rgba(140,210,255,.58) 40%,rgba(80,160,240,.28) 100%);
+      box-shadow:inset 0 -2px 4px rgba(80,160,240,.4),0 1px 3px rgba(0,0,0,.12);
+      pointer-events:none;z-index:9999;
+    `;
+    document.body.appendChild(gota);
+
+    gota.animate([
+      { transform:'translateY(0) scaleX(1)',                    opacity:.9  },
+      { transform:`translateY(${dist*.25}px) scaleX(1.08)`,    opacity:.95, offset:.15 },
+      { transform:`translateY(${dist*.7}px) scaleX(.92)`,      opacity:.75, offset:.7  },
+      { transform:`translateY(${dist}px) scaleX(.7) scaleY(.5)`, opacity:0 },
+    ], { duration:dur, delay:del, fill:'forwards', easing:'ease-in' });
+
+    /* Rastro húmedo */
+    if (Math.random() > .35) {
+      const r = document.createElement('div');
+      const rH = Math.round(dist * .55);
+      r.style.cssText = `
+        position:fixed;
+        left:calc(${x}vw + ${Math.round(tam*.38)}px);
+        top:calc(${y}vh + ${Math.round(tam*.8)}px);
+        width:${Math.max(2,Math.round(tam*.22))}px;height:${rH}px;
+        background:linear-gradient(180deg,rgba(140,210,255,.4) 0%,transparent 100%);
+        border-radius:0 0 50% 50%;pointer-events:none;z-index:9998;
+        transform-origin:top center;transform:scaleY(0);
+      `;
+      document.body.appendChild(r);
+      r.animate([
+        { transform:'scaleY(0)',    opacity:.5 },
+        { transform:'scaleY(.4)',   opacity:.45, offset:.25 },
+        { transform:'scaleY(1)',    opacity:.28, offset:.75 },
+        { transform:'scaleY(1.05)',opacity:0   },
+      ], { duration:dur*.9, delay:del+dur*.12, fill:'forwards', easing:'ease-in' });
+      setTimeout(() => r.remove(), del + dur + 600);
+    }
+    setTimeout(() => gota.remove(), del + dur + 500);
+  }
+}
+
 /* Espuma estática ondulada — curvas blancas sin animación */
 function apCriarEspuma(foamDiv) {
   foamDiv.innerHTML = `
@@ -2884,9 +2950,10 @@ function iniciarApertura() {
     apAudioOlas.volume = 0.8;
     if (!silenciado) apAudioOlas.play().catch(() => {});
 
-    /* Mar se abre */
+    /* Mar se abre + salpica la pantalla */
     $('ap-ola-izq').classList.add('ap-abierto');
     $('ap-ola-der').classList.add('ap-abierto');
+    salpicarPantalla();
 
     /* Pasar a instrucciones justo al terminar la transición (3.4s) */
     setTimeout(() => {
