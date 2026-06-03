@@ -362,7 +362,7 @@ const GENERADORES_FIGURAS = [figHombre1, figMujer, figHombre2, figAnciano, figNi
 
 /* ── GENERADOR DE MULTITUD con animales visibles ── */
 function generarMultitud(n, anchoDisponible) {
-  const ANIMALES_EXODO = ['🐪','🐫','🐐','🐑','🐕','🐈','🫏','🐂'];
+  const ANIMALES_EXODO = ['🐪','🐫','🐐','🐑','🐕','🐈','🫏','🐂','🐓','🐔'];
 
   const ancho    = anchoDisponible || 400;
 
@@ -387,11 +387,9 @@ function generarMultitud(n, anchoDisponible) {
   pool.sort(() => Math.random() - .5);
 
   /* Posiciones para animales: ~1 de cada 4, nunca en el primer lugar */
+  /* Animales cada 3 figuras — siempre presentes, no aleatorios */
   const posicionesAnimal = new Set();
-  const numAnimales = Math.max(1, Math.floor(n / 4));
-  while (posicionesAnimal.size < numAnimales) {
-    posicionesAnimal.add(1 + Math.floor(Math.random() * (n - 1)));
-  }
+  for (let i = 2; i < n; i += 3) posicionesAnimal.add(i);
 
   /* Ancho total del grupo */
   const anchoTotal = (n - 1) * PASO + figW + 4;
@@ -418,12 +416,26 @@ function generarMultitud(n, anchoDisponible) {
   let htmlAnimales = '';
   for (const i of posicionesAnimal) {
     const cls      = i % 2 === 0 ? 'figura' : 'figura figura-par';
-    const emoji    = ANIMALES_EXODO[Math.floor(Math.random() * ANIMALES_EXODO.length)];
-    const esGrande = ['🐪','🐫','🐂'].includes(emoji);
-    const size     = Math.round((esGrande ? 22 : 17) * escala);
-    const top      = Math.round((esGrande ? 14 : 24) * escala);
-    const offsetX  = (Math.random() > 0.5 ? 4 : -3);
-    htmlAnimales += `<div class="${cls}" style="left:${i*PASO + offsetX}px;top:${top}px;font-size:${size}px;line-height:1;z-index:3;position:absolute;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${emoji}</div>`;
+    const emoji     = ANIMALES_EXODO[Math.floor(Math.random() * ANIMALES_EXODO.length)];
+    const esGrande  = ['🐪','🐫','🐂'].includes(emoji);
+    const esMediano = ['🫏','🐕','🐑','🐐'].includes(emoji);
+    const size = Math.round(figH * (esGrande ? 1.5 : esMediano ? .34 : .25));
+    const top  = esGrande ? 0 : Math.round(figH - size - 2);
+    const offsetX = (Math.random() > .5 ? 3 : -2);
+
+    /* Camello → imagen SVG escalable; resto → emoji */
+    const esCamello = ['🐪','🐫'].includes(emoji);
+    const contenido = esCamello
+      ? `<img src="img/animales/camello.svg" width="${size}" height="${size}" style="object-fit:contain;display:block;">`
+      : emoji;
+
+    htmlAnimales += `<div class="${cls}" style="
+      left:${i*PASO + offsetX}px;top:${top}px;
+      width:${size}px;height:${size}px;
+      font-size:${size}px;line-height:1;
+      overflow:hidden;display:flex;align-items:flex-end;justify-content:center;
+      z-index:3;position:absolute;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${contenido}</div>`;
   }
 
   return `<div style="position:relative;width:${anchoTotal}px;height:${figH+6}px">${htmlPersonas}${htmlAnimales}</div>`;

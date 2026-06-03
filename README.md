@@ -104,7 +104,7 @@ Visita: `https://thaishps3.github.io/mar-rojo/`
 No requiere servidor, instalación ni conexión a internet (excepto para la fuente de Google Fonts).
 
 ---
-## Sonidos Créditos
+## Créditos
 ### Delfin:
 Sound Effect by <a href="https://pixabay.com/es/users/sondangsirait419-44635360/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=220055">Sondang Sirait</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=220055">Pixabay</a>
 
@@ -120,6 +120,11 @@ Sound Effect by <a href="https://pixabay.com/es/users/u_w4utmqapnm-37408805/?utm
 ### Olas del mar
 
 Sound Effect by <a href="https://pixabay.com/es/users/kokoreli777-39793239/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=169411">michael koreli</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=169411">Pixabay</a>
+
+
+### Imagenes
+
+Imagen de <a href="https://pixabay.com/es/users/yamu_jay-44818947/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=8975999">kp yamu Jayanath</a> en <a href="https://pixabay.com/es//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=8975999">Pixabay</a>
 
 ## 📖 Referencias bíblicas
 
