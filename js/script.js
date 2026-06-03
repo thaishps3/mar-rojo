@@ -2753,69 +2753,74 @@ function apCriarNadadores(contenedor, wallW, H) {
 }
 
 function salpicarPantalla() {
-  /* Flash azul — el mar golpea la pantalla */
-  const flash = document.createElement('div');
-  flash.style.cssText = `
-    position:fixed;inset:0;z-index:9999;pointer-events:none;
-    background:rgba(20,90,200,.42);
-    animation:agua-flash .55s ease-out forwards;
-  `;
-  document.body.appendChild(flash);
-  setTimeout(() => flash.remove(), 700);
 
-  /* Gotas resbalando por la pantalla */
-  const total = 30 + Math.floor(Math.random() * 16);
-  for (let i = 0; i < total; i++) {
+  /* Contenedor — cristal empañado: blur fuerte en el fondo */
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9997;pointer-events:none;
+    background:rgba(25,90,190,.12);
+    backdrop-filter:blur(7px) brightness(.88) saturate(1.25);
+    -webkit-backdrop-filter:blur(7px) brightness(.88) saturate(1.25);
+  `;
+  document.body.appendChild(overlay);
+
+  /* Función que crea una gota — reutilizada para distintos tamaños */
+  function crearGota(minTam, maxTam, opacityFactor) {
     const gota = document.createElement('div');
-    const tam  = 7 + Math.random() * 20;
-    const x    = Math.random() * 96;
-    const y    = Math.random() * 55;
-    const dur  = (2.2 + Math.random() * 3.5) * 1000;
-    const del  = Math.random() * 1400;
-    const dist = 80 + Math.random() * (window.innerHeight * .55);
+    const tam  = minTam + Math.random() * (maxTam - minTam);
+    const alto = tam * (.78 + Math.random() * .44);
+    const x    = Math.random() * 97;
+    const y    = Math.random() * 92;
+    const del  = Math.random() * 320;
 
     gota.style.cssText = `
-      position:fixed;left:${x}vw;top:${y}vh;
-      width:${tam}px;height:${Math.round(tam*1.25)}px;
-      border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
-      background:radial-gradient(ellipse at 32% 28%,
-        rgba(255,255,255,.88) 0%,rgba(140,210,255,.58) 40%,rgba(80,160,240,.28) 100%);
-      box-shadow:inset 0 -2px 4px rgba(80,160,240,.4),0 1px 3px rgba(0,0,0,.12);
-      pointer-events:none;z-index:9999;
+      position:absolute;
+      left:${x}vw; top:${y}vh;
+      width:${tam}px; height:${alto}px;
+      border-radius:50%;
+      background:radial-gradient(
+        ellipse at 36% 30%,
+        rgba(255,255,255,${.92 * opacityFactor})  0%,
+        rgba(225,242,255,${.78 * opacityFactor}) 10%,
+        rgba(160,210,245,${.60 * opacityFactor}) 28%,
+        rgba(70,140,220,${.66 * opacityFactor})  55%,
+        rgba(20,65,155,${.86 * opacityFactor})   82%,
+        rgba(10,40,120,${.90 * opacityFactor})  100%
+      );
+      box-shadow:
+        inset  2px  3px  5px rgba(255,255,255,${.62 * opacityFactor}),
+        inset -1px -2px  4px rgba(0,30,100,${.42 * opacityFactor}),
+        0 2px 7px rgba(0,0,0,${.30 * opacityFactor});
+      backdrop-filter:blur(${tam > 20 ? 3.5 : 1.5}px) brightness(1.06);
+      -webkit-backdrop-filter:blur(${tam > 20 ? 3.5 : 1.5}px) brightness(1.06);
+      transform:scale(0); opacity:0;
     `;
-    document.body.appendChild(gota);
+    overlay.appendChild(gota);
 
     gota.animate([
-      { transform:'translateY(0) scaleX(1)',                    opacity:.9  },
-      { transform:`translateY(${dist*.25}px) scaleX(1.08)`,    opacity:.95, offset:.15 },
-      { transform:`translateY(${dist*.7}px) scaleX(.92)`,      opacity:.75, offset:.7  },
-      { transform:`translateY(${dist}px) scaleX(.7) scaleY(.5)`, opacity:0 },
-    ], { duration:dur, delay:del, fill:'forwards', easing:'ease-in' });
-
-    /* Rastro húmedo */
-    if (Math.random() > .35) {
-      const r = document.createElement('div');
-      const rH = Math.round(dist * .55);
-      r.style.cssText = `
-        position:fixed;
-        left:calc(${x}vw + ${Math.round(tam*.38)}px);
-        top:calc(${y}vh + ${Math.round(tam*.8)}px);
-        width:${Math.max(2,Math.round(tam*.22))}px;height:${rH}px;
-        background:linear-gradient(180deg,rgba(140,210,255,.4) 0%,transparent 100%);
-        border-radius:0 0 50% 50%;pointer-events:none;z-index:9998;
-        transform-origin:top center;transform:scaleY(0);
-      `;
-      document.body.appendChild(r);
-      r.animate([
-        { transform:'scaleY(0)',    opacity:.5 },
-        { transform:'scaleY(.4)',   opacity:.45, offset:.25 },
-        { transform:'scaleY(1)',    opacity:.28, offset:.75 },
-        { transform:'scaleY(1.05)',opacity:0   },
-      ], { duration:dur*.9, delay:del+dur*.12, fill:'forwards', easing:'ease-in' });
-      setTimeout(() => r.remove(), del + dur + 600);
-    }
-    setTimeout(() => gota.remove(), del + dur + 500);
+      { transform:'scale(0)',    opacity:0 },
+      { transform:'scale(1.1)', opacity:1, offset:.12 },
+      { transform:'scale(1)',    opacity:1, offset:.28 },
+      { transform:'scale(1)',    opacity:1, offset:.70 },
+      { transform:'scale(.95)', opacity:0 },
+    ], { duration:3000 + Math.random()*400, delay:del,
+         fill:'forwards', easing:'ease-out' });
   }
+
+  /* Gotas grandes y medianas */
+  const totalGrandes = 55 + Math.floor(Math.random() * 25);
+  for (let i = 0; i < totalGrandes; i++) crearGota(14, 65, 1);
+
+  /* Micro-gotas — más densas, más transparentes, como en la imagen */
+  const totalMicro = 80 + Math.floor(Math.random() * 40);
+  for (let i = 0; i < totalMicro; i++) crearGota(3, 13, .75);
+
+  /* Todo el overlay se desvanece */
+  overlay.animate(
+    [{ opacity:1 },{ opacity:0 }],
+    { duration:700, delay:3000, fill:'forwards' }
+  );
+  setTimeout(() => overlay.remove(), 3900);
 }
 
 /* Espuma estática ondulada — curvas blancas sin animación */
