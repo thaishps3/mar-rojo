@@ -750,6 +750,8 @@ const estado = {
   animalesSalvados: 0,
   basuraRetirada:   0,
   gruposCruzados:   0,
+  erroresNivel:     0,
+  estrellasTotal:   0,
   objetos:          [],
   grupos:           [],
   arrastre:         null,
@@ -1055,6 +1057,7 @@ function iniciarNivel() {
   estado.animalesSalvados = 0;
   estado.basuraRetirada  = 0;
   estado.gruposCruzados  = 0;
+  estado.erroresNivel    = 0;
   estado.objetos         = [];
   estado.grupos          = [];
   estado.arrastre        = null;
@@ -1112,7 +1115,7 @@ function iniciarNivel() {
   estado.idAnimacion = requestAnimationFrame(bucle);
 }
 
-function iniciarJuego()   { estado.puntuacion = 0; estado.vidas = 3; estado.nivel = 0; iniciarNivel(); }
+function iniciarJuego()   { estado.puntuacion = 0; estado.vidas = 3; estado.nivel = 0; estado.estrellasTotal = 0; iniciarNivel(); }
 function siguienteNivel() { estado.nivel++; estado.nivel >= NIVELES.length ? mostrarVictoria() : iniciarNivel(); }
 
 function detenerTodo() {
@@ -1160,11 +1163,24 @@ function bucle(ts) {
 
   for (const obj of estado.objetos) {
     if (!obj.activo) continue;
+    /* Si el objeto está siendo arrastrado, ignorar colisión —
+       el niño puede pasar sobre los israelitas sin penalización */
+    if (estado.arrastre && estado.arrastre.id === obj.id) continue;
+
     const cObj = obj.y + obj.datos.s * .5;
     let cerca = false;
     for (const g of estado.grupos) {
       const cGrupo = g.y + 23;
-      if (Math.abs(cObj - cGrupo) < COL) { manejarColision(); return; }
+      if (Math.abs(cObj - cGrupo) < COL) {
+        if (obj.esBasura) {
+          /* Basura que no se recogió a tiempo → desaparece sin penalizar */
+          eliminarObjeto(obj);
+        } else {
+          /* Pez/animal no rescatado a tiempo → sí penaliza */
+          manejarColision();
+        }
+        return;
+      }
       if (cObj > cGrupo - 4 && cObj - cGrupo < DANG) cerca = true;
     }
     obj.el.classList.toggle('peligro', cerca);
@@ -1402,6 +1418,7 @@ function reciclarBasura(obj, binId) {
 function lugarIncorrecto(obj, razon, binCorrecto) {
   devolverAlOrigen(obj);
   sndError();
+  estado.erroresNivel++;
   estado.vidas--;
   $('val-vidas').textContent = '❤️'.repeat(Math.max(0, estado.vidas));
   const flash = $('destello-vida');
@@ -1500,7 +1517,12 @@ function comprobarNivelCompleto() {
 function nivelCompleto() {
   detenerTodo(); detenerAmbiente(); detenerVoz(); sndNivel();
 
+  /* Calcular y acumular estrellas */
+  const estrellas = calcularEstrellas(estado.erroresNivel);
+  estado.estrellasTotal += estrellas;
+
   $('lu-pts').textContent = estado.puntuacion;
+  mostrarEstrellas('lu-estrellas', estrellas, .4);
   const hist = HISTORIAS[Math.min(estado.nivel, HISTORIAS.length - 1)];
   $('lu-escena').textContent = hist.escena;
   $('lu-titulo').textContent = hist.titulo;
@@ -1542,13 +1564,42 @@ function mostrarVictoria() {
   sndFanfarria();
   setTimeout(() => sndAplausos(), 300);
   setTimeout(() => { if (!silenciado) sndAplausos(); }, 3200);
+
+  /* Estrellas del último nivel */
+  const estrellas = calcularEstrellas(estado.erroresNivel);
+  estado.estrellasTotal += estrellas;
+
+  /* Título según estrellas totales */
+  const titulo = calcularTitulo(estado.estrellasTotal);
+
+  /* Guardar récord */
+  const esNuevo = guardarRecord(estado.puntuacion, estado.estrellasTotal, titulo.texto);
+
   $('win-pts').textContent = estado.puntuacion;
+
+  /* Título del jugador */
+  $('win-titulo-jugador').innerHTML =
+    `<span class="titulo-emoji">${titulo.emoji}</span>${titulo.texto}`;
+
+  /* Estrellas totales */
+  mostrarEstrellas('win-estrellas-total', Math.min(estado.estrellasTotal, 3), .3);
+
+  /* Mensaje de récord */
+  const recEl = $('win-record');
+  if (esNuevo && estado.puntuacion > 0) {
+    recEl.className = 'win-record nuevo-record';
+    recEl.textContent = '🎉 ¡Nuevo récord personal!';
+  } else {
+    const prev = cargarRecord();
+    recEl.className = 'win-record';
+    recEl.textContent = prev.puntos > 0
+      ? `Récord anterior: ${prev.puntos} pts — ${'⭐'.repeat(prev.estrellas)}`
+      : '';
+  }
+
   mostrarPantalla('s-win');
   lanzarConfeti();
-  /* Narración de victoria — Moisés despide al jugador */
-  setTimeout(() => {
-    reproducirAudio(AUDIO_NIVELES[AUDIO_NIVELES.length - 1]);
-  }, 1000);
+  setTimeout(() => reproducirAudio(AUDIO_NIVELES[AUDIO_NIVELES.length - 1]), 1000);
 }
 
 function lanzarConfeti() {
@@ -2764,8 +2815,58 @@ function apCriarNadadores(contenedor, wallW, H) {
   }
 }
 
-function salpicarPantalla() {
+const RECORD_KEY = 'marRojo_record';
 
+function cargarRecord() {
+  try { return JSON.parse(localStorage.getItem(RECORD_KEY)) || { puntos:0, estrellas:0, titulo:'' }; }
+  catch { return { puntos:0, estrellas:0, titulo:'' }; }
+}
+
+function guardarRecord(puntos, estrellas, titulo) {
+  const prev = cargarRecord();
+  const esNuevo = estrellas > prev.estrellas ||
+    (estrellas === prev.estrellas && puntos > prev.puntos);
+  if (esNuevo) localStorage.setItem(RECORD_KEY, JSON.stringify({ puntos, estrellas, titulo }));
+  return esNuevo;
+}
+
+function calcularEstrellas(errores) {
+  if (errores === 0) return 3;
+  if (errores <= 2)  return 2;
+  return 1;
+}
+
+function calcularTitulo(totalEstrellas) {
+  if (totalEstrellas === 15) return { texto:'¡Campeón del Éxodo!',   emoji:'🏆' };
+  if (totalEstrellas >= 11)  return { texto:'Héroe de Israel',        emoji:'⚔️' };
+  if (totalEstrellas >= 6)   return { texto:'Guardián del Mar Rojo',  emoji:'🌊' };
+  return                            { texto:'Aprendiz del Éxodo',     emoji:'📜' };
+}
+
+function mostrarEstrellas(contenedorId, cantidad, delay) {
+  const el = $(contenedorId);
+  el.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const s = document.createElement('span');
+    s.className = 'estrella-item' + (i < cantidad ? '' : ' vacia');
+    s.style.setProperty('--del', `${delay + i * .18}s`);
+    s.textContent = '⭐';
+    el.appendChild(s);
+  }
+}
+
+function mostrarRecordInicio() {
+  const rec = cargarRecord();
+  const el  = $('start-record');
+  if (!rec.puntos && !rec.estrellas) { el.classList.add('oculto'); return; }
+  el.classList.remove('oculto');
+  el.innerHTML = `Mejor: ${'⭐'.repeat(rec.estrellas)} &nbsp;|&nbsp; ${rec.puntos} pts`;
+  if (rec.titulo) el.innerHTML += `<br>${rec.titulo}`;
+}
+
+
+
+function salpicarPantalla() {
   /* Contenedor — cristal empañado: blur fuerte en el fondo */
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -2990,6 +3091,7 @@ function iniciarApertura() {
 }
 
 $('btn-inicio').onclick = () => iniciarApertura();
+mostrarRecordInicio();
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
 $('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
 $('btn-nueva-partida').onclick = () => { detenerVoz(); iniciarInstrucciones(); };

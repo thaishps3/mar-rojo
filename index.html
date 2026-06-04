@@ -32,6 +32,7 @@
       </div>
     </div>
     <button class="boton" id="btn-inicio">▶&nbsp;&nbsp;Jugar</button>
+    <div id="start-record" class="start-record oculto"></div>
     <blockquote class="cita-biblica">
       "Y pasaron los hijos de Israel por en medio del mar, en seco." — Éxodo 14:22
     </blockquote>
@@ -300,6 +301,7 @@
     <p class="puntuacion-grande" style="color:#a0e8ff">
       Puntos: <span id="lu-pts">0</span>
     </p>
+    <div id="lu-estrellas" class="estrellas-display"></div>
     <button class="boton" id="btn-siguiente">Continuar ▶</button>
   </section>
 
@@ -309,12 +311,14 @@
   <section id="s-win" class="pantalla oculta">
     <div class="deco-victoria">🎉🙏🌊♻️🎉</div>
     <h2 class="titulo-victoria">¡El pueblo cruzó el Mar Rojo!</h2>
+    <div id="win-titulo-jugador" class="win-titulo-jugador"></div>
+    <div id="win-estrellas-total" class="estrellas-display"></div>
+    <p class="puntuacion-grande">Puntuación final: <span id="win-pts">0</span></p>
+    <div id="win-record" class="win-record"></div>
     <p class="txt-victoria">
       ¡Salvaste a los animales del mar y reciclaste toda la basura!<br>
-      El pueblo de Israel llegó sano y salvo a la otra orilla.<br>
-      Dios cumplió su promesa.
+      El pueblo de Israel llegó sano y salvo a la otra orilla.
     </p>
-    <p class="puntuacion-grande">Puntuación final: <span id="win-pts">0</span></p>
     <button class="boton" id="btn-nueva-partida">Jugar de nuevo ↩</button>
     <blockquote class="cita-biblica">
       "Así salvó el Señor aquel día a Israel de mano de los egipcios." — Éxodo 14:30

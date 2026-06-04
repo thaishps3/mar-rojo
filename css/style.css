@@ -420,6 +420,71 @@ body { display: flex; align-items: center; justify-content: center; }
   100% { opacity:0; pointer-events:none; }
 }
 
+/* ══════════════════════════════════════════════════
+   SISTEMA DE ESTRELLAS, TÍTULOS Y RÉCORD
+══════════════════════════════════════════════════ */
+
+/* Contenedor de estrellas */
+.estrellas-display {
+  display:flex; justify-content:center; gap:clamp(6px,3vw,16px);
+  margin:clamp(8px,2vh,16px) 0;
+}
+.estrella-item {
+  font-size:clamp(2em,10vw,3.5em);
+  display:inline-block;
+  animation:estrella-pop .5s var(--del,0s) cubic-bezier(.2,1.6,.5,1) both;
+  filter:drop-shadow(0 0 10px rgba(255,200,0,.85));
+}
+.estrella-item.vacia {
+  filter:grayscale(1) brightness(.5);
+  animation:estrella-pop .4s var(--del,0s) ease both;
+}
+@keyframes estrella-pop {
+  from { transform:scale(0) rotate(-25deg); opacity:0; }
+  to   { transform:scale(1) rotate(0deg);  opacity:1; }
+}
+
+/* Título del jugador en pantalla victoria */
+.win-titulo-jugador {
+  text-align:center;
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(1.2em,5.5vw,2em);
+  color:#f4c750;
+  text-shadow:0 0 18px rgba(244,199,80,.7);
+  margin:8px 0 4px;
+  animation:ap-tit .6s .2s ease both;
+}
+.win-titulo-jugador .titulo-emoji {
+  font-size:1.3em; vertical-align:middle; margin-right:6px;
+}
+
+/* Récord en pantalla victoria */
+.win-record {
+  text-align:center;
+  font-size:clamp(.75em,3vw,1em);
+  color:rgba(255,255,255,.75);
+  margin:4px 0 10px;
+  min-height:1.4em;
+}
+.win-record.nuevo-record {
+  color:#7ef0a0;
+  font-weight:700;
+  animation:estrella-pop .5s .8s ease both;
+}
+
+/* Récord en pantalla de inicio */
+.start-record {
+  text-align:center;
+  font-size:clamp(.7em,2.8vw,.95em);
+  color:rgba(255,255,255,.7);
+  margin:8px 0 0;
+  padding:6px 14px;
+  background:rgba(255,255,255,.1);
+  border-radius:20px;
+  display:inline-block;
+}
+.start-record.oculto { display:none; }
+
 /* ── PANTALLA DE INICIO ── */
 #s-start {
   background:
