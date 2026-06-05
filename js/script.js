@@ -22,18 +22,20 @@ const CONTENEDORES = {
 
 /* Seres del mar — deben arrastrarse al AGUA */
 const ANIMALES = [
-  { e:'🦀', n:'Cangrejo',   s:34 },
-  { e:'🐟', n:'Pez',        s:32 },
-  { e:'🐡', n:'Pez globo',  s:34 },
-  { e:'🦑', n:'Calamar',    s:38 },
-  { e:'🐬', n:'Delfín',     s:40 },
-  { e:'🦈', n:'Tiburón',    s:44 },
-  { e:'🐙', n:'Pulpo',      s:44 },
-  { e:'🐋', n:'Ballena',    s:50 },
-  { e:'🦭', n:'Foca',       s:38 },
-  { e:'🦞', n:'Langosta',   s:34 },
-  { e:'🐢', n:'Tortuga',    s:36 },
-  { e:'🦐', n:'Gamba',      s:28 },
+  { e:'🦀', n:'Cangrejo',    s:34 },
+  { e:'🐟', n:'Pez',         s:32 },
+  { e:'🐡', n:'Pez globo',   s:34 },
+  { e:'🦑', n:'Calamar',     s:38 },
+  { e:'🐬', n:'Delfín',      s:40 },
+  { e:'🦈', n:'Tiburón',     s:44 },
+  { e:'🐙', n:'Pulpo',       s:44 },
+  { e:'🐋', n:'Ballena',     s:50 },
+  { e:'🦭', n:'Foca',        s:38 },
+  { e:'🦞', n:'Langosta',    s:34 },
+  { e:'🐢', n:'Tortuga',     s:36 },
+  { e:'🦐', n:'Gamba',       s:28 },
+  /* Pez diablo — aparece raramente, da el doble de puntos */
+  { e:'🐡', n:'Pez Diablo',  s:50, esBonus:true },
 ];
 
 /* Objetos contaminantes — deben arrastrarse al CONTENEDOR CORRECTO
@@ -387,9 +389,12 @@ function generarMultitud(n, anchoDisponible) {
   pool.sort(() => Math.random() - .5);
 
   /* Posiciones para animales: ~1 de cada 4, nunca en el primer lugar */
-  /* Animales cada 3 figuras — siempre presentes, no aleatorios */
+  /* Animales cada 3 figuras — siempre presentes, no aleatorios.
+     El último animal es siempre el buey 🐂 */
   const posicionesAnimal = new Set();
   for (let i = 2; i < n; i += 3) posicionesAnimal.add(i);
+  const posicionesArr   = [...posicionesAnimal];
+  const posicionBuey    = posicionesArr[posicionesArr.length - 1]; /* último */
 
   /* Ancho total del grupo */
   const anchoTotal = (n - 1) * PASO + figW + 4;
@@ -407,21 +412,31 @@ function generarMultitud(n, anchoDisponible) {
       const svgEscalado = svgOriginal
         .replace(/width="(\d+)"/, `width="${figW}"`)
         .replace(/height="(\d+)"/, `height="${gen === figAnciano ? Math.round(56*escala) : figH}"`);
-      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:1;position:absolute">${svgEscalado}</div>`;
+      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:2;position:absolute">${svgEscalado}</div>`;
       pIdx++;
     }
   }
 
-  /* ── Animales después (z-index 3, siempre encima) ── */
+  /* ── Animales después ── */
   let htmlAnimales = '';
   for (const i of posicionesAnimal) {
     const cls      = i % 2 === 0 ? 'figura' : 'figura figura-par';
-    const emoji     = ANIMALES_EXODO[Math.floor(Math.random() * ANIMALES_EXODO.length)];
+    const emoji     = (i === posicionBuey)
+      ? '🐂'
+      : ANIMALES_EXODO.filter(a => a !== '🐂')[Math.floor(Math.random() * (ANIMALES_EXODO.length - 1))];
     const esGrande  = ['🐪','🐫','🐂'].includes(emoji);
     const esMediano = ['🫏','🐕','🐑','🐐'].includes(emoji);
-    const size = Math.round(figH * (esGrande ? 1.5 : esMediano ? .34 : .25));
-    const top  = esGrande ? 0 : Math.round(figH - size - 2);
+    const esPequeno = !esGrande && !esMediano;
+
+    const size = Math.round(figH * (esGrande ? 1.7 : esMediano ? .5 : .25));
+
+    /* Alinear patas al nivel del suelo + 2px por encima para simular perspectiva */
+    const top  = Math.round(figH - size - 2);
     const offsetX = (Math.random() > .5 ? 3 : -2);
+
+    /* Pequeños (gato, gallina) delante de judíos z-index:3
+       Grandes y medianos detrás z-index:1 */
+    const zIdx = esPequeno ? 3 : 1;
 
     /* Camello → imagen SVG escalable; resto → emoji */
     const esCamello = ['🐪','🐫'].includes(emoji);
@@ -434,7 +449,7 @@ function generarMultitud(n, anchoDisponible) {
       width:${size}px;height:${size}px;
       font-size:${size}px;line-height:1;
       overflow:hidden;display:flex;align-items:flex-end;justify-content:center;
-      z-index:3;position:absolute;
+      z-index:${zIdx};position:absolute;
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${contenido}</div>`;
   }
 
@@ -750,6 +765,8 @@ const estado = {
   animalesSalvados: 0,
   basuraRetirada:   0,
   gruposCruzados:   0,
+  erroresNivel:     0,
+  estrellasTotal:   0,
   objetos:          [],
   grupos:           [],
   arrastre:         null,
@@ -1055,6 +1072,7 @@ function iniciarNivel() {
   estado.animalesSalvados = 0;
   estado.basuraRetirada  = 0;
   estado.gruposCruzados  = 0;
+  estado.erroresNivel    = 0;
   estado.objetos         = [];
   estado.grupos          = [];
   estado.arrastre        = null;
@@ -1112,7 +1130,7 @@ function iniciarNivel() {
   estado.idAnimacion = requestAnimationFrame(bucle);
 }
 
-function iniciarJuego()   { estado.puntuacion = 0; estado.vidas = 3; estado.nivel = 0; iniciarNivel(); }
+function iniciarJuego()   { estado.puntuacion = 0; estado.vidas = 3; estado.nivel = 0; estado.estrellasTotal = 0; iniciarNivel(); }
 function siguienteNivel() { estado.nivel++; estado.nivel >= NIVELES.length ? mostrarVictoria() : iniciarNivel(); }
 
 function detenerTodo() {
@@ -1257,7 +1275,34 @@ function aparecerAnimal() {
   const nv   = NIVELES[estado.nivel];
   const disp = nv.animalesDisp;
 
-  /* Rellenar y barajar la cola cuando se vacíe */
+  /* 40% de probabilidad de aparecer el pez diablo */
+  if (Math.random() < .40) {
+    const idxDiablo = ANIMALES.findIndex(a => a.esBonus);
+    crearObjeto(ANIMALES[idxDiablo], false);
+    /* Aplicar aspecto especial al elemento recién creado */
+    setTimeout(() => {
+      const el = estado.objetos[estado.objetos.length - 1]?.el;
+      if (el) {
+        el.style.filter   = 'hue-rotate(300deg) saturate(3) brightness(1.2)';
+        el.style.animation = (el.style.animation || '') + ', pez-diablo-pulso 1s ease-in-out infinite';
+        const badge = document.createElement('div');
+        badge.textContent = '×2';
+        badge.style.cssText = `
+          position:absolute;top:-8px;right:-8px;
+          background:#ff2020;color:#fff;
+          font-size:10px;font-weight:900;
+          border-radius:50%;width:18px;height:18px;
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 0 6px #ff0000;pointer-events:none;z-index:5;
+        `;
+        el.style.position = 'relative';
+        el.appendChild(badge);
+      }
+    }, 30);
+    return;
+  }
+
+  /* Rellenar y barajar la cola cuando se vacíe (solo animales normales) */
   if (colaAnimales.length === 0) {
     colaAnimales = [...disp].sort(() => Math.random() - .5);
   }
@@ -1371,10 +1416,17 @@ function rescatarAnimal(obj, cx, cy) {
   crearEfectoSalpicadura(cx - area.left, cy - area.top, '💦');
   sndSalpicadura();
   estado.rescatados++; estado.animalesSalvados++;
-  const pts = 10 * (estado.nivel + 1); estado.puntuacion += pts;
+
+  /* Pez diablo da el doble de puntos */
+  const multiplicador = obj.datos.esBonus ? 2 : 1;
+  const pts = 10 * (estado.nivel + 1) * multiplicador;
+  estado.puntuacion += pts;
+
   $('val-puntos').textContent   = estado.puntuacion;
   $('val-animales').textContent = estado.animalesSalvados;
-  flotarPuntos(cx - area.left, cy - area.top, '+'+pts, 'pts-animal');
+  flotarPuntos(cx - area.left, cy - area.top,
+    obj.datos.esBonus ? `🔥 +${pts}` : `+${pts}`,
+    obj.datos.esBonus ? 'pts-diablo' : 'pts-animal');
   sndPuntos();
   comprobarNivelCompleto();
 }
@@ -1415,6 +1467,7 @@ function reciclarBasura(obj, binId) {
 function lugarIncorrecto(obj, razon, binCorrecto) {
   devolverAlOrigen(obj);
   sndError();
+  estado.erroresNivel++;
   estado.vidas--;
   $('val-vidas').textContent = '❤️'.repeat(Math.max(0, estado.vidas));
   const flash = $('destello-vida');
@@ -1513,7 +1566,12 @@ function comprobarNivelCompleto() {
 function nivelCompleto() {
   detenerTodo(); detenerAmbiente(); detenerVoz(); sndNivel();
 
+  /* Calcular y acumular estrellas */
+  const estrellas = calcularEstrellas(estado.erroresNivel);
+  estado.estrellasTotal += estrellas;
+
   $('lu-pts').textContent = estado.puntuacion;
+  mostrarEstrellas('lu-estrellas', estrellas, .4);
   const hist = HISTORIAS[Math.min(estado.nivel, HISTORIAS.length - 1)];
   $('lu-escena').textContent = hist.escena;
   $('lu-titulo').textContent = hist.titulo;
@@ -1555,13 +1613,42 @@ function mostrarVictoria() {
   sndFanfarria();
   setTimeout(() => sndAplausos(), 300);
   setTimeout(() => { if (!silenciado) sndAplausos(); }, 3200);
+
+  /* Estrellas del último nivel */
+  const estrellas = calcularEstrellas(estado.erroresNivel);
+  estado.estrellasTotal += estrellas;
+
+  /* Título según estrellas totales */
+  const titulo = calcularTitulo(estado.estrellasTotal);
+
+  /* Guardar récord */
+  const esNuevo = guardarRecord(estado.puntuacion, estado.estrellasTotal, titulo.texto);
+
   $('win-pts').textContent = estado.puntuacion;
+
+  /* Título del jugador */
+  $('win-titulo-jugador').innerHTML =
+    `<span class="titulo-emoji">${titulo.emoji}</span>${titulo.texto}`;
+
+  /* Estrellas totales */
+  mostrarEstrellas('win-estrellas-total', Math.min(estado.estrellasTotal, 3), .3);
+
+  /* Mensaje de récord */
+  const recEl = $('win-record');
+  if (esNuevo && estado.puntuacion > 0) {
+    recEl.className = 'win-record nuevo-record';
+    recEl.textContent = '🎉 ¡Nuevo récord personal!';
+  } else {
+    const prev = cargarRecord();
+    recEl.className = 'win-record';
+    recEl.textContent = prev.puntos > 0
+      ? `Récord anterior: ${prev.puntos} pts — ${'⭐'.repeat(prev.estrellas)}`
+      : '';
+  }
+
   mostrarPantalla('s-win');
   lanzarConfeti();
-  /* Narración de victoria — Moisés despide al jugador */
-  setTimeout(() => {
-    reproducirAudio(AUDIO_NIVELES[AUDIO_NIVELES.length - 1]);
-  }, 1000);
+  setTimeout(() => reproducirAudio(AUDIO_NIVELES[AUDIO_NIVELES.length - 1]), 1000);
 }
 
 function lanzarConfeti() {
@@ -2777,8 +2864,58 @@ function apCriarNadadores(contenedor, wallW, H) {
   }
 }
 
-function salpicarPantalla() {
+const RECORD_KEY = 'marRojo_record';
 
+function cargarRecord() {
+  try { return JSON.parse(localStorage.getItem(RECORD_KEY)) || { puntos:0, estrellas:0, titulo:'' }; }
+  catch { return { puntos:0, estrellas:0, titulo:'' }; }
+}
+
+function guardarRecord(puntos, estrellas, titulo) {
+  const prev = cargarRecord();
+  const esNuevo = estrellas > prev.estrellas ||
+    (estrellas === prev.estrellas && puntos > prev.puntos);
+  if (esNuevo) localStorage.setItem(RECORD_KEY, JSON.stringify({ puntos, estrellas, titulo }));
+  return esNuevo;
+}
+
+function calcularEstrellas(errores) {
+  if (errores === 0) return 3;
+  if (errores <= 2)  return 2;
+  return 1;
+}
+
+function calcularTitulo(totalEstrellas) {
+  if (totalEstrellas === 15) return { texto:'¡Campeón del Éxodo!',   emoji:'🏆' };
+  if (totalEstrellas >= 11)  return { texto:'Héroe de Israel',        emoji:'⚔️' };
+  if (totalEstrellas >= 6)   return { texto:'Guardián del Mar Rojo',  emoji:'🌊' };
+  return                            { texto:'Aprendiz del Éxodo',     emoji:'📜' };
+}
+
+function mostrarEstrellas(contenedorId, cantidad, delay) {
+  const el = $(contenedorId);
+  el.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const s = document.createElement('span');
+    s.className = 'estrella-item' + (i < cantidad ? '' : ' vacia');
+    s.style.setProperty('--del', `${delay + i * .18}s`);
+    s.textContent = '⭐';
+    el.appendChild(s);
+  }
+}
+
+function mostrarRecordInicio() {
+  const rec = cargarRecord();
+  const el  = $('start-record');
+  if (!rec.puntos && !rec.estrellas) { el.classList.add('oculto'); return; }
+  el.classList.remove('oculto');
+  el.innerHTML = `Mejor: ${'⭐'.repeat(rec.estrellas)} &nbsp;|&nbsp; ${rec.puntos} pts`;
+  if (rec.titulo) el.innerHTML += `<br>${rec.titulo}`;
+}
+
+
+
+function salpicarPantalla() {
   /* Contenedor — cristal empañado: blur fuerte en el fondo */
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -3003,6 +3140,7 @@ function iniciarApertura() {
 }
 
 $('btn-inicio').onclick = () => iniciarApertura();
+mostrarRecordInicio();
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
 $('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
 $('btn-nueva-partida').onclick = () => { detenerVoz(); iniciarInstrucciones(); };

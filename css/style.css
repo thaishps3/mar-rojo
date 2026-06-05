@@ -361,12 +361,12 @@ body { display: flex; align-items: center; justify-content: center; }
   overflow:hidden; opacity:0;
   transition: opacity .6s ease;
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='54'%3E%3Cpath d='M14,0 C4,9 24,18 14,27 C4,36 24,45 14,54' stroke='rgba(255,255,255,0.82)' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='54'%3E%3Cpath d='M21,0 C13,9 26,18 20,27 C14,36 26,45 20,54' stroke='rgba(255,255,255,0.38)' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='54'%3E%3Cpath d='M6,0 C-2,9 16,18 6,27 C-2,36 16,45 6,54' stroke='rgba(255,255,255,0.18)' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='54'%3E%3Cpath d='M14,0 C2,9 26,18 14,27 C2,36 26,45 14,54' stroke='rgba(255,255,255,0.90)' stroke-width='4.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='54'%3E%3Cpath d='M21,0 C11,9 27,18 20,27 C11,36 27,45 20,54' stroke='rgba(255,255,255,0.50)' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='54'%3E%3Cpath d='M6,0 C-4,9 18,18 6,27 C-4,36 18,45 6,54' stroke='rgba(255,255,255,0.22)' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-size: 28px 54px, 28px 54px, 28px 54px;
   background-repeat: repeat-y;
-  animation: ap-foam-vert 1.8s linear infinite;
+  animation: ap-foam-vert 1.6s linear infinite;
 }
 .ap-foam-r { right:0; }
 .ap-foam-l { left:0;  }
@@ -613,19 +613,20 @@ body { display: flex; align-items: center; justify-content: center; }
 
 /* Ondas verticales animadas — se desplazan hacia arriba en el borde interior */
 #zona-agua-izq::before, #zona-agua-der::before {
-  content:''; position:absolute; top:0; bottom:0; width:18px; z-index:2;
+  content:''; position:absolute; top:0; bottom:0; width:22px; z-index:2;
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='54'%3E%3Cpath d='M9,0 C1,9 17,18 9,27 C1,36 17,45 9,54' stroke='rgba(255,255,255,0.75)' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='54'%3E%3Cpath d='M14,0 C8,9 18,18 13,27 C8,36 18,45 13,54' stroke='rgba(255,255,255,0.35)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-size: 18px 54px, 18px 54px;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='54'%3E%3Cpath d='M11,0 C-1,9 23,18 11,27 C-1,36 23,45 11,54' stroke='rgba(255,255,255,0.92)' stroke-width='4.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='54'%3E%3Cpath d='M17,0 C7,9 22,18 16,27 C7,36 22,45 16,54' stroke='rgba(255,255,255,0.50)' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='54'%3E%3Cpath d='M4,0 C-4,9 14,18 4,27 C-4,36 14,45 4,54' stroke='rgba(255,255,255,0.28)' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 22px 54px, 22px 54px, 22px 54px;
   background-repeat: repeat-y;
-  animation: ondas-vert 2.2s linear infinite;
+  animation: ondas-vert 1.6s linear infinite;
 }
 #zona-agua-izq::before { right:0; }
 #zona-agua-der::before { left:0; }
 @keyframes ondas-vert {
-  from { background-position: 0 0, 0 -27px; }
-  to   { background-position: 0 54px, 0 27px; }
+  from { background-position: 0 0, 0 -27px, 0 -14px; }
+  to   { background-position: 0 54px, 0 27px, 0 40px; }
 }
 
 /* Estados de zona al arrastrar un animal */
@@ -907,6 +908,13 @@ body { display: flex; align-items: center; justify-content: center; }
 }
 .pts-flotantes.pts-animal  { color: #5dc8f0; }
 .pts-flotantes.pts-basura  { color: #80dd60; }
+.pts-flotantes.pts-diablo  { color: #ff4444; font-size:1.3em; font-weight:900;
+  text-shadow:0 0 10px rgba(255,0,0,.7); }
+
+@keyframes pez-diablo-pulso {
+  0%,100% { box-shadow:0 0 6px  rgba(255,0,0,.6), 0 0 12px rgba(255,0,0,.3); }
+  50%     { box-shadow:0 0 14px rgba(255,0,0,.9), 0 0 24px rgba(255,0,0,.6); }
+}
 @keyframes sube-pts { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-52px)} }
 
 /* Destello rojo al perder vida */
