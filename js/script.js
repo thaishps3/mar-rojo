@@ -364,7 +364,7 @@ const GENERADORES_FIGURAS = [figHombre1, figMujer, figHombre2, figAnciano, figNi
 
 /* ── GENERADOR DE MULTITUD con animales visibles ── */
 function generarMultitud(n, anchoDisponible) {
-  const ANIMALES_EXODO = ['🐪','🐫','🐐','🐑','🐕','🐈','🫏','🐂','🐓','🐔'];
+  const ANIMALES_EXODO = ['🐪','🐎','🐐','🐑','🐕','🐈','🫏','🐂','🐓','🐔'];
 
   const ancho    = anchoDisponible || 400;
 
@@ -424,31 +424,27 @@ function generarMultitud(n, anchoDisponible) {
     const emoji     = (i === posicionBuey)
       ? '🐂'
       : ANIMALES_EXODO.filter(a => a !== '🐂')[Math.floor(Math.random() * (ANIMALES_EXODO.length - 1))];
-    const esGrande  = ['🐪','🐫','🐂'].includes(emoji);
+    const esGrande  = ['🐪','🐎','🐂'].includes(emoji);
     const esMediano = ['🫏','🐕','🐑','🐐'].includes(emoji);
     const esPequeno = !esGrande && !esMediano;
 
     const size = Math.round(figH * (esGrande ? 1.7 : esMediano ? .5 : .25));
-
-    /* Alinear patas al nivel del suelo + 2px por encima para simular perspectiva */
     const top  = Math.round(figH - size - 2);
     const offsetX = (Math.random() > .5 ? 3 : -2);
+    const zIdx = esGrande ? 1 : 3;
 
-    /* Pequeños (gato, gallina) delante de judíos z-index:3
-       Grandes y medianos detrás z-index:1 */
-    const zIdx = esPequeno ? 3 : 1;
-
-    /* Camello → imagen SVG escalable; resto → emoji */
-    const esCamello = ['🐪','🐫'].includes(emoji);
-    const contenido = esCamello
-      ? `<img src="img/animales/camello.svg" width="${size}" height="${size}" style="object-fit:contain;display:block;">`
+    /* Caballo y camello → SVG propio; resto → emoji */
+    const svgAnimal = emoji === '🐎' ? 'caballo.svg' : emoji === '🐪' ? 'camello.svg' : null;
+    const animalW   = Math.round(size * 1.7);
+    const contenido = svgAnimal
+      ? `<img src="img/animales/${svgAnimal}" width="${animalW}" height="${size}" style="object-fit:contain;display:block;">`
       : emoji;
-
+    const divW = svgAnimal ? animalW : size;
     htmlAnimales += `<div class="${cls}" style="
       left:${i*PASO + offsetX}px;top:${top}px;
-      width:${size}px;height:${size}px;
+      width:${divW}px;height:${size}px;
       font-size:${size}px;line-height:1;
-      overflow:hidden;display:flex;align-items:flex-end;justify-content:center;
+      overflow:visible;display:flex;align-items:flex-end;justify-content:center;
       z-index:${zIdx};position:absolute;
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${contenido}</div>`;
   }
@@ -1271,6 +1267,47 @@ function crearObjeto(datos, esBasura) {
 /* Cola de animales para evitar repeticiones — se rota barajando */
 let colaAnimales = [];
 
+/* Pez Diablo — pez de las profundidades con antena luminosa */
+function svgPezDiablo(tam) {
+  return `<svg width="${tam}" height="${tam}" viewBox="0 0 80 80"
+    xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">
+    <!-- Halo pulsante del foco -->
+    <circle cx="56" cy="9" r="13" fill="rgba(255,255,80,.22)">
+      <animate attributeName="r" values="10;18;10" dur=".85s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values=".22;.55;.22" dur=".85s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Foco bioluminiscente -->
+    <circle cx="56" cy="9" r="5" fill="#ffff44">
+      <animate attributeName="r" values="4;7;4" dur=".85s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Antena -->
+    <path d="M43,30 Q50,20 56,9" stroke="#666" stroke-width="2.5"
+          fill="none" stroke-linecap="round"/>
+    <!-- Aleta dorsal -->
+    <path d="M22,30 Q34,16 46,30" fill="#1e1e1e" stroke="#333" stroke-width="2"/>
+    <!-- Cuerpo negro ovalado -->
+    <ellipse cx="38" cy="52" rx="33" ry="21" fill="#111"/>
+    <!-- Textura cuerpo -->
+    <ellipse cx="38" cy="52" rx="33" ry="21" fill="none"
+             stroke="#2a2a2a" stroke-width="3" stroke-dasharray="4 6"/>
+    <!-- Ojo amarillo-verde -->
+    <circle cx="54" cy="46" r="7" fill="#88ff22"/>
+    <circle cx="55" cy="45" r="3.5" fill="#000"/>
+    <circle cx="56" cy="44" r="1.2" fill="#fff" opacity=".8"/>
+    <!-- Boca -->
+    <path d="M12,58 Q38,74 64,58" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+    <!-- Dientes irregulares -->
+    <path d="M16,58 L14,67 M24,61 L22,71 M34,63 L34,73
+             M44,61 L46,71 M54,58 L56,67"
+          stroke="#e0e0e0" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <!-- Aleta cola -->
+    <path d="M5,46 Q-8,38 5,28 L12,38 Z" fill="#1a1a1a"/>
+    <path d="M5,58 Q-8,66 5,76 L12,66 Z" fill="#1a1a1a"/>
+    <!-- Aleta pectoral -->
+    <path d="M30,66 Q20,75 16,68 L24,62 Z" fill="#222"/>
+  </svg>`;
+}
+
 function aparecerAnimal() {
   const nv   = NIVELES[estado.nivel];
   const disp = nv.animalesDisp;
@@ -1279,25 +1316,16 @@ function aparecerAnimal() {
   if (Math.random() < .40) {
     const idxDiablo = ANIMALES.findIndex(a => a.esBonus);
     crearObjeto(ANIMALES[idxDiablo], false);
-    /* Aplicar aspecto especial al elemento recién creado */
+    /* Reemplazar emoji con SVG del pez diablo */
     setTimeout(() => {
-      const el = estado.objetos[estado.objetos.length - 1]?.el;
-      if (el) {
-        el.style.filter   = 'hue-rotate(300deg) saturate(3) brightness(1.2)';
-        el.style.animation = (el.style.animation || '') + ', pez-diablo-pulso 1s ease-in-out infinite';
-        const badge = document.createElement('div');
-        badge.textContent = '×2';
-        badge.style.cssText = `
-          position:absolute;top:-8px;right:-8px;
-          background:#ff2020;color:#fff;
-          font-size:10px;font-weight:900;
-          border-radius:50%;width:18px;height:18px;
-          display:flex;align-items:center;justify-content:center;
-          box-shadow:0 0 6px #ff0000;pointer-events:none;z-index:5;
-        `;
-        el.style.position = 'relative';
-        el.appendChild(badge);
+      const obj = estado.objetos[estado.objetos.length - 1];
+      if (!obj) return;
+      const span = obj.el.querySelector('.c-em');
+      if (span) {
+        span.style.fontSize = '';
+        span.innerHTML = svgPezDiablo(parseInt(span.style.fontSize) || ANIMALES.find(a=>a.esBonus).s * 1.5);
       }
+      obj.el.style.filter = 'drop-shadow(0 0 8px rgba(255,255,0,.7))';
     }, 30);
     return;
   }

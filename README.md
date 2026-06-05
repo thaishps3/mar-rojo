@@ -126,6 +126,9 @@ Sound Effect by <a href="https://pixabay.com/es/users/kokoreli777-39793239/?utm_
 
 Imagen de <a href="https://pixabay.com/es/users/yamu_jay-44818947/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=8975999">kp yamu Jayanath</a> en <a href="https://pixabay.com/es//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=8975999">Pixabay</a>
 
+###Caballo
+Imagen de <a href="https://pixabay.com/es/users/clker-free-vector-images-3736/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=48394">Clker-Free-Vector-Images</a> en <a href="https://pixabay.com/es//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=48394">Pixabay</a>
+
 ## 📖 Referencias bíblicas
 
 - **Éxodo 3:7-8** — La llamada de Dios a Moisés
