@@ -364,22 +364,12 @@ const GENERADORES_FIGURAS = [figHombre1, figMujer, figHombre2, figAnciano, figNi
 
 /* ── GENERADOR DE MULTITUD con animales visibles ── */
 function generarMultitud(n, anchoDisponible) {
-  const ANIMALES_EXODO = ['🐪','🐎','🐐','🐑','🐕','🐈','🫏','🐂','🐓','🐔'];
-
-  const ancho    = anchoDisponible || 400;
-
-  /* Escala proporcional para PC: figuras más grandes en pantallas anchas.
-     Base: 380px de arena (móvil). Máximo: 1.7× en pantallas grandes. */
-  const escala   = Math.min(1.7, Math.max(1.0, ancho / 380));
-
-  /* Paso entre figuras — comprimido en móvil, natural en PC */
+  const ancho   = anchoDisponible || 400;
+  const escala  = Math.min(1.7, Math.max(1.0, ancho / 380));
   const PASO_MAX = Math.round(18 * escala);
   const PASO_MIN = 11;
-  const margen   = 28;
-  const pasoIdeal = Math.floor((ancho - margen) / n);
+  const pasoIdeal = Math.floor((ancho - 28) / n);
   const PASO      = Math.max(PASO_MIN, Math.min(PASO_MAX, pasoIdeal));
-
-  /* Tamaño de la figura SVG escalado */
   const figW = Math.round(28 * escala);
   const figH = Math.round(52 * escala);
 
@@ -388,66 +378,66 @@ function generarMultitud(n, anchoDisponible) {
   while (pool.length < n) pool.push(...GENERADORES_FIGURAS);
   pool.sort(() => Math.random() - .5);
 
-  /* Posiciones para animales: ~1 de cada 4, nunca en el primer lugar */
-  /* Animales cada 3 figuras — siempre presentes, no aleatorios.
-     El último animal es siempre el buey 🐂 */
-  const posicionesAnimal = new Set();
-  for (let i = 2; i < n; i += 3) posicionesAnimal.add(i);
-  const posicionesArr   = [...posicionesAnimal];
-  const posicionBuey    = posicionesArr[posicionesArr.length - 1]; /* último */
-
-  /* Ancho total del grupo */
-  const anchoTotal = (n - 1) * PASO + figW + 4;
-
-  /* ── Personas primero ── */
-  let htmlPersonas = '', pIdx = 0;
+  /* ── TODOS los judíos siempre — sin excepción ── */
+  let htmlPersonas = '';
   for (let i = 0; i < n; i++) {
-    if (!posicionesAnimal.has(i)) {
-      const cls  = i % 2 === 0 ? 'figura' : 'figura figura-par';
-      const gen  = pool[pIdx % pool.length];
-      const esNino = gen === figNino;
-      const top  = esNino ? `top:${Math.round(8*escala)}px` : 'top:0';
-      /* Generar SVG y escalar con width/height CSS */
-      const svgOriginal = gen();
-      const svgEscalado = svgOriginal
-        .replace(/width="(\d+)"/, `width="${figW}"`)
-        .replace(/height="(\d+)"/, `height="${gen === figAnciano ? Math.round(56*escala) : figH}"`);
-      htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:2;position:absolute">${svgEscalado}</div>`;
-      pIdx++;
-    }
+    const cls = i % 2 === 0 ? 'figura' : 'figura figura-par';
+    const gen = pool[i % pool.length];
+    const esNino = gen === figNino;
+    const top = esNino ? `top:${Math.round(8*escala)}px` : 'top:0';
+    const svgE = gen()
+      .replace(/width="(\d+)"/, `width="${figW}"`)
+      .replace(/height="(\d+)"/, `height="${gen === figAnciano ? Math.round(56*escala) : figH}"`);
+    htmlPersonas += `<div class="${cls}" style="left:${i*PASO}px;${top};z-index:2;position:absolute">${svgE}</div>`;
   }
 
-  /* ── Animales después ── */
+  /* ── Animales como capas independientes — NO reemplazan a nadie ──
+     Grandes (camello, caballo, buey) → detrás z-index:1
+     Medianos y pequeños (ovejas, perro, gato…) → delante z-index:3 */
+
+  const anchoTotal = (n - 1) * PASO + figW + 4;
   let htmlAnimales = '';
-  for (const i of posicionesAnimal) {
-    const cls      = i % 2 === 0 ? 'figura' : 'figura figura-par';
-    const emoji     = (i === posicionBuey)
-      ? '🐂'
-      : ANIMALES_EXODO.filter(a => a !== '🐂')[Math.floor(Math.random() * (ANIMALES_EXODO.length - 1))];
+
+  function addAnimal(xPos, emoji, extraTopPx) {
     const esGrande  = ['🐪','🐎','🐂'].includes(emoji);
     const esMediano = ['🫏','🐕','🐑','🐐'].includes(emoji);
-    const esPequeno = !esGrande && !esMediano;
-
-    const size = Math.round(figH * (esGrande ? 1.7 : esMediano ? .5 : .25));
-    const top  = Math.round(figH - size - 2);
-    const offsetX = (Math.random() > .5 ? 3 : -2);
-    const zIdx = esGrande ? 1 : 3;
-
-    /* Caballo y camello → SVG propio; resto → emoji */
-    const svgAnimal = emoji === '🐎' ? 'caballo.svg' : emoji === '🐪' ? 'camello.svg' : null;
-    const animalW   = Math.round(size * 1.7);
-    const contenido = svgAnimal
-      ? `<img src="img/animales/${svgAnimal}" width="${animalW}" height="${size}" style="object-fit:contain;display:block;">`
+    const size      = Math.round(figH * (esGrande ? 1.7 : esMediano ? .5 : .25));
+    const top       = Math.round(figH - size - 2) + (extraTopPx || 0);
+    const svgSrc    = emoji === '🐎' ? 'caballo.svg' : emoji === '🐪' ? 'camello.svg' : null;
+    const svgW      = Math.round(size * 1.2);
+    const zIdx      = esGrande ? 1 : 3;
+    const contenido = svgSrc
+      ? `<img src="img/animales/${svgSrc}" width="${svgW}" height="${size}" style="object-fit:contain;display:block;">`
       : emoji;
-    const divW = svgAnimal ? animalW : size;
-    htmlAnimales += `<div class="${cls}" style="
-      left:${i*PASO + offsetX}px;top:${top}px;
-      width:${divW}px;height:${size}px;
-      font-size:${size}px;line-height:1;
-      overflow:visible;display:flex;align-items:flex-end;justify-content:center;
-      z-index:${zIdx};position:absolute;
+    const w = svgSrc ? svgW : size;
+    htmlAnimales += `<div style="
+      position:absolute;left:${xPos}px;top:${top}px;
+      width:${w}px;height:${size}px;
+      font-size:${size}px;line-height:1;overflow:visible;
+      display:flex;align-items:flex-end;justify-content:center;
+      z-index:${zIdx};
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">${contenido}</div>`;
   }
+
+  /* Grandes detrás: distribuidos al 8%, 60%, 88% del ancho */
+  addAnimal(Math.round(anchoTotal * .08),  '🐪', -6);  /* camello — más alto */
+  addAnimal(Math.round(anchoTotal * .60),  '🐎', -3);  /* caballo */
+  addAnimal(Math.round(anchoTotal * .88),  '🐂',  0);  /* buey */
+
+  /* Rebaño de ovejas/cabras delante: grupo de 5-7 en el 30%-55% */
+  const ovejaEmoji = () => Math.random() > .5 ? '🐑' : '🐐';
+  const numOvejas  = 5 + Math.floor(Math.random() * 3);
+  const ovejaStep  = Math.round(anchoTotal * .25 / numOvejas);
+  const ovejaStart = Math.round(anchoTotal * .30);
+  for (let j = 0; j < numOvejas; j++) {
+    addAnimal(ovejaStart + j * ovejaStep + Math.round((Math.random()-.5)*6), ovejaEmoji(), 0);
+  }
+
+  /* Animales pequeños delante dispersos */
+  const EXTRAS = ['🐈','🐓','🐔','🫏','🐕'];
+  [[.18, 0],[.45, 0],[.74, 0]].forEach(([pct, off]) => {
+    addAnimal(Math.round(anchoTotal * pct), EXTRAS[Math.floor(Math.random()*EXTRAS.length)], off);
+  });
 
   return `<div style="position:relative;width:${anchoTotal}px;height:${figH+6}px">${htmlPersonas}${htmlAnimales}</div>`;
 }
@@ -1312,8 +1302,8 @@ function aparecerAnimal() {
   const nv   = NIVELES[estado.nivel];
   const disp = nv.animalesDisp;
 
-  /* 40% de probabilidad de aparecer el pez diablo */
-  if (Math.random() < .40) {
+  /* Pez diablo solo aparece a partir del nivel 3 */
+  if (estado.nivel >= 2 && Math.random() < .40) {
     const idxDiablo = ANIMALES.findIndex(a => a.esBonus);
     crearObjeto(ANIMALES[idxDiablo], false);
     /* Reemplazar emoji con SVG del pez diablo */
@@ -1445,9 +1435,11 @@ function rescatarAnimal(obj, cx, cy) {
   sndSalpicadura();
   estado.rescatados++; estado.animalesSalvados++;
 
-  /* Pez diablo da el doble de puntos */
-  const multiplicador = obj.datos.esBonus ? 2 : 1;
-  const pts = 10 * (estado.nivel + 1) * multiplicador;
+  /* Pez diablo: 100 pts nivel 3, 300 nivel 4, 500 nivel 5 */
+  const PTS_DIABLO = [100, 300, 500];
+  const pts = obj.datos.esBonus
+    ? (PTS_DIABLO[estado.nivel - 2] || 100)
+    : 10 * (estado.nivel + 1);
   estado.puntuacion += pts;
 
   $('val-puntos').textContent   = estado.puntuacion;
@@ -2789,7 +2781,7 @@ $('btn-paso-sig').onclick = () => {
   if (pasoActual < PASOS_INSTRUCCION.length - 1) {
     mostrarPasoInstruccion(pasoActual + 1);
   } else {
-    iniciarJuego();
+    iniciarApertura();
   }
 };
 
@@ -2809,10 +2801,10 @@ $('btn-repetir').onclick = () => {
   reproducirAudio(AUDIO_INSTRUCCIONES[pasoActual]);
 };
 
-/* Saltar todas las instrucciones */
+/* Saltar todas las instrucciones → apertura directamente */
 $('btn-saltar').onclick = () => {
   detenerVoz();
-  iniciarJuego();
+  iniciarApertura();
 };
 
 
@@ -3150,10 +3142,10 @@ function iniciarApertura() {
     $('ap-ola-der').classList.add('ap-abierto');
     salpicarPantalla();
 
-    /* Pasar a instrucciones justo al terminar la transición (3.4s) */
+    /* Pasar al juego justo al terminar la transición (3.4s) */
     setTimeout(() => {
       if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
-      iniciarInstrucciones();
+      iniciarJuego();
     }, 3400);
   }
 
@@ -3167,7 +3159,7 @@ function iniciarApertura() {
   }
 }
 
-$('btn-inicio').onclick = () => iniciarApertura();
+$('btn-inicio').onclick = () => iniciarInstrucciones();
 mostrarRecordInicio();
 $('btn-reiniciar').onclick     = () => { detenerVoz(); detenerTodo(); estado.puntuacion=0; estado.vidas=3; estado.nivel=0; iniciarNivel(); };
 $('btn-siguiente').onclick     = () => { detenerVoz(); siguienteNivel(); };
