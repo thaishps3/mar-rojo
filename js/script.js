@@ -420,9 +420,11 @@ function generarMultitud(n, anchoDisponible) {
 
   /* ── Animales después ── */
   let htmlAnimales = '';
-  /* Multiplicador de los animales grandes: 1.1× en arena estrecha (móvil)
-     y hasta 1.7× en pantallas anchas. Así no se desbordan sobre el mar. */
-  const multGrande = Math.min(1.7, Math.max(1.1, escala * 1.1));
+  /* Altura de los animales grandes: van DETRÁS del pueblo (z-index 1) pero
+     deben asomar por encima de las cabezas. Por eso son MÁS ALTOS que las
+     personas (1.45× en móvil, hasta 1.7× en PC). El ancho se controla aparte
+     para que no se salgan sobre el mar. */
+  const multGrande = Math.min(1.7, Math.max(1.45, escala * 1.45));
   for (const i of posicionesAnimal) {
     const cls      = i % 2 === 0 ? 'figura' : 'figura figura-par';
     const emoji     = (i === posicionBuey)
