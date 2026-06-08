@@ -372,6 +372,10 @@ function generarMultitud(n, anchoDisponible) {
      Base: 380px de arena (móvil). Máximo: 1.7× en pantallas grandes. */
   const escala   = Math.min(1.7, Math.max(1.0, ancho / 380));
 
+  /* Tamaño de la figura SVG escalado */
+  const figW = Math.round(28 * escala);
+  const figH = Math.round(52 * escala);
+
   /* Paso entre figuras — calculado para que TODO el grupo quepa dentro
      del ancho disponible (la arena). Así nadie -ni los animales grandes-
      se sale sobre el mar en pantallas estrechas. */
@@ -379,10 +383,6 @@ function generarMultitud(n, anchoDisponible) {
   const PASO_MIN  = 8;
   const pasoQueCabe = Math.floor((ancho - figW - 4) / Math.max(1, n - 1));
   const PASO      = Math.max(PASO_MIN, Math.min(PASO_MAX, pasoQueCabe));
-
-  /* Tamaño de la figura SVG escalado */
-  const figW = Math.round(28 * escala);
-  const figH = Math.round(52 * escala);
 
   /* Mezclar generadores */
   const pool = [];
