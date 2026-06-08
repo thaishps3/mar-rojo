@@ -372,12 +372,13 @@ function generarMultitud(n, anchoDisponible) {
      Base: 380px de arena (móvil). Máximo: 1.7× en pantallas grandes. */
   const escala   = Math.min(1.7, Math.max(1.0, ancho / 380));
 
-  /* Paso entre figuras — comprimido en móvil, natural en PC */
-  const PASO_MAX = Math.round(18 * escala);
-  const PASO_MIN = 11;
-  const margen   = 28;
-  const pasoIdeal = Math.floor((ancho - margen) / n);
-  const PASO      = Math.max(PASO_MIN, Math.min(PASO_MAX, pasoIdeal));
+  /* Paso entre figuras — calculado para que TODO el grupo quepa dentro
+     del ancho disponible (la arena). Así nadie -ni los animales grandes-
+     se sale sobre el mar en pantallas estrechas. */
+  const PASO_MAX  = Math.round(18 * escala);
+  const PASO_MIN  = 8;
+  const pasoQueCabe = Math.floor((ancho - figW - 4) / Math.max(1, n - 1));
+  const PASO      = Math.max(PASO_MIN, Math.min(PASO_MAX, pasoQueCabe));
 
   /* Tamaño de la figura SVG escalado */
   const figW = Math.round(28 * escala);
@@ -2958,7 +2959,7 @@ function mostrarRecordInicio() {
 
 
 
-function salpicarPantalla() {
+function salpicarPantalla(onCubierto) {
   /* Contenedor — cristal empañado: blur fuerte en el fondo */
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -2976,7 +2977,7 @@ function salpicarPantalla() {
     const alto = tam * (.78 + Math.random() * .44);
     const x    = Math.random() * 97;
     const y    = Math.random() * 92;
-    const del  = Math.random() * 320;
+    const del  = Math.random() * 160;
 
     gota.style.cssText = `
       position:absolute;
@@ -3004,11 +3005,11 @@ function salpicarPantalla() {
 
     gota.animate([
       { transform:'scale(0)',    opacity:0 },
-      { transform:'scale(1.1)', opacity:1, offset:.12 },
-      { transform:'scale(1)',    opacity:1, offset:.28 },
-      { transform:'scale(1)',    opacity:1, offset:.70 },
+      { transform:'scale(1.12)', opacity:1, offset:.30 },
+      { transform:'scale(1)',    opacity:1, offset:.45 },
+      { transform:'scale(1)',    opacity:1, offset:.75 },
       { transform:'scale(.95)', opacity:0 },
-    ], { duration:3000 + Math.random()*400, delay:del,
+    ], { duration:1500 + Math.random()*300, delay:del,
          fill:'forwards', easing:'ease-out' });
   }
 
@@ -3020,12 +3021,17 @@ function salpicarPantalla() {
   const totalMicro = 80 + Math.floor(Math.random() * 40);
   for (let i = 0; i < totalMicro; i++) crearGota(3, 13, .75);
 
-  /* Todo el overlay se desvanece */
+  /* La pantalla queda cubierta de gotas a los ~650 ms. En ese instante
+     avisamos para que el juego se cargue DETRÁS de las gotas; así, cuando
+     se disuelven, ya se ve el juego y nunca se vuelve a ver la apertura. */
+  if (typeof onCubierto === 'function') setTimeout(onCubierto, 650);
+
+  /* Las gotas se disuelven y dejan ver lo que hay debajo (ya el juego) */
   overlay.animate(
     [{ opacity:1 },{ opacity:0 }],
-    { duration:700, delay:3000, fill:'forwards' }
+    { duration:650, delay:950, fill:'forwards' }
   );
-  setTimeout(() => overlay.remove(), 3900);
+  setTimeout(() => overlay.remove(), 1650);
 }
 
 /* Espuma estática ondulada — curvas blancas sin animación */
@@ -3160,16 +3166,16 @@ function iniciarApertura() {
     apAudioOlas.volume = 0.8;
     if (!silenciado) apAudioOlas.play().catch(() => {});
 
-    /* Mar se abre + salpica la pantalla */
+    /* Mar se abre + la pantalla se cubre de gotas */
     $('ap-ola-izq').classList.add('ap-abierto');
     $('ap-ola-der').classList.add('ap-abierto');
-    salpicarPantalla();
 
-    /* Al terminar de abrirse el mar (3.4s) empieza el juego */
-    setTimeout(() => {
+    /* En cuanto las gotas cubren la pantalla (~650 ms) arranca el juego
+       POR DETRÁS; al disolverse las gotas ya se ve el juego, no la apertura. */
+    salpicarPantalla(() => {
       if (apAudioOlas) { apAudioOlas.pause(); apAudioOlas = null; }
       iniciarJuego();
-    }, 3400);
+    });
   }
 
   if (!silenciado) {
